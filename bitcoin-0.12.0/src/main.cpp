@@ -813,6 +813,28 @@ std::string FormatStateMessage(const CValidationState &state)
         state.GetRejectCode());
 }
 
+/* add by sdk begin */
+bool AddToMempool( Cqkgj_mempool& pool, const Cqkgj_basic_data &data )
+{
+    AssertLockHeld( cs_main );
+
+    // is it already in the memory pool?
+    uint256 hash = data.get_hash();
+
+    double dPriority = 0.0;
+    unsigned int ui_height = 0;
+    Cqkgj_process_data process( data, dPriority,ui_height );
+
+    //unsigned int ui_size = process.get_size();
+
+    LOCK( pool.cs );
+    bool res = pool.add_to_mempool( hash,process);
+
+    return res;
+}
+/* add by sdk end */
+
+
 bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
                               bool* pfMissingInputs, bool fOverrideMempoolLimit, bool fRejectAbsurdFee,
                               std::vector<uint256>& vHashTxnToUncache)
@@ -5068,16 +5090,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (bPingFinished) {
             pfrom->nPingNonceSent = 0;
         }
-
-        //Begin Add by syl 2016-11-04===================================
-        //设置节点时间
-        pfrom->m_currTime = GetTime();
-        if(pfrom->m_bNetState == false)
-        {
-        	pfrom->m_creBlockTime = GetTime();
-        	pfrom->m_bNetState = true;
-        }
-        //End	Add by syl 2016-11-04===================================
     }
 
 
@@ -5667,13 +5679,6 @@ bool SendMessages(CNode* pto)
         if (!vGetData.empty())
             pto->PushMessage(NetMsgType::GETDATA, vGetData);
 
-        //Begin Add by syl 2016-11-04=================================
-        //节点连接断开
-        if(pto->fDisconnect)
-        {
-        	pto->m_bNetState = false;
-        }
-        //End	Add by syl 2016-11-04=================================
     }
     return true;
 }

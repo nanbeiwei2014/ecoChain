@@ -173,6 +173,71 @@ public:
 
 struct CMutableTransaction;
 
+/* add by sdk begin */
+/* 区块国际数据类 */
+class Cqkgj_basic_data
+{
+private:
+    const uint256 m_hash;       /* data's hash */
+    void update_hash() const;
+public:
+    static const int32_t CURRENT_VERSION=1;
+    const std::string m_address; /* account address */
+    const std::string m_data;      /* user send data */
+    const std::string m_sign;              /* signature */
+    //unsigned int m_data_state;           /* data state */
+    const int32_t m_version;
+
+    Cqkgj_basic_data();
+    ~Cqkgj_basic_data();
+
+    Cqkgj_basic_data& operator=(const Cqkgj_basic_data& data );
+
+    ADD_SERIALIZE_METHODS;
+
+    template< typename Stream, typename Operation >
+    inline void SerializationOp(Stream &s, Operation ser_action, int nType, int nVersion )
+    {
+        READWRITE( *const_cast<int32_t*>(&this->m_version));
+        nVersion = this->m_version;
+        READWRITE( *const_cast<std::string*>(&m_address));
+        READWRITE( *const_cast<std::string*>(&m_data));
+        READWRITE( *const_cast<std::string*>(&m_sign));
+        if ( ser_action.ForRead() )
+        {
+            update_hash();
+        }
+    }
+
+    const uint256& get_hash() const
+    {
+        return m_hash;
+    }
+
+    const std::string get_addr() const{ return m_address;}
+    const std::string get_sign() const{ return m_sign;     }
+    const std::string get_data() const{ return m_data;     }
+
+    bool is_null() const
+    {
+        return m_address.length()==0 &&m_data.length()==0 && m_sign.length() == 0;
+    }
+
+    friend bool operator==(const Cqkgj_basic_data& a, const Cqkgj_basic_data& b)
+    {
+        return a.m_hash == b.m_hash;
+    }
+
+    friend bool operator!=(const Cqkgj_basic_data&a, const Cqkgj_basic_data& b)
+    {
+        return a.m_hash != b.m_hash;
+    }
+
+    std::string to_string() const;
+};
+/* add by sdk end */
+
+
 /** The basic transaction that is broadcasted on the network and contained in
  * blocks.  A transaction can contain multiple inputs and outputs.
  */

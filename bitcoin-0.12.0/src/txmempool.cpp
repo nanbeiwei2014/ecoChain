@@ -995,3 +995,94 @@ void CTxMemPool::TrimToSize(size_t sizelimit, std::vector<uint256>* pvNoSpendsRe
     if (maxFeeRateRemoved > CFeeRate(0))
         LogPrint("mempool", "Removed %u txn, rolling minimum fee bumped to %s\n", nTxnRemoved, maxFeeRateRemoved.ToString());
 }
+
+/* add by sdk  begin */
+Cqkgj_process_data::Cqkgj_process_data(const Cqkgj_basic_data& data,double _priority,
+                                       unsigned int _height):
+    m_data(data),m_priority(_priority),m_height(_height)
+{
+      m_data_size=::GetSerializeSize(data,SER_NETWORK,PROTOCOL_VERSION);
+      m_state = 0;
+}
+
+Cqkgj_process_data::Cqkgj_process_data( const Cqkgj_process_data &other )
+{
+    *this = other;
+}
+
+Cqkgj_process_data::Cqkgj_process_data(){}
+Cqkgj_process_data::~Cqkgj_process_data(){}
+
+double Cqkgj_process_data::get_priority( unsigned int cur_height ) const
+{
+    double local_prio = (double)(cur_height-m_height);
+    double result = m_height + local_prio;
+    if ( result < 0 )
+    {
+        result = 0;
+    }
+    return result;
+}
+
+int Cqkgj_process_data::get_state()  const
+{
+    return this->m_state;
+}
+
+bool Cqkgj_process_data::set_state( int state ) 
+{
+    if ( state < 0 || state > 3 )
+    {
+        return false;
+    }
+    m_state = state;
+    return true;
+}
+
+Cqkgj_mempool::Cqkgj_mempool(){}
+Cqkgj_mempool::~Cqkgj_mempool()
+{
+    map_hash_data.clear();
+    map_state_data.clear();
+}
+
+Cqkgj_basic_data Cqkgj_mempool::get_data_by_hash( uint256 hash )
+{
+    Cqkgj_basic_data data;
+    std::map< uint256,Cqkgj_process_data>::iterator it = map_hash_data.find(hash);
+    if ( it != map_hash_data.end())
+    {
+        //data = it->second;
+        return data;
+    }
+    return data;
+}
+
+std::vector<Cqkgj_process_data> Cqkgj_mempool::get_data_by_state( int state )
+{
+    std::vector<Cqkgj_process_data> obj;
+    if ( state < 0 || state > 3 )
+    {
+        return obj;
+    }
+
+    std::map< uint32_t, std::vector<Cqkgj_process_data> >::iterator it = map_state_data.find(state);
+    if ( it != map_state_data.end())
+    {
+        return (*it).second;
+    }
+    return obj;
+}
+
+bool Cqkgj_mempool::add_to_mempool( uint256 &hash, Cqkgj_process_data &process )
+{
+    LOCK( cs );
+    Cqkgj_mempool::it_hash it = map_hash_data.find(hash);
+    //if this data exists in mempool already, return false
+    if( it == map_hash_data.end() ) //if ( this->exists(hash))
+        return false;
+    map_hash_data.insert(make_pair(hash,process));
+    m_total_size += process.get_size();
+    return true;
+}
+/* add by sdk end */

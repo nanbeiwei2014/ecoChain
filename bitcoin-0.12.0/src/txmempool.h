@@ -604,4 +604,74 @@ struct TxCoinAgePriorityCompare
     }
 };
 
+/* add by sdk begin */
+/* 区块国际数据处理类 */
+class Cqkgj_process_data
+{
+private:
+    size_t  m_data_size; /* 数据大小*/
+    double m_priority;   /* 优先级 */
+    unsigned int m_height; /* 高度 */
+    uint32_t m_state;      /* 状态 */
+public:
+    Cqkgj_basic_data m_data;
+    Cqkgj_process_data();
+    Cqkgj_process_data(const Cqkgj_basic_data &data,
+                       double _priority,unsigned int _height);
+    Cqkgj_process_data( const Cqkgj_process_data &other );
+
+    ~Cqkgj_process_data();
+
+    const Cqkgj_basic_data &get_data() const
+    {
+        return this->m_data;
+    }
+    double get_priority( unsigned int cur_height ) const;
+    size_t get_size() const { return m_data_size; }
+    unsigned int get_height() const { return m_height; }
+    const Cqkgj_basic_data& get_data(){ return this->m_data;}
+    bool set_state( int state );
+    int get_state( )  const;
+};
+
+struct mempool_hash
+{
+    uint256 operator()(const Cqkgj_process_data &data ) const
+    {
+        return data.get_data().get_hash();
+    }
+};
+
+/* 内存池类 */
+class Cqkgj_mempool
+{
+private:
+    uint64_t m_total_size;
+public:
+    std::map< uint256, Cqkgj_process_data > map_hash_data;
+    std::map< uint32_t,std::vector<Cqkgj_process_data> > map_state_data;
+public:
+
+    typedef std::map<uint256,Cqkgj_process_data>::iterator it_hash;
+    typedef std::map<uint32_t,std::vector<Cqkgj_process_data> >::iterator it_state;
+
+    Cqkgj_mempool();
+    ~Cqkgj_mempool();
+    mutable CCriticalSection cs;
+    std::string get_address( uint256 &hash );
+    Cqkgj_basic_data get_data_by_hash( uint256 hash );
+    std::vector< Cqkgj_process_data > get_data_by_state( int state );
+    bool add_to_mempool_by_hash( uint256 hash, Cqkgj_basic_data data);
+    bool exists( uint256 hash ) const
+    {
+        LOCK(cs);
+        return (map_hash_data.count(hash) > 0?true:false);
+    }
+
+    bool add_to_mempool( uint256 &hash, Cqkgj_process_data &data );
+
+};
+
+/* add by sdk end */
+
 #endif // BITCOIN_TXMEMPOOL_H
