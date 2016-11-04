@@ -107,6 +107,25 @@ bool DecodeHexTx(CTransaction& tx, const std::string& strHexTx)
     return true;
 }
 
+bool QKGJ_DecodeHexTx(Cqkgj_basic_data& data, const std::string& strHexTx)
+{
+    if ( !IsHex( strHexTx ))
+    {
+        return false;
+    }
+    vector<unsigned char > tx_data( ParseHex( strHexTx));
+    CDataStream ssData( tx_data,SER_NETWORK, PROTOCOL_VERSION );
+    try
+    {
+        ssData>>data;
+    }
+    catch ( const std::exception& )
+    {
+        return false;
+    }
+    return true;
+}
+
 bool DecodeHexBlk(CBlock& block, const std::string& strHexBlk)
 {
     if (!IsHex(strHexBlk))
