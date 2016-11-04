@@ -159,6 +159,9 @@ extern CAddrMan addrman;
 /** Maximum number of connections to simultaneously allow (aka connection slots) */
 extern int nMaxConnections;
 
+//Begin Add by syl 2016-11-04=====================================
+extern std::vector<CNode*> g_vAllNodes;		//包含本地节点信息
+//End	Add by syl 2016-11-04=====================================
 extern std::vector<CNode*> vNodes;
 extern CCriticalSection cs_vNodes;
 extern std::map<CInv, CDataStream> mapRelay;
@@ -186,7 +189,7 @@ extern std::map<CNetAddr, LocalServiceInfo> mapLocalHost;
 class CNodeStats
 {
 public:
-    NodeId nodeid;
+	NodeId nodeid;
     uint64_t nServices;
     bool fRelayTxes;
     int64_t nLastSend;
@@ -314,6 +317,12 @@ typedef std::map<CSubNet, CBanEntry> banmap_t;
 class CNode
 {
 public:
+	//Begin Add by syl 2016-11-03=======================================
+	uint64_t  	m_currTime;
+	uint64_t	m_creBlockTime;
+	bool		m_bNetState;
+	//End	Add by syl 2016-11-03=======================================
+
     // socket
     uint64_t nServices;
     SOCKET hSocket;
