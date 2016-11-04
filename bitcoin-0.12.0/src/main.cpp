@@ -5068,6 +5068,16 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         if (bPingFinished) {
             pfrom->nPingNonceSent = 0;
         }
+
+        //Begin Add by syl 2016-11-04===================================
+        //设置节点时间
+        pfrom->m_currTime = GetTime();
+        if(pfrom->m_bNetState == false)
+        {
+        	pfrom->m_creBlockTime = GetTime();
+        	pfrom->m_bNetState = true;
+        }
+        //End	Add by syl 2016-11-04===================================
     }
 
 
@@ -5657,6 +5667,13 @@ bool SendMessages(CNode* pto)
         if (!vGetData.empty())
             pto->PushMessage(NetMsgType::GETDATA, vGetData);
 
+        //Begin Add by syl 2016-11-04=================================
+        //节点连接断开
+        if(pto->fDisconnect)
+        {
+        	pto->m_bNetState = false;
+        }
+        //End	Add by syl 2016-11-04=================================
     }
     return true;
 }

@@ -87,6 +87,9 @@ int nMaxConnections = DEFAULT_MAX_PEER_CONNECTIONS;
 bool fAddressesInitialized = false;
 std::string strSubVersion;
 
+//Begin Add by syl 2016-11-04=====================================
+vector<CNode*> g_vAllNodes;		//包含本地节点信息
+//End	Add by syl 2016-11-04=====================================
 vector<CNode*> vNodes;
 CCriticalSection cs_vNodes;
 map<CInv, CDataStream> mapRelay;
@@ -420,6 +423,10 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest)
         {
             LOCK(cs_vNodes);
             vNodes.push_back(pnode);
+
+            //Begin Add by syl 2016-11-04================================================
+            g_vAllNodes.push_back(pnode);
+            //End	Add by syl 2016-11-04================================================
         }
 
         pnode->nTimeConnected = GetTime();
@@ -1017,6 +1024,10 @@ static void AcceptConnection(const ListenSocket& hListenSocket) {
     {
         LOCK(cs_vNodes);
         vNodes.push_back(pnode);
+
+        //Begin Add by syl 2016-11-04================================================
+        g_vAllNodes.push_back(pnode);
+        //End	Add by syl 2016-11-04================================================
     }
 }
 
@@ -1956,7 +1967,13 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     if (pnodeLocalHost == NULL)
+    {
         pnodeLocalHost = new CNode(INVALID_SOCKET, CAddress(CService("127.0.0.1", 0), nLocalServices));
+
+        //Begin Add by syl 2016-11-04================================================
+        g_vAllNodes.push_back(pnodeLocalHost);
+        //End	Add by syl 2016-11-04================================================
+    }
 
     Discover(threadGroup);
 
@@ -2396,6 +2413,12 @@ CNode::CNode(SOCKET hSocketIn, const CAddress& addrIn, const std::string& addrNa
         PushVersion();
 
     GetNodeSignals().InitializeNode(GetId(), this);
+
+    //Begin Add by syl 2016-11-04=============================
+    m_currTime = GetTime();
+    m_creBlockTime = GetTime();
+    m_bNetState = true;
+    //End	Add by syl 2016-11-04=============================
 }
 
 CNode::~CNode()
