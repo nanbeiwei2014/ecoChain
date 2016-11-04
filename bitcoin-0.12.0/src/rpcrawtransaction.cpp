@@ -840,3 +840,116 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 
     return hashTx.GetHex();
 }
+
+/* add by sdk begin */
+UniValue get_data_from_sys( const UniValue& params, bool bHelp )
+{
+    if( bHelp || params.size() != 1 )
+    {
+        throw runtime_error(
+             "get_data_to_sys  \"txid\" ( verbose )\n"
+             "\nGet a transaction data spending the given inputs and creating new outputs.\n"
+             "Outputs can be addresses or data.\n"
+             "Returns hex-encoded raw transaction hash.\n"
+             "Note that the transaction's inputs are not signed, and\n"
+             "it is not stored in the wallet or transmitted to the network.\n"
+
+             "\nArguments:\n"
+             "1. \"transactions\"        (string, required) A json array of json objects\n"
+             "     [\n"
+             "       {\n"
+             "         \"txid\":\"id\",    (string, required) The transaction id\n"
+             "         \"vout\":n        (numeric, required) The output number\n"
+             "       }\n"
+             "       ,...\n"
+             "     ]\n"
+             "2. \"outputs\"             (string, required) a json object with outputs\n"
+             "    {\n"
+             "      \"address\": x.xxx   (numeric or string, required) The key is the bitcoin address, the numeric value (can be string) is the " + CURRENCY_UNIT + " amount\n"
+             "      \"data\": \"hex\",     (string, required) The key is \"data\", the value is hex encoded data\n"
+             "      ...\n"
+             "    }\n"
+             "3. locktime                (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
+             "\nResult:\n"
+             "\"transaction\"            (string) hex string of the transaction\n"
+
+             "\nExamples\n"
+             + HelpExampleCli("get_data_from_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"address\\\":0.01}\"")
+             + HelpExampleCli("get_data_from_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"data\\\":\\\"00010203\\\"}\"")
+             + HelpExampleRpc("get_data_from_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"address\\\":0.01}\"")
+             + HelpExampleRpc("get_data_from_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"data\\\":\\\"00010203\\\"}\"")
+        );
+    }
+    LOCK( cs_main );
+    uint256 hash = ParseHashV( params[0], "parameter 1");
+    hash = hash;
+
+    string strHex; //= QKGJ_EncodeHexTx( data );
+
+    return strHex;
+}
+
+UniValue send_data_to_sys(const UniValue& params, bool bHelp)
+{
+    if ( bHelp || params.size() != 1 )
+    {
+        throw runtime_error(
+            "send_data_to_sys \"{\"user_address\":\"data\"}[{\"txid\":\"id\",\"vout\":n},...] {\"address\":amount,\"data\":\"hex\",...} ( signature )\"\n"
+            "\nSend a transaction data spending the given inputs and creating new outputs.\n"
+            "Outputs can be addresses or data.\n"
+            "Returns hex-encoded raw transaction hash.\n"
+            "Note that the transaction's inputs are not signed, and\n"
+            "it is not stored in the wallet or transmitted to the network.\n"
+
+            "\nArguments:\n"
+            "1. \"transactions\"        (string, required) A json array of json objects\n"
+            "     [\n"
+            "       {\n"
+            "         \"txid\":\"id\",    (string, required) The transaction id\n"
+            "         \"vout\":n        (numeric, required) The output number\n"
+            "       }\n"
+            "       ,...\n"
+            "     ]\n"
+            "2. \"outputs\"             (string, required) a json object with outputs\n"
+            "    {\n"
+            "      \"address\": x.xxx   (numeric or string, required) The key is the bitcoin address, the numeric value (can be string) is the " + CURRENCY_UNIT + " amount\n"
+            "      \"data\": \"hex\",     (string, required) The key is \"data\", the value is hex encoded data\n"
+            "      ...\n"
+            "    }\n"
+            "3. locktime                (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
+            "\nResult:\n"
+            "\"transaction\"            (string) hex string of the transaction\n"
+
+            "\nExamples\n"
+            + HelpExampleCli("send_data_to_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"address\\\":0.01}\"")
+            + HelpExampleCli("send_data_to_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"data\\\":\\\"00010203\\\"}\"")
+            + HelpExampleRpc("send_data_to_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"address\\\":0.01}\"")
+            + HelpExampleRpc("send_data_to_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"data\\\":\\\"00010203\\\"}\"")
+        );
+    }
+
+    LOCK( cs_main );
+    RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR), true );
+    if ( params.isNull() )
+    {
+        throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
+    }
+
+    Cqkgj_basic_data data;
+    if ( !QKGJ_DecodeHexTx( data, params[0].get_str()))
+    {
+        throw JSONRPCError( RPC_DESERIALIZATION_ERROR, "basic data decode failed!");
+    }
+    uint256 hash_data = data.get_hash();
+
+    /* check whether this transaction exists in mempool already */
+    bool bHaveMempool = mempool.exists( hash_data );
+    //if( !bHaveMempool )
+    //{
+        /* push to local node and synand avoid recomputing tx sizec with wallets */
+        //mempool.map_hash_data.insert(pair<uint256,CTransaction>(hash_tx,raw_tx));
+    //}// end of if ( !bHaveMempool )
+
+    return hash_data.GetHex();
+}
+/* add by sdk end */

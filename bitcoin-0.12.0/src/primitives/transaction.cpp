@@ -67,6 +67,39 @@ uint256 CMutableTransaction::GetHash() const
     return SerializeHash(*this);
 }
 
+/* add by sdk begin */
+Cqkgj_basic_data::Cqkgj_basic_data():m_version(Cqkgj_basic_data::CURRENT_VERSION),m_address(),m_data(),m_sign(){
+    update_hash();
+}
+Cqkgj_basic_data::~Cqkgj_basic_data(){}
+Cqkgj_basic_data& Cqkgj_basic_data::operator=( const Cqkgj_basic_data &data )
+{
+    *const_cast<int*>(&m_version) = data.m_version;
+    *const_cast<std::string*> (&m_address) = data.m_address;
+    *const_cast<std::string*> (&m_data) = data.m_data;
+    *const_cast<std::string*> (&m_sign) = data.m_sign;
+    *const_cast<uint256*> (&m_hash) = data.m_hash;
+    return *this;
+}
+
+void Cqkgj_basic_data::update_hash()const
+{
+    *const_cast<uint256*>(&m_hash) = SerializeHash(*this);
+}
+
+std::string Cqkgj_basic_data::to_string() const
+{
+    std::string str;
+    str += strprintf("Cqkgj_basic_data(hash=%s,ver=%d,addr=%s,data=%s,sign=%s)\n",
+                     get_hash().ToString().substr(0,10),
+                     m_version,
+                     m_address.c_str(),
+                     m_data.c_str(),
+                     m_sign.c_str());
+    return str;
+}
+/* add by sdk end */
+
 void CTransaction::UpdateHash() const
 {
     *const_cast<uint256*>(&hash) = SerializeHash(*this);

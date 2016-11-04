@@ -35,6 +35,9 @@ class CChainParams;
 class CInv;
 class CScriptCheck;
 class CTxMemPool;
+/* add by sdk begin */
+class Cqkgj_mempool;
+/* add by sdk end */
 class CValidationInterface;
 class CValidationState;
 
@@ -266,6 +269,11 @@ void Misbehaving(NodeId nodeid, int howmuch);
 void FlushStateToDisk();
 /** Prune block files and flush state to disk. */
 void PruneAndFlush();
+
+/** add qkgj_basic_data to memory pool **/
+/* add by sdk begin */
+bool AddToMempool( Cqkgj_mempool& pool, const Cqkgj_basic_data &data );
+/* add by sdk end */
 
 /** (try to) add transaction to memory pool **/
 bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
