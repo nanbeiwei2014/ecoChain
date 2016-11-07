@@ -35,6 +35,18 @@ static inline size_t RecursiveDynamicUsage(const CTransaction& tx) {
     }
     return mem;
 }
+//************begin add by mengqg 20161107**********************88
+static inline size_t RecursiveDynamicUsage(const Cqkgj_basic_data& tx) {
+    size_t mem =5; /*memusage::DynamicUsage(tx.vin) + memusage::DynamicUsage(tx.vout);
+    for (std::vector<CTxIn>::const_iterator it = tx.vin.begin(); it != tx.vin.end(); it++) {
+        mem += RecursiveDynamicUsage(*it);
+    }
+    for (std::vector<CTxOut>::const_iterator it = tx.vout.begin(); it != tx.vout.end(); it++) {
+        mem += RecursiveDynamicUsage(*it);
+    }*/
+    return mem;
+}
+//********end  by mengqg 20161107****************************
 
 static inline size_t RecursiveDynamicUsage(const CMutableTransaction& tx) {
     size_t mem = memusage::DynamicUsage(tx.vin) + memusage::DynamicUsage(tx.vout);
