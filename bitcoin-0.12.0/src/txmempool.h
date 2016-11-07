@@ -610,6 +610,8 @@ class Cqkgj_process_data
 {
 private:
     size_t  m_data_size; /* 数据大小*/
+    size_t m_basi_size; /* avoid recomputing basic data size */
+    size_t m_mod_size; /* modified size fot priority */
     double m_priority;   /* 优先级 */
     unsigned int m_height; /* 高度 */
     uint32_t m_state;      /* 状态 */
@@ -626,6 +628,7 @@ public:
     {
         return this->m_data;
     }
+    size_t get_data_size(){ return m_data_size; }
     double get_priority( unsigned int cur_height ) const;
     size_t get_size() const { return m_data_size; }
     unsigned int get_height() const { return m_height; }

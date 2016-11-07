@@ -87,6 +87,20 @@ void Cqkgj_basic_data::update_hash()const
     *const_cast<uint256*>(&m_hash) = SerializeHash(*this);
 }
 
+unsigned int Cqkgj_basic_data::cal_mod_size( unsigned int n_data_size ) const
+{
+    if( 0 == n_data_size )
+    {
+        n_data_size = ::GetSerializeSize( *this, SER_NETWORK, PROTOCOL_VERSION );
+    }
+    unsigned int offset = 41U + 110U;
+    if ( n_data_size > offset )
+    {
+        n_data_size -= offset;
+    }
+    return n_data_size;
+}
+
 std::string Cqkgj_basic_data::to_string() const
 {
     std::string str;
