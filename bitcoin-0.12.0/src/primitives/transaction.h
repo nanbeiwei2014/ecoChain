@@ -218,6 +218,7 @@ public:
     const std::string get_sign() const{ return m_sign;     }
     const std::string get_data() const{ return m_data;     }
 
+    unsigned int cal_mod_size( unsigned int n_data_size =  0 ) const;
     bool is_null() const
     {
         return m_address.length()==0 &&m_data.length()==0 && m_sign.length() == 0;

@@ -1001,8 +1001,10 @@ Cqkgj_process_data::Cqkgj_process_data(const Cqkgj_basic_data& data,double _prio
                                        unsigned int _height):
     m_data(data),m_priority(_priority),m_height(_height)
 {
-      m_data_size=::GetSerializeSize(data,SER_NETWORK,PROTOCOL_VERSION);
-      m_state = 0;
+    m_data_size=::GetSerializeSize(data,SER_NETWORK,PROTOCOL_VERSION);
+    m_mod_size = data.cal_mod_size( m_data_size );
+    m_data_size=::GetSerializeSize(data,SER_NETWORK,PROTOCOL_VERSION);
+    m_state = 0;
 }
 
 Cqkgj_process_data::Cqkgj_process_data( const Cqkgj_process_data &other )
