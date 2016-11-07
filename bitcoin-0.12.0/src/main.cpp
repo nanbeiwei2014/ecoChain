@@ -54,7 +54,9 @@ using namespace std;
  */
 
 CCriticalSection cs_main;
-
+//*********begin add by mengqg 20161107*********************8
+Cqkgj_mempool   qmempool;
+//**********end 20161107********************
 BlockMap mapBlockIndex;
 CChain chainActive;
 CBlockIndex *pindexBestHeader = NULL;
@@ -80,7 +82,7 @@ bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
 /** Fees smaller than this (in satoshi) are considered zero fee (for relaying, mining and transaction creation) */
 CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);
 
-CTxMemPool mempool(::minRelayTxFee);
+CTxMemPool mempool(::minRelayTxFee);  //*****delete by mengqg
 
 struct COrphanTx {
     CTransaction tx;
@@ -1257,7 +1259,8 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransa
 /** Return transaction in tx, and if it was found inside a block, its hash is placed in hashBlock */
 bool GetTransaction(const uint256 &hash, CTransaction &txOut, const Consensus::Params& consensusParams, uint256 &hashBlock, bool fAllowSlow)
 {
-    CBlockIndex *pindexSlow = NULL;
+ /*******
+     CBlockIndex *pindexSlow = NULL;
 
     LOCK(cs_main);
 
@@ -1311,7 +1314,7 @@ bool GetTransaction(const uint256 &hash, CTransaction &txOut, const Consensus::P
             }
         }
     }
-
+*******/
     return false;
 }
 

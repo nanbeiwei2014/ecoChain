@@ -124,7 +124,11 @@ struct BlockHasher
 
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
-extern CTxMemPool mempool;
+
+//******modify  by mengqg 20161107****************************
+extern Cqkgj_mempool qmempool;
+extern CTxMemPool mempool;   //delete by mengqg
+//***********************************
 typedef boost::unordered_map<uint256, CBlockIndex*, BlockHasher> BlockMap;
 extern BlockMap mapBlockIndex;
 extern uint64_t nLastBlockTx;

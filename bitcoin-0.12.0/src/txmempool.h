@@ -672,9 +672,41 @@ public:
     }
 
     bool add_to_mempool( uint256 &hash, Cqkgj_process_data &data );
+public:
+    struct CompareIteratorByHash {
+        bool operator()(const it_hash &a, const it_hash &b) const {
+            return a->second.get_data().get_hash() < a->second.get_data().get_hash();
+        }
+    };
+
+    typedef std::set<it_hash, CompareIteratorByHash> setEntries;
 
 };
+class CompareCqkgjMemPoolProcessDataByScore
+{
+public:
+    bool operator()(const Cqkgj_process_data& a, const Cqkgj_process_data& b)
+    {
+        size_t f1 = b.get_size();
+        size_t f2 = a.get_size();
+        if (f1 == f2) {
+            return b.get_data().get_hash() < a.get_data().get_hash();
+        }
+        return f1 > f2;
+    }
+};
 
+typedef std::pair<double, Cqkgj_mempool::it_hash> DataAgePriority;
+
+struct DataAgePriorityCompare
+{
+    bool operator()(const DataAgePriority& a, const DataAgePriority& b)
+    {
+        if (a.first == b.first)
+            return CompareCqkgjMemPoolProcessDataByScore()((b.second->second), (a.second->second)); //Reverse order to make sort less than
+        return a.first < b.first;
+    }
+};
 /* add by sdk end */
 
 #endif // BITCOIN_TXMEMPOOL_H
