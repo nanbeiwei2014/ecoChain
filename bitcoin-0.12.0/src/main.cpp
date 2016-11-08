@@ -824,8 +824,7 @@ bool AddToMempool( Cqkgj_mempool& pool, const Cqkgj_basic_data &data )
     uint256 hash = data.get_hash();
 
     double dPriority = 0.0;
-    unsigned int ui_height = 0;
-    Cqkgj_process_data process( data, dPriority,ui_height );
+    Cqkgj_process_data process( data, GetTime(),dPriority,chainActive.Height() );
 
     //unsigned int ui_size = process.get_size();
 
