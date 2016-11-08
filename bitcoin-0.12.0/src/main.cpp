@@ -22,12 +22,12 @@
 #include "pow.h"
 #include "primitives/block.h"
 #include "primitives/transaction.h"
+#include "txmempool.h"
 #include "script/script.h"
 #include "script/sigcache.h"
 #include "script/standard.h"
 #include "tinyformat.h"
 #include "txdb.h"
-#include "txmempool.h"
 #include "ui_interface.h"
 #include "undo.h"
 #include "util.h"
@@ -4746,7 +4746,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         	for(iIter = vQkgjMsg.begin(); iIter != vQkgjMsg.end(); iIter++)
         	{
         		//写入内存池
-        		Cqkgj_process_data	newProData(*iIter, GetTime(), 10.0, 100);
+                Cqkgj_basic_data  newBasicData = *iIter;
+                Cqkgj_process_data	newProData(*iIter, GetTime(), 10.0, 100);
 
         		if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) == qmempool.map_hash_data.end())
         		{
