@@ -1056,7 +1056,9 @@ Cqkgj_basic_data Cqkgj_mempool::get_data_by_hash( uint256 hash )
     std::map< uint256,Cqkgj_process_data>::iterator it = map_hash_data.find(hash);
     if ( it != map_hash_data.end())
     {
-        //data = it->second;
+        Cqkgj_process_data process;
+        process = it->second;
+        data = process.m_data;
         return data;
     }
     return data;
