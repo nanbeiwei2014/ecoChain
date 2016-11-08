@@ -4513,6 +4513,39 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
     else if (strCommand == NetMsgType::INV)
     {
+    	//Begion Add by syl 2016-11-01================================
+    	vector<CInv> vInv;
+    	vRecv >> vInv;
+    	if (vInv.size() > MAX_INV_SZ)
+    	{
+    		Misbehaving(pfrom->GetId(), 20);
+    	    return error("message inv size() = %u", vInv.size());
+    	}
+
+    	LOCK(cs_main);
+
+    	std::vector<CInv> vToFetch;
+    	for (unsigned int nInv = 0; nInv < vInv.size(); nInv++)
+    	{
+    		const CInv &inv = vInv[nInv];
+
+    	    if (inv.type == MSG_TX)
+    	    {
+    	    	//检查是否存在该条记录或是否合法，如果不存在则添加
+    	    	if(!qmempool.exists(inv.hash))
+    	    	{
+    	    		vToFetch.push_back(inv);
+    	    	}
+    	    }
+    	}
+
+    	if (!vToFetch.empty())
+    	{
+    		pfrom->PushMessage(NetMsgType::MEMPOOL, vToFetch);
+    	}
+    	//End 	Add by syl 2016-111-01================================
+
+    	/* Noted by syl 2016-11-08================================================
         vector<CInv> vInv;
         vRecv >> vInv;
         if (vInv.size() > MAX_INV_SZ)
@@ -4583,6 +4616,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         if (!vToFetch.empty())
             pfrom->PushMessage(NetMsgType::GETDATA, vToFetch);
+        Noted by syl 2016-11-08================================================*/
     }
 
 
@@ -4702,6 +4736,26 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
     else if (strCommand == NetMsgType::TX)
     {
+    	//Begin Add by syl 2016-11-08==========================================================
+    	vector<Cqkgj_basic_data> vQkgjMsg;
+        vRecv >> vQkgjMsg;
+
+        if (vQkgjMsg.size() > 0)
+        {
+        	vector<Cqkgj_basic_data>::iterator iIter;
+        	for(iIter = vQkgjMsg.begin(); iIter != vQkgjMsg.end(); iIter++)
+        	{
+        		//写入内存池
+        		Cqkgj_process_data	newProData(*iIter, GetTime(), 10.0, 100);
+
+        		if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) == qmempool.map_hash_data.end())
+        		{
+        			qmempool.add_to_mempool(newProData.m_data.get_hash(), newProData);
+        		}
+        	}
+        }
+    	//End	Add by syl 2016-11-08==========================================================
+    	/*Noted by syl 2016-11-08==============================================================
         // Stop processing the transaction early if
         // We are in blocks only mode and peer is either not whitelisted or whitelistrelay is off
         if (GetBoolArg("-blocksonly", DEFAULT_BLOCKSONLY) && (!pfrom->fWhitelisted || !GetBoolArg("-whitelistrelay", DEFAULT_WHITELISTRELAY)))
@@ -4835,6 +4889,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 Misbehaving(pfrom->GetId(), nDoS);
         }
         FlushStateToDisk(state, FLUSH_STATE_PERIODIC);
+        //Noted by syl 2016-11-08==============================================================*/
     }
 
 
@@ -4986,6 +5041,29 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
     else if (strCommand == NetMsgType::MEMPOOL)
     {
+    	//Begin Add by syl 2016-11-08====================================================
+    	vector<CInv> vInv;
+    	vRecv >> vInv;
+
+    	//从mempool中获取数据，然后发送
+    	vector<Cqkgj_basic_data> vNewData;
+    	vector<CInv>::iterator iIter;
+    	for(iIter = vInv.begin(); iIter != vInv.end(); iIter++)
+    	{
+    		if(qmempool.exists(iIter->hash))
+    		{
+    			Cqkgj_basic_data newData = qmempool.get_data_by_hash(iIter->hash);
+    			vNewData.push_back(newData);
+    		}
+    	}
+
+    	if(vNewData.size() > 0)
+    	{
+    		pfrom->PushMessage(NetMsgType::TX, vNewData);
+    	}
+    	//End	Add by syl 2016-11-08====================================================
+
+    	/* Noted by syl 2016-11-08=======================================================
         if (CNode::OutboundTargetReached(false) && !pfrom->fWhitelisted)
         {
             LogPrint("net", "mempool request with bandwidth limit reached, disconnect peer=%d\n", pfrom->GetId());
@@ -5013,6 +5091,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         }
         if (vInv.size() > 0)
             pfrom->PushMessage(NetMsgType::INV, vInv);
+        // Noted by syl 2016-11-08=======================================================*/
     }
 
 
@@ -5551,6 +5630,7 @@ bool SendMessages(CNode* pto)
             pto->vBlockHashesToAnnounce.clear();
         }
 
+        /* Noted by syl 2016-11-08====================================================
         //
         // Message: inventory
         //
@@ -5633,6 +5713,37 @@ bool SendMessages(CNode* pto)
                 pto->fDisconnect = true;
             }
         }
+        // Noted by syl 2016-11-08====================================================*/
+        //Begin Add by syl 2016-11-08===================================================
+        //先发hash值，再根据请求发送数据
+        vector<CInv> vQkgjInv;
+    	if(pto->msgQkgjToSend.size() > 0)
+    	{
+    		LOCK(pto->cs_qkgjmsg);
+
+        	BOOST_FOREACH(const CInv& inv, pto->msgQkgjToSend)
+        	{
+        		if (inv.type != MSG_TX)
+        			continue;
+
+        		vQkgjInv.push_back(inv);
+        		//if (vQkgjInv.size() >= 1000)
+        		{
+        			pto->PushMessage(NetMsgType::INV, vQkgjInv);
+        			vQkgjInv.clear();
+
+        			pto->msgQkgjToSend.clear();
+        		}
+        	}
+        }
+        if (!vQkgjInv.empty())
+        {
+        	pto->PushMessage(NetMsgType::INV, vQkgjInv);
+        	vQkgjInv.clear();
+
+        	pto->msgQkgjToSend.clear();
+        }
+        //End	Add by syl 2016-11-08===================================================
 
         //
         // Message: getdata (blocks)

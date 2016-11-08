@@ -1047,7 +1047,7 @@ Cqkgj_mempool::Cqkgj_mempool(){}
 Cqkgj_mempool::~Cqkgj_mempool()
 {
     map_hash_data.clear();
-    map_state_data.clear();
+    //map_state_data.clear();
 }
 
 Cqkgj_basic_data Cqkgj_mempool::get_data_by_hash( uint256 hash )
@@ -1071,16 +1071,17 @@ std::vector<Cqkgj_process_data> Cqkgj_mempool::get_data_by_state( int state )
     {
         return obj;
     }
-
+/*
     std::map< uint32_t, std::vector<Cqkgj_process_data> >::iterator it = map_state_data.find(state);
     if ( it != map_state_data.end())
     {
         return (*it).second;
     }
+*/
     return obj;
 }
 
-bool Cqkgj_mempool::add_to_mempool( uint256 &hash, Cqkgj_process_data &process )
+bool Cqkgj_mempool::add_to_mempool(const uint256 &hash, Cqkgj_process_data &process )
 {
     LOCK( cs );
     Cqkgj_mempool::it_hash it = map_hash_data.find(hash);

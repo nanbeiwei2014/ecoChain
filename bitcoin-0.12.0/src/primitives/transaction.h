@@ -188,6 +188,7 @@ public:
     //unsigned int m_data_state;           /* data state */
     const int32_t m_version;
 
+    Cqkgj_basic_data(std::string addr,std::string data,std::string sign);
     Cqkgj_basic_data();
     ~Cqkgj_basic_data();
 
