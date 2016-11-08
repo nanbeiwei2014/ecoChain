@@ -997,9 +997,9 @@ void CTxMemPool::TrimToSize(size_t sizelimit, std::vector<uint256>* pvNoSpendsRe
 }
 
 /* add by sdk  begin */
-Cqkgj_process_data::Cqkgj_process_data(const Cqkgj_basic_data& data,double _priority,
+Cqkgj_process_data::Cqkgj_process_data(const Cqkgj_basic_data& data,int64_t n_time,double _priority,
                                        unsigned int _height):
-    m_data(data),m_priority(_priority),m_height(_height)
+    m_data(data),m_time(n_time),m_priority(_priority),m_height(_height)
 {
     m_data_size=::GetSerializeSize(data,SER_NETWORK,PROTOCOL_VERSION);
     m_mod_size = data.cal_mod_size( m_data_size );
@@ -1017,13 +1017,15 @@ Cqkgj_process_data::~Cqkgj_process_data(){}
 
 double Cqkgj_process_data::get_priority( unsigned int cur_height ) const
 {
-    double local_prio = (double)(cur_height-m_height);
-    double result = m_height + local_prio;
-    if ( result < 0 )
-    {
-        result = 0;
-    }
-    return result;
+    cur_height = cur_height;
+    return (chainActive.Height()-this->m_height)*(GetTime()-this->m_time );
+    //double local_prio = (double)(cur_height-m_height);
+    //double result = m_height + local_prio;
+    //if ( result < 0 )
+    //{
+    //    result = 0;
+    //}
+    //return result;
 }
 
 int Cqkgj_process_data::get_state()  const
