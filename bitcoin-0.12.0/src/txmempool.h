@@ -636,6 +636,7 @@ public:
     size_t get_size() const { return m_data_size; }
     unsigned int get_height() const { return m_height; }
     const Cqkgj_basic_data& get_data(){ return this->m_data;}
+
     bool set_state( int state );
     int get_state( )  const;
 };
@@ -655,18 +656,18 @@ private:
     uint64_t m_total_size;
 public:
     std::map< uint256, Cqkgj_process_data > map_hash_data;
-    std::map< uint32_t,std::vector<Cqkgj_process_data> > map_state_data;
+    //std::map< uint32_t,std::vector<Cqkgj_process_data> > map_state_data;
 public:
 
     typedef std::map<uint256,Cqkgj_process_data>::iterator it_hash;
-    typedef std::map<uint32_t,std::vector<Cqkgj_process_data> >::iterator it_state;
+    //typedef std::map<uint32_t,std::vector<Cqkgj_process_data> >::iterator it_state;
 
     Cqkgj_mempool();
     ~Cqkgj_mempool();
     mutable CCriticalSection cs;
     std::string get_address( uint256 &hash );
     Cqkgj_basic_data get_data_by_hash( uint256 hash );
-    std::vector< Cqkgj_process_data > get_data_by_state( int state );
+    std::vector< Cqkgj_process_data > get_data_by_state( int state );	//获取指定状态数据集合
     bool add_to_mempool_by_hash( uint256 hash, Cqkgj_basic_data data);
     bool exists( uint256 hash ) const
     {
@@ -674,7 +675,8 @@ public:
         return (map_hash_data.count(hash) > 0?true:false);
     }
 
-    bool add_to_mempool( uint256 &hash, Cqkgj_process_data &data );
+    bool add_to_mempool(const uint256 &hash, Cqkgj_process_data &data );
+
 public:
     struct CompareIteratorByHash {
         bool operator()(const it_hash &a, const it_hash &b) const {

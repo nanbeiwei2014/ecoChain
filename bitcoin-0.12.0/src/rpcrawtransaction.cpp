@@ -882,7 +882,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     }
     LOCK( cs_main );
     uint256 hash = ParseHashV( params[0], "parameter 1");
-    hash = hash;
+    //hash = hash;
 
     string strHex; //= QKGJ_EncodeHexTx( data );
 
@@ -891,7 +891,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
 
 UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 {
-    if ( bHelp || params.size() != 1 )
+    if ( bHelp || params.size() != 1)
     {
         throw runtime_error(
             "send_data_to_sys \"{\"user_address\":\"data\"}[{\"txid\":\"id\",\"vout\":n},...] {\"address\":amount,\"data\":\"hex\",...} ( signature )\"\n"
@@ -929,27 +929,51 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     }
 
     LOCK( cs_main );
-    RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR), true );
-    if ( params.isNull() )
-    {
-        throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
-    }
+    //RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR), true );
+    //if ( params.isNull() )
+   // {
+    //    throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
+    //}
 
-    Cqkgj_basic_data data;
-    if ( !QKGJ_DecodeHexTx( data, params[0].get_str()))
-    {
-        throw JSONRPCError( RPC_DESERIALIZATION_ERROR, "basic data decode failed!");
-    }
+    //解析JSON
+
+
+    Cqkgj_basic_data data("qukuaiguoji", "abcdefg", "123456");
+    //if ( !QKGJ_DecodeHexTx( data, params[0].get_str()))
+    //{
+    //    throw JSONRPCError( RPC_DESERIALIZATION_ERROR, "basic data decode failed!");
+    //}
+
     uint256 hash_data = data.get_hash();
 
-    /* check whether this transaction exists in mempool already */
-    bool bHaveMempool = mempool.exists( hash_data );
-    //if( !bHaveMempool )
-    //{
-        /* push to local node and synand avoid recomputing tx sizec with wallets */
-        //mempool.map_hash_data.insert(pair<uint256,CTransaction>(hash_tx,raw_tx));
-    //}// end of if ( !bHaveMempool )
+    //写入内存池
+    Cqkgj_process_data	newProData(data, 0, 123.00, 1);
 
-    return hash_data.GetHex();
+    if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) != qmempool.map_hash_data.end())
+    {
+    	return UniValue(UniValue::VNUM, "{\"resutl\":\"data exist !\"}");
+    }
+    else
+    {
+    	qmempool.add_to_mempool(newProData.m_data.get_hash(), newProData);
+    }
+
+    //触发广播数据到其他节点的广播消息
+    RelayQkgjMsg(data);
+
+    return UniValue(UniValue::VNUM, "{\"resutl\":\"success\"}");
 }
 /* add by sdk end */
+
+//Begin	Add by syl 2016-10-31========================================
+void RelayQkgjMsg(const Cqkgj_basic_data& msgData)
+{
+	CInv inv(MSG_TX, msgData.get_hash());
+
+	LOCK(cs_vNodes);
+	BOOST_FOREACH(CNode* pnode, vNodes)
+	{
+		pnode->PushQkgjMsg(inv);
+    }
+}
+//End	Add by syl 2016-10-31========================================

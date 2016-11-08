@@ -68,6 +68,11 @@ uint256 CMutableTransaction::GetHash() const
 }
 
 /* add by sdk begin */
+
+Cqkgj_basic_data::Cqkgj_basic_data(std::string addr,std::string data,std::string sign):m_version(Cqkgj_basic_data::CURRENT_VERSION),m_address(addr),m_data(data),m_sign(sign){
+	update_hash();
+}
+
 Cqkgj_basic_data::Cqkgj_basic_data():m_version(Cqkgj_basic_data::CURRENT_VERSION),m_address(),m_data(),m_sign(){
     update_hash();
 }

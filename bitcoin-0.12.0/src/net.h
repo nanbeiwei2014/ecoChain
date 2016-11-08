@@ -323,6 +323,13 @@ public:
 	bool		m_bNetState;
 	//End	Add by syl 2016-11-03=======================================
 
+	//Begin Add by syl 2016-10-31=======================================
+	std::vector<CInv> msgQkgjToSend;			//库存消息
+	CCriticalSection cs_qkgjmsg;
+
+	std::vector<uint256>	m_hasBeenSendMsg;	//库存消息中已发送出去的消息的哈希值
+	//End 	Add by syl 2016-10-31=======================================
+
     // socket
     uint64_t nServices;
     SOCKET hSocket;
@@ -521,6 +528,16 @@ public:
             vInventoryToSend.push_back(inv);
         }
     }
+
+    //Begin Add by syl 2016-10-31===================================
+    void PushQkgjMsg(const CInv& strMsg)
+    {
+    	LOCK(cs_qkgjmsg);
+        if (strMsg.type != MSG_TX)
+        	return;
+        msgQkgjToSend.push_back(strMsg);
+    }
+    //End	 Add by syl 2016-10-31===================================
 
     void PushBlockHash(const uint256 &hash)
     {

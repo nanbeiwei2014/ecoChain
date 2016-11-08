@@ -10,6 +10,8 @@
 #include "rpcprotocol.h"
 #include "uint256.h"
 
+#include "./primitives/transaction.h"		//Add by syl 2016-11-08=======================
+
 #include <list>
 #include <map>
 #include <stdint.h>
@@ -240,6 +242,10 @@ extern UniValue resendwallettransactions(const UniValue& params, bool fHelp);
 extern UniValue send_data_to_sys(const UniValue& params, bool bHelp);
 extern UniValue get_data_from_sys(const UniValue& params, bool bHelp);
 /* add by sdk end */
+
+//Begin	Add by syl 2016-10-31========================================
+extern void RelayQkgjMsg(const Cqkgj_basic_data& msgData);
+//End	Add by syl 2016-10-31========================================
 
 extern UniValue getrawtransaction(const UniValue& params, bool fHelp); // in rcprawtransaction.cpp
 extern UniValue listunspent(const UniValue& params, bool fHelp);
