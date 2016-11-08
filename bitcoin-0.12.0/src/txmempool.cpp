@@ -1086,7 +1086,7 @@ bool Cqkgj_mempool::add_to_mempool(const uint256 &hash, Cqkgj_process_data &proc
     LOCK( cs );
     Cqkgj_mempool::it_hash it = map_hash_data.find(hash);
     //if this data exists in mempool already, return false
-    if( it == map_hash_data.end() ) //if ( this->exists(hash))
+    if( it != map_hash_data.end() ) //if ( this->exists(hash))
         return false;
     map_hash_data.insert(make_pair(hash,process));
     m_total_size += process.get_size();
