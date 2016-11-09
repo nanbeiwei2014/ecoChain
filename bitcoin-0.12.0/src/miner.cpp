@@ -617,7 +617,8 @@ void static BitcoinMiner(const CChainParams& chainparams)
             	(*iter)= g_vAllNodes[1];
             }
 
-            if((VALID_BLOCK_NODES<nConnectCount)&&("127.0.0.1"==(*iter)->addr.ToStringIP()))
+             std::string strIp=(*iter)->addr.ToStringIP();
+            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
             {
         	   if ((GetTime()-pindexPrev->nTime)<(0.9*DEFAULT_GENERATE_PERIOD))
         		   continue;
