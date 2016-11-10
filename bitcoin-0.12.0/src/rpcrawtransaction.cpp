@@ -947,7 +947,7 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     uint256 hash_data = data.get_hash();
 
     //写入内存池
-    Cqkgj_process_data	newProData(data, 0, 123.00, 1);
+    Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
 
     if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) != qmempool.map_hash_data.end())
     {

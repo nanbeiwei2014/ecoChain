@@ -616,11 +616,12 @@ private:
     double m_priority;   /* 优先级 */
     unsigned int m_height; /* 高度 */
     uint32_t m_state;      /* 状态 */
+    unsigned int m_sign_op_count;
 public:
     Cqkgj_basic_data m_data;
     Cqkgj_process_data();
     Cqkgj_process_data(const Cqkgj_basic_data &data,int64_t _time,
-                       double _priority,unsigned int _height);
+                       double _priority,unsigned int _height, unsigned int n_sig_ops );
     Cqkgj_process_data( const Cqkgj_process_data &other );
 
     ~Cqkgj_process_data();
@@ -636,6 +637,7 @@ public:
     size_t get_size() const { return m_data_size; }
     unsigned int get_height() const { return m_height; }
     const Cqkgj_basic_data& get_data(){ return this->m_data;}
+    unsigned int get_sign_op_count() const{ return m_sign_op_count; }
 
     bool set_state( int state );
     int get_state( )  const;
@@ -668,7 +670,7 @@ public:
     std::string get_address( uint256 &hash );
     Cqkgj_basic_data get_data_by_hash( uint256 hash );
     std::vector< Cqkgj_process_data > get_data_by_state( int state );	//获取指定状态数据集合
-    bool add_to_mempool_by_hash( uint256 hash, Cqkgj_basic_data data);
+    //bool add_to_mempool_by_hash( uint256 hash, Cqkgj_basic_data data);
     bool exists( uint256 hash ) const
     {
         LOCK(cs);
