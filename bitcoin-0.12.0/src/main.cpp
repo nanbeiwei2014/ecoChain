@@ -824,7 +824,8 @@ bool AddToMempool( Cqkgj_mempool& pool, const Cqkgj_basic_data &data )
     uint256 hash = data.get_hash();
 
     double dPriority = 0.0;
-    Cqkgj_process_data process( data, GetTime(),dPriority,chainActive.Height() );
+    unsigned int n_sig_ops = 0;
+    Cqkgj_process_data process( data, GetTime(),dPriority,chainActive.Height(), n_sig_ops);
 
     //unsigned int ui_size = process.get_size();
 
@@ -4763,7 +4764,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         	{
         		//写入内存池
                 Cqkgj_basic_data  newBasicData = *iIter;
-                Cqkgj_process_data	newProData(*iIter, GetTime(), 10.0, 100);
+                Cqkgj_process_data	newProData(*iIter, GetTime(), 10.0, 100,0);
 
         		if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) == qmempool.map_hash_data.end())
         		{

@@ -998,8 +998,8 @@ void CTxMemPool::TrimToSize(size_t sizelimit, std::vector<uint256>* pvNoSpendsRe
 
 /* add by sdk  begin */
 Cqkgj_process_data::Cqkgj_process_data(const Cqkgj_basic_data& data,int64_t n_time,double _priority,
-                                       unsigned int _height):
-    m_data(data),m_time(n_time),m_priority(_priority),m_height(_height)
+                                       unsigned int _height, unsigned int n_sig_ops):
+    m_data(data),m_time(n_time),m_priority(_priority),m_height(_height),m_sign_op_count(n_sig_ops)
 {
     m_data_size=::GetSerializeSize(data,SER_NETWORK,PROTOCOL_VERSION);
     m_mod_size = data.cal_mod_size( m_data_size );
