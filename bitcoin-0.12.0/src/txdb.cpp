@@ -198,13 +198,15 @@ bool CBlockTreeDB::LoadBlockIndexGuts()
                 pindexNew->nVersion       = diskindex.nVersion;
                 pindexNew->hashMerkleRoot = diskindex.hashMerkleRoot;
                 pindexNew->nTime          = diskindex.nTime;
-                pindexNew->nBits          = diskindex.nBits;
-                pindexNew->nNonce         = diskindex.nNonce;
+                //pindexNew->nBits          = diskindex.nBits;
+                //pindexNew->nNonce         = diskindex.nNonce;
                 pindexNew->nStatus        = diskindex.nStatus;
                 pindexNew->nTx            = diskindex.nTx;
 
-                if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, Params().GetConsensus()))
-                    return error("LoadBlockIndex(): CheckProofOfWork failed: %s", pindexNew->ToString());
+//******************begin delete by mengqg 20161109******************************************************************************
+                //if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, Params().GetConsensus()))
+                //    return error("LoadBlockIndex(): CheckProofOfWork failed: %s", pindexNew->ToString());
+//******************end delete by mengqg 20161109******************************************************************************
 
                 pcursor->Next();
             } else {

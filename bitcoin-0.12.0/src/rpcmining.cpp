@@ -114,7 +114,9 @@ UniValue getgenerate(const UniValue& params, bool fHelp)
 
 UniValue generate(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() < 1 || params.size() > 1)
+//******************begin delete by mengqg 20161109******************************************************************************
+/*****
+     if (fHelp || params.size() < 1 || params.size() > 1)
         throw runtime_error(
             "generate numblocks\n"
             "\nMine blocks immediately (before the RPC call returns)\n"
@@ -179,7 +181,9 @@ UniValue generate(const UniValue& params, bool fHelp)
         //mark script as important because it was used at least for one coinbase output
         coinbaseScript->KeepScript();
     }
-    return blockHashes;
+*****/
+//******************end delete by mengqg 20161109******************************************************************************
+    return false;//blockHashes;
 }
 
 UniValue setgenerate(const UniValue& params, bool fHelp)
@@ -322,7 +326,10 @@ static UniValue BIP22ValidationResult(const CValidationState& state)
 
 UniValue getblocktemplate(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() > 1)
+//******************begin delete by mengqg 20161109******************************************************************************
+/*****
+
+	if (fHelp || params.size() > 1)
         throw runtime_error(
             "getblocktemplate ( \"jsonrequestobject\" )\n"
             "\nIf the request parameters include a 'mode' key, that is used to explicitly select between the default 'template' request or a 'proposal'.\n"
@@ -394,7 +401,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
             strMode = modeval.get_str();
         else if (modeval.isNull())
         {
-            /* Do nothing */
+            /// Do nothing
         }
         else
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid mode");
@@ -586,8 +593,9 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     result.push_back(Pair("curtime", pblock->GetBlockTime()));
     result.push_back(Pair("bits", strprintf("%08x", pblock->nBits)));
     result.push_back(Pair("height", (int64_t)(pindexPrev->nHeight+1)));
-
-    return result;
+******/
+//******************end delete by mengqg 20161109******************************************************************************
+    return false;//result;
 }
 
 class submitblock_StateCatcher : public CValidationInterface

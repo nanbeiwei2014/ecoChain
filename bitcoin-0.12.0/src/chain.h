@@ -182,7 +182,7 @@ public:
         nVersion       = block.nVersion;
         hashMerkleRoot = block.hashMerkleRoot;
         nTime          = block.nTime;
-        nBits          = block.nBits;
+       // nBits          = block.nBits;
         nNonce         = block.nNonce;
     }
 
@@ -212,7 +212,7 @@ public:
             block.hashPrevBlock = pprev->GetBlockHash();
         block.hashMerkleRoot = hashMerkleRoot;
         block.nTime          = nTime;
-        block.nBits          = nBits;
+       // block.nBits          = nBits;
         block.nNonce         = nNonce;
         return block;
     }
@@ -318,7 +318,7 @@ public:
         READWRITE(hashPrev);
         READWRITE(hashMerkleRoot);
         READWRITE(nTime);
-        READWRITE(nBits);
+       // READWRITE(nBits);
         READWRITE(nNonce);
     }
 
@@ -329,8 +329,8 @@ public:
         block.hashPrevBlock   = hashPrev;
         block.hashMerkleRoot  = hashMerkleRoot;
         block.nTime           = nTime;
-        block.nBits           = nBits;
-        block.nNonce          = nNonce;
+        //block.nBits           = nBits;
+        //block.nNonce          = nNonce;
         return block.GetHash();
     }
 

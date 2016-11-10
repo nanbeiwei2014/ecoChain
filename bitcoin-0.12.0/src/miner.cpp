@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "miner.h"
-
+#include <math.h>
 #include "amount.h"
 #include "chain.h"
 #include "chainparams.h"
@@ -69,11 +69,15 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
         pblock->nTime = nNewTime;
 
     // Updating time can change work required on testnet:
+//******************begin delete by mengqg 20161109******************************************************************************
+/*****
     if (consensusParams.fPowAllowMinDifficultyBlocks)
         pblock->nBits = GetNextWorkRequired(pindexPrev, pblock, consensusParams);
-
+*****/
+//******************end delete by mengqg 20161109******************************************************************************
     return nNewTime - nOldTime;
 }
+/*****
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn)
 {
     // Create new block
@@ -300,7 +304,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
     return pblocktemplate.release();
 }
 
-
+******/
 
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
 {
@@ -314,13 +318,6 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
     // -blockversion=N to test forking scenarios
     if (chainparams.MineBlocksOnDemand())
         pblock->nVersion = GetArg("-blockversion", pblock->nVersion);
-
-/****   // How much of the block should be dedicated to high-priority transactions,
-    // included regardless of the fees they pay
-    unsigned int nBlockPrioritySize = GetArg("-blockprioritysize", DEFAULT_BLOCK_PRIORITY_SIZE);
-    nBlockPrioritySize = std::min(nBlockMaxSize, nBlockPrioritySize);
-*****/
-
 
     // Largest block you're willing to create:
     unsigned int nBlockMaxSize = GetArg("-blockmaxsize", DEFAULT_BLOCK_MAX_SIZE);
@@ -336,10 +333,6 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
     // Collect memory pool transactions into the block
 
     Cqkgj_mempool::setEntries inBlock;
-
-
-
- //   CTxMemPool::setEntries waitSet;
 
     // This vector will be sorted into a priority queue:
     vector<DataAgePriority> vecPriority;
@@ -520,8 +513,9 @@ bool static ScanHash(const CBlockHeader *pblock, uint32_t nNonce, uint256 *phash
 static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainparams)
 {
     LogPrintf("%s\n", pblock->ToString());
-    LogPrintf("generated %s\n", FormatMoney(pblock->vtx[0].vout[0].nValue));
-
+//*********begin delete by mengqg 20161109********************************************
+    //LogPrintf("generated %s\n", FormatMoney(pblock->vtx[0].vout[0].nValue));
+//*********end by mengqg 20161109********************************************
     // Found a solution
     {
         LOCK(cs_main);
@@ -611,10 +605,10 @@ void static BitcoinMiner(const CChainParams& chainparams)
             }
 
             vector<CNode*>::iterator iter=g_vAllNodes.begin();
-            if ((0.05*DEFAULT_GENERATE_PERIOD)>(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
+            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
             {
             	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
-            	(*iter)= g_vAllNodes[1];
+            	iter++;
             }
 
              std::string strIp=(*iter)->addr.ToStringIP();

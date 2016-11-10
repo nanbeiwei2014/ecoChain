@@ -127,9 +127,9 @@ TestChain100Setup::CreateAndProcessBlock(const std::vector<CMutableTransaction>&
     // IncrementExtraNonce creates a valid coinbase and merkleRoot
     unsigned int extraNonce = 0;
     IncrementExtraNonce(&block, chainActive.Tip(), extraNonce);
-
-    while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())) ++block.nNonce;
-
+//********************begin test delete by mengqg 20161110************************************************************************************
+    //while (!CheckProofOfWork(block.GetHash(), block.nBits, chainparams.GetConsensus())) ++block.nNonce;
+//*********************end delete by mengqg 20161110************************************************************************************
     CValidationState state;
     ProcessNewBlock(state, chainparams, NULL, &block, true, NULL);
 
