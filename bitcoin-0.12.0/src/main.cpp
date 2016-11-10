@@ -2987,8 +2987,8 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
     // because we receive the wrong transactions for it.
 
     // Size limits
-    if (//block.vtx.empty() ||
-    		block.vtx.size() > MAX_BLOCK_SIZE || ::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION) > MAX_BLOCK_SIZE)
+   //block.vtx.empty() ||
+     if (block.qvtx.size() > MAX_BLOCK_SIZE || ::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION) > MAX_BLOCK_SIZE)
         return state.DoS(100, error("CheckBlock(): size limits failed"),
                          REJECT_INVALID, "bad-blk-length");
 
@@ -3011,8 +3011,8 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
             return error("CheckBlock(): CheckTransaction of %s failed with %s",
                 tx.GetHash().ToString(),
                 FormatStateMessage(state));
-*****/
-//******************end delete by mengqg 20161109******************************************************************************
+
+
     unsigned int nSigOps = 0;
     BOOST_FOREACH(const CTransaction& tx, block.vtx)
     {
@@ -3024,7 +3024,12 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
 
     if (fCheckPOW && fCheckMerkleRoot)
         block.fChecked = true;
-
+*****/
+//******************end delete by mengqg 20161109******************************************************************************
+//**********begin add by mengqg 20161110**********************************************************
+    if (fCheckMerkleRoot)
+        block.fChecked = true;
+//**********end add by mengqg 20161110**********************************************************
     return true;
 }
 

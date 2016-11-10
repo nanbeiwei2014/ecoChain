@@ -215,6 +215,10 @@ public:
         return m_hash;
     }
 
+    const uint256& GetHash() const
+    {
+        return m_hash;
+    }
     const std::string get_addr() const{ return m_address;}
     const std::string get_sign() const{ return m_sign;     }
     const std::string get_data() const{ return m_data;     }
