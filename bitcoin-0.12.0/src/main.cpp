@@ -2001,6 +2001,9 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     // verify that the view's current state corresponds to the previous block
     uint256 hashPrevBlock = pindex->pprev == NULL ? uint256() : pindex->pprev->GetBlockHash();
+    std::string str1="",str2="";
+    str1=hashPrevBlock.ToString();
+    str2=view.GetBestBlock().ToString();
     assert(hashPrevBlock == view.GetBestBlock());
 
     // Special case for the genesis block, skipping connection of its transactions
@@ -2089,7 +2092,12 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     CDiskTxPos pos(pindex->GetBlockPos(), GetSizeOfCompactSize(block.vtx.size()));
     std::vector<std::pair<uint256, CDiskTxPos> > vPos;
     vPos.reserve(block.vtx.size());
-    blockundo.vtxundo.reserve(block.vtx.size() - 1);
+
+//********begin edit by mengqg 20161111********************************************************************
+    //blockundo.vtxundo.reserve(block.vtx.size() - 1);
+    blockundo.vtxundo.reserve(block.vtx.size());
+
+//*********end  edit by mengqg 20161111***************************************************************
     for (unsigned int i = 0; i < block.vtx.size(); i++)
     {
         const CTransaction &tx = block.vtx[i];
@@ -2139,13 +2147,18 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
 
+
+//******************begin delete by mengqg 20161111******************************************************************************************
+/*******
     CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
+
     if (block.vtx[0].GetValueOut() > blockReward)
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
                                block.vtx[0].GetValueOut(), blockReward),
                                REJECT_INVALID, "bad-cb-amount");
-
+    *******/
+//******************end delete by mengqg 20161111******************************************************************************************
     if (!control.Wait())
         return state.DoS(100, false);
     int64_t nTime4 = GetTimeMicros(); nTimeVerify += nTime4 - nTime2;
@@ -4196,7 +4209,9 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         pfrom->PushMessage(NetMsgType::BLOCK, block);
                     else // MSG_FILTERED_BLOCK)
                     {
-                        LOCK(pfrom->cs_filter);
+//**********************begin delete by mengqg 20161110**********************************************************************
+ /*****
+                       	LOCK(pfrom->cs_filter);
                         if (pfrom->pfilter)
                         {
                             CMerkleBlock merkleBlock(block, *pfrom->pfilter);
@@ -4211,6 +4226,8 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                             BOOST_FOREACH(PairType& pair, merkleBlock.vMatchedTxn)
                                 pfrom->PushMessage(NetMsgType::TX, block.vtx[pair.first]);
                         }
+ *****/
+//**********************end delete by mengqg 20161110**********************************************************************
                         // else
                             // no response
                     }
