@@ -276,11 +276,6 @@ public:
         genesis = CreateGenesisBlock(1396688602,  1);
         consensus.hashGenesisBlock = genesis.GetHash();
 
-        std::string str ="";
-        str=str;
-        str =genesis.GetHash().ToString();
-        str=str;
-        str=genesis.hashMerkleRoot.ToString() ;
 
 
         assert(consensus.hashGenesisBlock == uint256S("0x782bfc75b57fd723646fe04a223379c9e360bf2ac34df90cd10131c15739dbe7"));

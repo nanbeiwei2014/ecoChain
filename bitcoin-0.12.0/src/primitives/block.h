@@ -29,7 +29,7 @@ public:
     //int  nHeight;
  //****************begin delete by mengqg 20161105******************************************
     //uint32_t nBits;
-    uint32_t nNonce;
+    //uint32_t nNonce;
  //****************end delete by mengqg 20161105******************************************
     CBlockHeader()
     {
@@ -47,7 +47,7 @@ public:
         READWRITE(nTime);
        // READWRITE(nHeight);
        //READWRITE(nBits);
-        READWRITE(nNonce);
+       //READWRITE(nNonce);
     }
 
     void SetNull()
@@ -58,7 +58,7 @@ public:
         nTime = 0;
         //nHeight=0;
         //nBits = 0;
-        nNonce = 0;
+        //nNonce = 0;
     }
 
     bool IsNull() const
@@ -122,7 +122,7 @@ public:
         block.nTime          = nTime;
         //block.nHeight		 = nHeight;
         //block.nBits          = nBits;
-        block.nNonce         = nNonce;
+        //block.nNonce         = nNonce;
         return block;
     }
 
