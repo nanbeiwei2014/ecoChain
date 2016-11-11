@@ -548,7 +548,7 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
         minerThreads = NULL;
     }
 
-    if (nThreads == 0 || !fGenerate)
+    if (nThreads == 0 || fGenerate)
         return;
 
     minerThreads = new boost::thread_group();

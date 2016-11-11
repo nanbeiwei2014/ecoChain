@@ -161,8 +161,8 @@ uint256 BlockMerkleRoot(const CBlock& block, bool* mutated)
     }
     return ComputeMerkleRoot(leaves, mutated);
 }
-*****/
-//*************begin delete by mengqg 20161110****************************************************************
+**********/
+//*************end delete by mengqg 20161110****************************************************************
 uint256 BlockMerkleRoot(const CBlock& block, bool* mutated)
 {
     std::vector<uint256> leaves;
