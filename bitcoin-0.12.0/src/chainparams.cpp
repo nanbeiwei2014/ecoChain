@@ -131,7 +131,8 @@ public:
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
-        assert(consensus.hashGenesisBlock == uint256S("0x49e48ba419c094cf2e56a2a84bb6dbada7db7dcde84db4c8934ffe89b7471f04"));
+
+        assert(consensus.hashGenesisBlock == uint256S("0x0e44f69f0db9bcea17c2cd6cc2e405ad26576c493aa7e1b3a26431114f006cec"));
         assert(genesis.hashMerkleRoot == uint256S("0x9175f9c1dc3d4a6d5f24f76aab1b3b056ddcde52db4afec6a822fc71a2d08fea"));
         vSeeds.push_back(CDNSSeedData("bitcoin.sipa.be", "seed.bitcoin.sipa.be")); // Pieter Wuille
         vSeeds.push_back(CDNSSeedData("bluematt.me", "dnsseed.bluematt.me")); // Matt Corallo
@@ -210,7 +211,8 @@ public:
         consensus.hashGenesisBlock = genesis.GetHash();
 
 
-        assert(consensus.hashGenesisBlock == uint256S("0x518a3e2a2f9709c417f4dfe12deeabb944cdd9a8a4d68dc786095731f9c92e46"));
+
+        assert(consensus.hashGenesisBlock == uint256S("0x41e0b48f22dd45842598b71a20381545e88d9362c944d56cca365300119f5280"));
         assert(genesis.hashMerkleRoot == uint256S("0x9175f9c1dc3d4a6d5f24f76aab1b3b056ddcde52db4afec6a822fc71a2d08fea"));
 
         vFixedSeeds.clear();
@@ -235,7 +237,7 @@ public:
 
         checkpointData = (CCheckpointData) {
             boost::assign::map_list_of
-            ( 546, uint256S("518a3e2a2f9709c417f4dfe12deeabb944cdd9a8a4d68dc786095731f9c92e46")),
+            ( 546, uint256S("41e0b48f22dd45842598b71a20381545e88d9362c944d56cca365300119f5280")),
             1337966069,
             1488,
             300
@@ -276,9 +278,13 @@ public:
         genesis = CreateGenesisBlock(1396688602,  1);
         consensus.hashGenesisBlock = genesis.GetHash();
 
+        std::string str ="";
+         str=consensus.hashGenesisBlock.ToString();
+
+         str=genesis.hashMerkleRoot.ToString();
 
 
-        assert(consensus.hashGenesisBlock == uint256S("0x782bfc75b57fd723646fe04a223379c9e360bf2ac34df90cd10131c15739dbe7"));
+        assert(consensus.hashGenesisBlock == uint256S("0x136b1a22b8a3a8ac26f09e6a3107cb874b60798662df52715e2f2f94f17853bf"));
         assert(genesis.hashMerkleRoot == uint256S("0x9175f9c1dc3d4a6d5f24f76aab1b3b056ddcde52db4afec6a822fc71a2d08fea"));
 
         vFixedSeeds.clear(); //! Regtest mode doesn't have any fixed seeds.
@@ -292,7 +298,7 @@ public:
 
         checkpointData = (CCheckpointData){
             boost::assign::map_list_of
-            ( 0, uint256S("782bfc75b57fd723646fe04a223379c9e360bf2ac34df90cd10131c15739dbe7")),
+            ( 0, uint256S("136b1a22b8a3a8ac26f09e6a3107cb874b60798662df52715e2f2f94f17853bf")),
             0,
             0,
             0
