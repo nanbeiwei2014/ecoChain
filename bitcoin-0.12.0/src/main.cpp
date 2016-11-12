@@ -2098,6 +2098,9 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     blockundo.vtxundo.reserve(block.vtx.size());
 
 //*********end  edit by mengqg 20161111***************************************************************
+
+//******************begin delete by mengqg 20161111******************************************************************************************
+    /*******
     for (unsigned int i = 0; i < block.vtx.size(); i++)
     {
         const CTransaction &tx = block.vtx[i];
@@ -2128,7 +2131,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
             nFees += view.GetValueIn(tx)-tx.GetValueOut();
 
             std::vector<CScriptCheck> vChecks;
-            bool fCacheResults = fJustCheck; /* Don't cache results if we're actually connecting blocks (still consult the cache, though) */
+            bool fCacheResults = fJustCheck; //* Don't cache results if we're actually connecting blocks (still consult the cache, though) *
             if (!CheckInputs(tx, state, view, fScriptChecks, flags, fCacheResults, nScriptCheckThreads ? &vChecks : NULL))
                 return error("ConnectBlock(): CheckInputs on %s failed with %s",
                     tx.GetHash().ToString(), FormatStateMessage(state));
@@ -2148,8 +2151,6 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
 
 
-//******************begin delete by mengqg 20161111******************************************************************************************
-/*******
     CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
 
     if (block.vtx[0].GetValueOut() > blockReward)
@@ -2820,7 +2821,7 @@ CBlockIndex* AddToBlockIndex(const CBlockHeader& block)
 /** Mark a block as having its data received and checked (up to BLOCK_VALID_TRANSACTIONS). */
 bool ReceivedBlockTransactions(const CBlock &block, CValidationState& state, CBlockIndex *pindexNew, const CDiskBlockPos& pos)
 {
-    pindexNew->nTx = block.vtx.size();
+    pindexNew->nTx = block.qvtx.size();
     pindexNew->nChainTx = 0;
     pindexNew->nFile = pos.nFile;
     pindexNew->nDataPos = pos.nPos;
@@ -3645,7 +3646,7 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
                 nGoodTransactions = 0;
                 pindexFailure = pindex;
             } else
-                nGoodTransactions += block.vtx.size();
+                nGoodTransactions += block.qvtx.size();
         }
         if (ShutdownRequested())
             return true;
@@ -3914,7 +3915,7 @@ void static CheckBlockIndex(const Consensus::Params& consensusParams)
             assert(pindex->GetBlockHash() == consensusParams.hashGenesisBlock); // Genesis block's hash must match.
             assert(pindex == chainActive.Genesis()); // The current active chain's genesis block must be this block.
         }
-        if (pindex->nChainTx == 0) assert(pindex->nSequenceId == 0);  // nSequenceId can't be set for blocks that aren't linked
+   //     if (pindex->nChainTx == 0) assert(pindex->nSequenceId == 0);  // nSequenceId can't be set for blocks that aren't linked
         // VALID_TRANSACTIONS is equivalent to nTx > 0 for all nodes (whether or not pruning has occurred).
         // HAVE_DATA is only equivalent to nTx > 0 (or VALID_TRANSACTIONS) if no pruning has occurred.
         if (!fHavePruned) {
