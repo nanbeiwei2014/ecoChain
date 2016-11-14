@@ -814,10 +814,12 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
 #ifndef WIN32
     if (GetBoolArg("-sysperms", false)) {
+/* Begin Noted by syl 2016-11-14============================================
 #ifdef ENABLE_WALLET
         if (!GetBoolArg("-disablewallet", false))
             return InitError("-sysperms is not allowed in combination with enabled wallet functionality");
 #endif
+ Begin Noted by syl 2016-11-14============================================*/
     } else {
         umask(077);
     }
@@ -850,11 +852,13 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (GetArg("-prune", 0)) {
         if (GetBoolArg("-txindex", DEFAULT_TXINDEX))
             return InitError(_("Prune mode is incompatible with -txindex."));
+/* Begin Noted by syl 2016-11-14============================================
 #ifdef ENABLE_WALLET
         if (GetBoolArg("-rescan", false)) {
             return InitError(_("Rescans are not possible in pruned mode. You will need to use -reindex which will download the whole blockchain again."));
         }
 #endif
+ Begin Noted by syl 2016-11-14============================================*/
     }
 
     // Make sure enough file descriptors are available
@@ -934,11 +938,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         LogPrintf("Prune configured to target %uMiB on disk for block and undo files.\n", nPruneTarget / 1024 / 1024);
         fPruneMode = true;
     }
-
+/* Begin Noted by syl 2016-11-14============================================
 #ifdef ENABLE_WALLET
     bool fDisableWallet = GetBoolArg("-disablewallet", false);
 #endif
-
+ Begin Noted by syl 2016-11-14============================================*/
     nConnectTimeout = GetArg("-timeout", DEFAULT_CONNECT_TIMEOUT);
     if (nConnectTimeout <= 0)
         nConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
@@ -962,7 +966,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (Params().RequireStandard() && !fRequireStandard)
         return InitError(strprintf("acceptnonstdtxn is not currently supported for %s chain", chainparams.NetworkIDString()));
     nBytesPerSigOp = GetArg("-bytespersigop", nBytesPerSigOp);
-
+/* Begin Noted by syl 2016-11-14===============================================
 #ifdef ENABLE_WALLET
     if (mapArgs.count("-mintxfee"))
     {
@@ -1015,7 +1019,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     std::string strWalletFile = GetArg("-wallet", "wallet.dat");
 #endif // ENABLE_WALLET
-
+ End Noted by syl 2016-11-14===============================================*/
     fIsBareMultisigStd = GetBoolArg("-permitbaremultisig", DEFAULT_PERMIT_BAREMULTISIG);
     fAcceptDatacarrier = GetBoolArg("-datacarrier", DEFAULT_ACCEPT_DATACARRIER);
     nMaxDatacarrierBytes = GetArg("-datacarriersize", nMaxDatacarrierBytes);
@@ -1048,11 +1052,13 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         return InitError(_("Initialization sanity check failed. Bitcoin Core is shutting down."));
 
     std::string strDataDir = GetDataDir().string();
+/* Begin Noted by syl 2016-11-14=========================================
 #ifdef ENABLE_WALLET
     // Wallet file must be a plain filename without a directory
     if (strWalletFile != boost::filesystem::basename(strWalletFile) + boost::filesystem::extension(strWalletFile))
         return InitError(strprintf(_("Wallet %s resides outside data directory %s"), strWalletFile, strDataDir));
 #endif
+ End Noted by syl 2016-11-14===========================================*/
     // Make sure only a single Bitcoin process is using the data directory.
     boost::filesystem::path pathLockFile = GetDataDir() / ".lock";
     FILE* file = fopen(pathLockFile.string().c_str(), "a"); // empty lock file; created if it doesn't exist.
@@ -1117,6 +1123,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     int64_t nStart;
 
     // ********************************************************* Step 5: verify wallet database integrity
+/* Begin Noted by syl 2016-11-14=========================================
 #ifdef ENABLE_WALLET
     if (!fDisableWallet) {
         LogPrintf("Using wallet %s\n", strWalletFile);
@@ -1135,6 +1142,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     } // (!fDisableWallet)
 #endif // ENABLE_WALLET
+ End	 Noted by syl 2016-11-14=========================================*/
     // ********************************************************* Step 6: network initialization
 
     RegisterNodeSignals(GetNodeSignals());
@@ -1437,6 +1445,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     fFeeEstimatesInitialized = true;
 
     // ********************************************************* Step 8: load wallet
+/* Begin Noted by syl 2016-11-14===============================================
 #ifdef ENABLE_WALLET
     if (fDisableWallet) {
         pwalletMain = NULL;
@@ -1588,7 +1597,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 #else // ENABLE_WALLET
     LogPrintf("No wallet support compiled in!\n");
 #endif // !ENABLE_WALLET
-
+ Begin Noted by syl 2016-11-14===============================================*/
     // ********************************************************* Step 9: data directory maintenance
 
     // if pruning, unset the service bit and perform the initial blockstore prune
@@ -1639,12 +1648,14 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     //// debug print
     LogPrintf("mapBlockIndex.size() = %u\n",   mapBlockIndex.size());
     LogPrintf("nBestHeight = %d\n",                   chainActive.Height());
+
+/*Begin Noted by syl 2016-11-14=========================================
 #ifdef ENABLE_WALLET
     LogPrintf("setKeyPool.size() = %u\n",      pwalletMain ? pwalletMain->setKeyPool.size() : 0);
     LogPrintf("mapWallet.size() = %u\n",       pwalletMain ? pwalletMain->mapWallet.size() : 0);
     LogPrintf("mapAddressBook.size() = %u\n",  pwalletMain ? pwalletMain->mapAddressBook.size() : 0);
 #endif
-
+Begin Noted by syl 2016-11-14=========================================*/
     if (GetBoolArg("-listenonion", DEFAULT_LISTEN_ONION))
         StartTorControl(threadGroup, scheduler);
 
@@ -1662,8 +1673,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     // ********************************************************* Step 12: finished
 
     SetRPCWarmupFinished();
+/*Begin Noted by syl 2016-11-14=========================================
     uiInterface.InitMessage(_("Done loading"));
-
 #ifdef ENABLE_WALLET
     if (pwalletMain) {
         // Add wallet transactions that aren't already in a block to mapTransactions
@@ -1673,6 +1684,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         threadGroup.create_thread(boost::bind(&ThreadFlushWalletDB, boost::ref(pwalletMain->strWalletFile)));
     }
 #endif
-
+End Noted by syl 2016-11-14========================================*/
     return !fRequestShutdown;
 }
