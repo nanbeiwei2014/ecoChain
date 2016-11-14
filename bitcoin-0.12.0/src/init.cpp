@@ -1086,10 +1086,11 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 #else
     LogPrintf("Using OpenSSL version %s\n", OpenSSL_version(OPENSSL_VERSION));
 #endif
-
+/* Begin Noted by syl 2016-11-14=========================================
 #ifdef ENABLE_WALLET
     LogPrintf("Using BerkeleyDB version %s\n", DbEnv::version(0, 0, 0));
 #endif
+ Begin Noted by syl 2016-11-14=========================================*/
     if (!fLogTimestamps)
         LogPrintf("Startup time: %s\n", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()));
     LogPrintf("Default data directory %s\n", GetDefaultDataDir().string());
