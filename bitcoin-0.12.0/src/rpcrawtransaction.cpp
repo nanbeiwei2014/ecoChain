@@ -17,11 +17,13 @@
 #include "primitives/transaction.h"
 #include "rpcserver.h"
 #include "script/script.h"
+#include "script/interpreter.h"
 #include "script/script_error.h"
 #include "script/sign.h"
 #include "script/standard.h"
 #include "txmempool.h"
 #include "uint256.h"
+#include "utiltime.h"
 #include "utilstrencodings.h"
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
@@ -882,11 +884,41 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     }
     LOCK( cs_main );
     uint256 hash = ParseHashV( params[0], "parameter 1");
-    //hash = hash;
+    Cqkgj_basic_data data;
+    if( !get_transaction(hash,data))
+    {
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"No information avaliable about qkgj_basic_data");
+    }
 
-    string strHex; //= QKGJ_EncodeHexTx( data );
+    UniValue result(UniValue::VOBJ);
+    result.push_back(Pair("address",data.m_address));
+    result.push_back(Pair("data",data.m_data));
+    result.push_back(Pair("data",data.m_sign));
 
-    return strHex;
+    return result;
+}
+
+/* get private key and public key */
+UniValue get_new_key( const UniValue& params,bool bHelp )
+{
+    LOCK( cs_main );
+    bool b_compress = true; //CanSupportFeature(FEATURE_COMPRPUBKEY );
+    CKey secret;
+    secret.MakeNewKey( b_compress );
+    CPubKey pub_key = secret.GetPubKey();
+    assert( secret.VerifyPubKey( pub_key ) );
+    CPrivKey pri_key = secret.GetPrivKey();
+
+    UniValue result(UniValue::VOBJ);
+    //std::vector<unsigned char> vch_key;
+    //vch_key.insert(vch_key.begin(),pri_key.begin(),pri_key.end());
+    std::string str;
+    str.insert(str.begin(), pri_key.begin(), pri_key.end());
+    //str.insert(str.begin(), vch_key.begin(), vch_key.end());
+    result.push_back(Pair("PriKey",str));
+    result.push_back(Pair("PubKey",pub_key.GetHash().ToString()));
+
+    return result;
 }
 
 UniValue send_data_to_sys(const UniValue& params, bool bHelp)
@@ -944,19 +976,27 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     //    throw JSONRPCError( RPC_DESERIALIZATION_ERROR, "basic data decode failed!");
     //}
 
-    uint256 hash_data = data.get_hash();
+    //uint256 hash_data = data.get_hash();
+    vector<unsigned char> vch_pub_key;
+    CScript script;
+
+    if (!check_sign(data, vch_pub_key, script))
+    {
+        return UniValue(UniValue::VNUM, "{\"resutl\":\"data exist !\"}");
+    }
 
     //写入内存池
     Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
+    AddToMempool(qmempool,data);
 
-    if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) != qmempool.map_hash_data.end())
-    {
-    	return UniValue(UniValue::VNUM, "{\"resutl\":\"data exist !\"}");
-    }
-    else
-    {
-    	qmempool.add_to_mempool(newProData.m_data.get_hash(), newProData);
-    }
+    //if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) != qmempool.map_hash_data.end())
+    //{
+    //	return UniValue(UniValue::VNUM, "{\"resutl\":\"data exist !\"}");
+    //}
+    //else
+    //{
+    //	qmempool.add_to_mempool(newProData.m_data.get_hash(), newProData);
+    //}
 
     //触发广播数据到其他节点的广播消息
     RelayQkgjMsg(data);

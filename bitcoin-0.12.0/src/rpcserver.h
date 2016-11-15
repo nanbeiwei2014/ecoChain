@@ -241,6 +241,7 @@ extern UniValue resendwallettransactions(const UniValue& params, bool fHelp);
 /* add by sdk begin */
 extern UniValue send_data_to_sys(const UniValue& params, bool bHelp);
 extern UniValue get_data_from_sys(const UniValue& params, bool bHelp);
+extern UniValue get_new_key(const UniValue& params, bool bHelp);
 /* add by sdk end */
 
 //Begin	Add by syl 2016-10-31========================================

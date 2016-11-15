@@ -77,13 +77,14 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
 //******************end delete by mengqg 20161109******************************************************************************
     return nNewTime - nOldTime;
 }
-/*****
+
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& scriptPubKeyIn)
 {
     // Create new block
     auto_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     if(!pblocktemplate.get())
         return NULL;
+#if 0
     CBlock *pblock = &pblocktemplate->block; // pointer for convenience
 
     // -regtest only: allow overriding block.nVersion with
@@ -300,11 +301,10 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
             throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
         }
     }
-
+#endif
     return pblocktemplate.release();
 }
 
-******/
 
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
 {

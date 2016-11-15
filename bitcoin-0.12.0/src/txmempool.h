@@ -658,11 +658,11 @@ private:
     uint64_t m_total_size;
 public:
     std::map< uint256, Cqkgj_process_data > map_hash_data;
-    //std::map< uint32_t,std::vector<Cqkgj_process_data> > map_state_data;
+    std::map< uint32_t,std::vector<Cqkgj_process_data> > map_state_data;
 public:
 
     typedef std::map<uint256,Cqkgj_process_data>::iterator it_hash;
-    //typedef std::map<uint32_t,std::vector<Cqkgj_process_data> >::iterator it_state;
+    typedef std::map<uint32_t,std::vector<Cqkgj_process_data> >::iterator it_state;
 
     Cqkgj_mempool();
     ~Cqkgj_mempool();
@@ -677,6 +677,8 @@ public:
         return (map_hash_data.count(hash) > 0?true:false);
     }
 
+    bool lookup( const uint256& hash, Cqkgj_basic_data& resultl ) ;
+
     bool add_to_mempool(const uint256 &hash, Cqkgj_process_data &data );
 
 public:
@@ -689,6 +691,9 @@ public:
     typedef std::set<it_hash, CompareIteratorByHash> setEntries;
 
 };
+/* add by sdk end */
+
+/* add by mqg begin */
 class CompareCqkgjMemPoolProcessDataByScore
 {
 public:
@@ -714,6 +719,6 @@ struct DataAgePriorityCompare
         return a.first < b.first;
     }
 };
-/* add by sdk end */
+/* add by mqg end */
 
 #endif // BITCOIN_TXMEMPOOL_H
