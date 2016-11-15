@@ -5014,7 +5014,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         }
     }
 
-
+    /*Noted by syl 2016-11-15=======================================================
     else if (strCommand == NetMsgType::FILTERLOAD)
     {
         CBloomFilter filter;
@@ -5061,7 +5061,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         pfrom->pfilter = new CBloomFilter();
         pfrom->fRelayTxes = true;
     }
-
+	Noted by syl 2016-11-15=======================================================*/
 
     else if (strCommand == NetMsgType::REJECT)
     {
