@@ -780,7 +780,8 @@ UniValue signrawtransaction(const UniValue& params, bool fHelp)
 
     return result;
 }
-
+//*************begin delete by  mengqg   20161115*************************************************************************************************
+/**********
 UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 2)
@@ -842,6 +843,8 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 
     return hashTx.GetHex();
 }
+**********/
+//*************end delete by  mengqg   20161115*************************************************************************************************
 
 /* add by sdk begin */
 UniValue get_data_from_sys( const UniValue& params, bool bHelp )
