@@ -520,7 +520,7 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
     {
         LOCK(cs_main);
         if (pblock->hashPrevBlock != chainActive.Tip()->GetBlockHash())
-            return error("BitcoinMiner: generated block is stale");
+            return error("QKGJ_Miner: generated block is stale");
     }
 
     // Inform about the new block
@@ -636,7 +636,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
             //pblock->nHeight = pindexPrev->nHeight+1;
             //define height into blockheader for caculating blockhash
 //**************************************************************************
-            LogPrintf("Running QKGJMiner with %u datas in block (%u bytes)\n", pblock->vtx.size(),
+            LogPrintf("Running QKGJMiner with %u datas in block (%u bytes)\n", pblock->qvtx.size(),
             		::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
 
