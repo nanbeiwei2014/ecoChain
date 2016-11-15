@@ -87,6 +87,11 @@ bool CheckSignatureEncoding(const std::vector<unsigned char> &vchSig, unsigned i
 
 uint256 SignatureHash(const CScript &scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
 
+/* add by sdk begin */
+uint256 sign_hash(const CScript& scriptCode, const Cqkgj_basic_data& data, unsigned int nIn, int nHashType);
+bool check_sign(Cqkgj_basic_data& vch_data, std::vector<unsigned char>&vch_pub_key, CScript& script);
+/* add by sdk end */
+
 class BaseSignatureChecker
 {
 public:

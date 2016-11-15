@@ -1047,7 +1047,19 @@ Cqkgj_mempool::Cqkgj_mempool(){}
 Cqkgj_mempool::~Cqkgj_mempool()
 {
     map_hash_data.clear();
-    //map_state_data.clear();
+    map_state_data.clear();
+}
+
+bool Cqkgj_mempool::lookup( const uint256& hash, Cqkgj_basic_data& result )
+{
+    LOCK( cs );
+    Cqkgj_mempool::it_hash it = map_hash_data.find( hash );
+    if( it == map_hash_data.end() )
+    {
+        return false;
+    }
+    result = it->second.get_data();
+    return true;
 }
 
 Cqkgj_basic_data Cqkgj_mempool::get_data_by_hash( uint256 hash )
@@ -1071,13 +1083,13 @@ std::vector<Cqkgj_process_data> Cqkgj_mempool::get_data_by_state( int state )
     {
         return obj;
     }
-/*
+
     std::map< uint32_t, std::vector<Cqkgj_process_data> >::iterator it = map_state_data.find(state);
     if ( it != map_state_data.end())
     {
-        return (*it).second;
+        obj = (*it).second;
     }
-*/
+
     return obj;
 }
 
@@ -1090,6 +1102,19 @@ bool Cqkgj_mempool::add_to_mempool(const uint256 &hash, Cqkgj_process_data &proc
         return false;
     map_hash_data.insert(make_pair(hash,process));
     m_total_size += process.get_size();
+
+    uint32_t uState = 0;
+    Cqkgj_mempool::it_state it_s = map_state_data.find(uState);
+    if( it_s == map_state_data.end())
+    {
+        std::vector< Cqkgj_process_data > vState;
+        vState.push_back(process);
+        map_state_data.insert(make_pair(uState,vState));
+    }
+    else
+    {
+        it_s->second.push_back(process);
+    }
     return true;
 }
 /* add by sdk end */

@@ -834,6 +834,18 @@ bool AddToMempool( Cqkgj_mempool& pool, const Cqkgj_basic_data &data )
 
     return res;
 }
+
+/* Retrieve a transaction(from memory pool,or from disk,if possible */
+bool get_transaction( const uint256 &hash, Cqkgj_basic_data &data )
+{
+    LOCK( cs_main );
+    uint256 *n_hash = const_cast<uint256*>(&hash);
+    if( qmempool.lookup(*n_hash,data))
+    {
+        return true;
+    }
+    return false;
+}
 /* add by sdk end */
 
 
