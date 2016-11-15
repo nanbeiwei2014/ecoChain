@@ -1219,7 +1219,8 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
 
     // see Step 2: parameter interactions for more information about these
-    fListen = GetBoolArg("-listen", DEFAULT_LISTEN);
+    //fListen = GetBoolArg("-listen", DEFAULT_LISTEN);		//Noted by syl 2016-11-14===============
+    fListen = true;											//Add by syl 2016-11-14===============
     fDiscover = GetBoolArg("-discover", true);
     fNameLookup = GetBoolArg("-dns", DEFAULT_NAME_LOOKUP);
 
