@@ -1044,11 +1044,7 @@ bool Cqkgj_process_data::set_state( int state )
 }
 
 Cqkgj_mempool::Cqkgj_mempool(){}
-Cqkgj_mempool::~Cqkgj_mempool()
-{
-    map_hash_data.clear();
-    map_state_data.clear();
-}
+Cqkgj_mempool::~Cqkgj_mempool(){}
 
 bool Cqkgj_mempool::lookup( const uint256& hash, Cqkgj_basic_data& result )
 {
@@ -1061,6 +1057,19 @@ bool Cqkgj_mempool::lookup( const uint256& hash, Cqkgj_basic_data& result )
     result = it->second.get_data();
     return true;
 }
+void Cqkgj_mempool::_clear()
+{
+    map_hash_data.clear();
+    map_state_data.clear();
+    m_total_size = 0;
+    ++m_data_update;
+}
+void Cqkgj_mempool::clear()
+{
+    LOCK( cs );
+    _clear();
+}
+
 
 void Cqkgj_mempool::add_data_updated( unsigned int n)
 {
@@ -1072,6 +1081,28 @@ unsigned int Cqkgj_mempool::get_data_updated() const
 {
     LOCK( cs );
     return m_data_update;
+}
+
+void Cqkgj_mempool::remove( const Cqkgj_basic_data& origData, std::list<Cqkgj_basic_data>& removed, bool bRecur)
+{
+    LOCK( cs );
+}
+
+void Cqkgj_mempool::remove_from_block( const std::vector<Cqkgj_basic_data>& vData,unsigned int uiBlockHeight,
+                            std::list<Cqkgj_basic_data>& conflicts)
+{
+    LOCK( cs );
+    std::vector<Cqkgj_process_data> process;
+    BOOST_FOREACH( const Cqkgj_basic_data& data, vData)
+    {
+        uint256 hash = data.get_hash();
+        it_hash it = map_hash_data.find( hash );
+        if ( it != map_hash_data.end() )
+        {
+            process.push_back( (*it).second );
+        }
+    }
+    return;
 }
 
 Cqkgj_basic_data Cqkgj_mempool::get_data_by_hash( uint256 hash )
