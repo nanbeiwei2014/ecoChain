@@ -662,6 +662,7 @@ public:
     std::map< uint32_t,std::vector<Cqkgj_process_data> > map_state_data;
 public:
 
+
     typedef std::map<uint256,Cqkgj_process_data>::iterator it_hash;
     typedef std::map<uint32_t,std::vector<Cqkgj_process_data> >::iterator it_state;
 
@@ -678,12 +679,19 @@ public:
         return (map_hash_data.count(hash) > 0?true:false);
     }
 
+    void clear();
+    void _clear();
+
     bool lookup( const uint256& hash, Cqkgj_basic_data& resultl ) ;
 
     bool add_to_mempool(const uint256 &hash, Cqkgj_process_data &data );
 
     void add_data_updated( unsigned int n);
     unsigned int get_data_updated() const;
+
+    void remove( const Cqkgj_basic_data& origData, std::list<Cqkgj_basic_data>& removed, bool bRecur);
+    void remove_from_block( const std::vector<Cqkgj_basic_data>& vData,unsigned int uiBlockHeight,
+                            std::list<Cqkgj_basic_data>& conflicts);
 public:
     struct CompareIteratorByHash {
         bool operator()(const it_hash &a, const it_hash &b) const {
