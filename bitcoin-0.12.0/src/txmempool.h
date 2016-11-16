@@ -656,6 +656,7 @@ class Cqkgj_mempool
 {
 private:
     uint64_t m_total_size;
+    unsigned int m_data_update;
 public:
     std::map< uint256, Cqkgj_process_data > map_hash_data;
     std::map< uint32_t,std::vector<Cqkgj_process_data> > map_state_data;
@@ -681,6 +682,8 @@ public:
 
     bool add_to_mempool(const uint256 &hash, Cqkgj_process_data &data );
 
+    void add_data_updated( unsigned int n);
+    unsigned int get_data_updated() const;
 public:
     struct CompareIteratorByHash {
         bool operator()(const it_hash &a, const it_hash &b) const {
