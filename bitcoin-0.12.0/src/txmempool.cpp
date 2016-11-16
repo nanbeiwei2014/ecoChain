@@ -1062,6 +1062,18 @@ bool Cqkgj_mempool::lookup( const uint256& hash, Cqkgj_basic_data& result )
     return true;
 }
 
+void Cqkgj_mempool::add_data_updated( unsigned int n)
+{
+    LOCK( cs );
+    m_data_update += n;
+}
+
+unsigned int Cqkgj_mempool::get_data_updated() const
+{
+    LOCK( cs );
+    return m_data_update;
+}
+
 Cqkgj_basic_data Cqkgj_mempool::get_data_by_hash( uint256 hash )
 {
     Cqkgj_basic_data data;
