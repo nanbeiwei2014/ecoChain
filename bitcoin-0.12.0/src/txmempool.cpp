@@ -1051,18 +1051,19 @@ Cqkgj_mempool::~Cqkgj_mempool(){}
 bool Cqkgj_mempool::lookup( const uint256& hash, Cqkgj_basic_data& result )
 {
     LOCK( cs );
-    Cqkgj_mempool::it_hash it = map_hash_data.find( hash );
-    if( it == map_hash_data.end() )
+    indexed_data_set::const_iterator i = map_data.find( hash );
+    if( i == map_data.end() )
     {
         return false;
     }
-    result = it->second.get_data();
+    result = i->get_data();
     return true;
 }
 void Cqkgj_mempool::_clear()
 {
     map_hash_data.clear();
     map_state_data.clear();
+    map_data.clear();
     m_total_size = 0;
     ++m_data_update;
 }
@@ -1085,9 +1086,46 @@ unsigned int Cqkgj_mempool::get_data_updated() const
     return m_data_update;
 }
 
+uint64_t Cqkgj_mempool::get_total_size()
+{
+    LOCK( cs );
+    return m_total_size;
+}
+
+void Cqkgj_mempool::remove_unchecked( data_it entry )
+{
+    const uint256 hash = entry->get_data().get_hash();
+    m_total_size -= entry->get_data_size();
+    map_data.erase( entry );
+    m_data_update++;
+}
+
+void Cqkgj_mempool::remove_staged( set_entries &stage )
+{
+    AssertLockHeld( cs );
+    BOOST_FOREACH( const data_it& it, stage )
+    {
+        remove_unchecked( it );
+    }
+}
+
 void Cqkgj_mempool::remove( const Cqkgj_basic_data& origData, std::list<Cqkgj_basic_data>& removed, bool bRecur)
 {
     LOCK( cs );
+    set_entries data_to_remove;
+    data_it origit = map_data.find( origData.get_hash() );
+    if ( origit != map_data.end())
+    {
+        data_to_remove.insert( origit );
+    }
+
+    set_entries set_all_removes;
+    set_all_removes.swap(data_to_remove);
+    BOOST_FOREACH( data_it it, set_all_removes)
+    {
+        removed.push_back(it->get_data());
+    }
+    remove_staged( set_all_removes );
 }
 
 void Cqkgj_mempool::remove_from_block( const std::vector<Cqkgj_basic_data>& vData,unsigned int uiBlockHeight,
@@ -1095,14 +1133,19 @@ void Cqkgj_mempool::remove_from_block( const std::vector<Cqkgj_basic_data>& vDat
 {
     LOCK( cs );
     std::vector<Cqkgj_process_data> process;
-    BOOST_FOREACH( const Cqkgj_basic_data& data, vData)
+    BOOST_FOREACH( const Cqkgj_basic_data& data, vData )
     {
         uint256 hash = data.get_hash();
-        it_hash it = map_hash_data.find( hash );
-        if ( it != map_hash_data.end() )
+        indexed_data_set::iterator it = map_data.find( hash );
+        if ( it != map_data.end() )
         {
-            process.push_back( (*it).second );
+            process.push_back( *it );
         }
+    }
+    BOOST_FOREACH( const Cqkgj_basic_data& data, vData )
+    {
+        std::list<Cqkgj_basic_data> dummy;
+        remove( data, dummy, false );
     }
     return;
 }
@@ -1110,15 +1153,12 @@ void Cqkgj_mempool::remove_from_block( const std::vector<Cqkgj_basic_data>& vDat
 Cqkgj_basic_data Cqkgj_mempool::get_data_by_hash( uint256 hash )
 {
     Cqkgj_basic_data data;
-    std::map< uint256,Cqkgj_process_data>::iterator it = map_hash_data.find(hash);
-    if ( it != map_hash_data.end())
+    indexed_data_set::const_iterator it = map_data.find( hash );
+    if ( it == map_data.end() )
     {
-        Cqkgj_process_data process;
-        process = it->second;
-        data = process.m_data;
         return data;
     }
-    return data;
+    return it->get_data();
 }
 
 std::vector<Cqkgj_process_data> Cqkgj_mempool::get_data_by_state( int state )
@@ -1141,25 +1181,13 @@ std::vector<Cqkgj_process_data> Cqkgj_mempool::get_data_by_state( int state )
 bool Cqkgj_mempool::add_to_mempool(const uint256 &hash, Cqkgj_process_data &process )
 {
     LOCK( cs );
-    Cqkgj_mempool::it_hash it = map_hash_data.find(hash);
-    //if this data exists in mempool already, return false
-    if( it != map_hash_data.end() ) //if ( this->exists(hash))
-        return false;
-    map_hash_data.insert(make_pair(hash,process));
-    m_total_size += process.get_size();
+    //Add to memory pool without checking anything.
+    //call by main.cpp AddToMempool,which does do all the appropriate checks.
+    indexed_data_set::iterator newit = map_data.insert( process ).first;
 
-    uint32_t uState = 0;
-    Cqkgj_mempool::it_state it_s = map_state_data.find(uState);
-    if( it_s == map_state_data.end())
-    {
-        std::vector< Cqkgj_process_data > vState;
-        vState.push_back(process);
-        map_state_data.insert(make_pair(uState,vState));
-    }
-    else
-    {
-        it_s->second.push_back(process);
-    }
+    m_data_update++;
+    m_total_size += process.get_data_size();
+
     return true;
 }
 /* add by sdk end */
