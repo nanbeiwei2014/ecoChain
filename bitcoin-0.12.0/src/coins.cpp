@@ -8,7 +8,7 @@
 #include "random.h"
 
 #include <assert.h>
-
+#if 0
 /**
  * calculate number of bytes for the bitmask, and its number of non-zero bytes
  * each bit in the bitmask represents the availability of one output, but the
@@ -294,3 +294,4 @@ CCoinsModifier::~CCoinsModifier()
         cache.cachedCoinsUsage += it->second.coins.DynamicMemoryUsage();
     }
 }
+#endif

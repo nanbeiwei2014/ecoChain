@@ -11,7 +11,7 @@
 #include "streams.h"
 #include "txmempool.h"
 #include "util.h"
-
+#if 0
 void TxConfirmStats::Initialize(std::vector<double>& defaultBuckets,
                                 unsigned int maxConfirms, double _decay, std::string _dataTypeString)
 {
@@ -580,3 +580,4 @@ void CBlockPolicyEstimator::Read(CAutoFile& filein)
     priStats.Read(filein);
     nBestSeenHeight = nFileBestSeenHeight;
 }
+#endif

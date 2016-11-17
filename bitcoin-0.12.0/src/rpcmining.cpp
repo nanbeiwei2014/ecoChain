@@ -28,7 +28,7 @@
 #include <univalue.h>
 
 using namespace std;
-
+#if 0
 /**
  * Return average network hashes per second based on the last 'lookup' blocks,
  * or from the last difficulty change if 'lookup' is nonpositive.
@@ -806,3 +806,4 @@ UniValue estimatesmartpriority(const UniValue& params, bool fHelp)
     result.push_back(Pair("blocks", answerFound));
     return result;
 }
+#endif

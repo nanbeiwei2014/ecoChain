@@ -36,7 +36,7 @@
 #include <univalue.h>
 
 using namespace std;
-
+#if 0
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, UniValue& out, bool fIncludeHex)
 {
     txnouttype type;
@@ -780,6 +780,7 @@ UniValue signrawtransaction(const UniValue& params, bool fHelp)
 
     return result;
 }
+#endif
 //*************begin delete by  mengqg   20161115*************************************************************************************************
 /**********
 UniValue sendrawtransaction(const UniValue& params, bool fHelp)

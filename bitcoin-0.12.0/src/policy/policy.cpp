@@ -13,7 +13,7 @@
 #include "utilstrencodings.h"
 
 #include <boost/foreach.hpp>
-
+#if 0
     /**
      * Check transaction inputs to mitigate two
      * potential denial-of-service attacks:
@@ -153,3 +153,4 @@ bool AreInputsStandard(const CTransaction& tx, const CCoinsViewCache& mapInputs)
 
     return true;
 }
+#endif
