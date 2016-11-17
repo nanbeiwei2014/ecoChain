@@ -16,7 +16,7 @@ class CAutoFile;
 class CFeeRate;
 class CTxMemPoolEntry;
 class CTxMemPool;
-
+#if 0
 /** \class CBlockPolicyEstimator
  * The BlockPolicyEstimator is used for estimating the fee or priority needed
  * for a transaction to be included in a block within a certain number of
@@ -287,3 +287,4 @@ private:
     double priLikely, priUnlikely;
 };
 #endif /*BITCOIN_POLICYESTIMATOR_H */
+#endif

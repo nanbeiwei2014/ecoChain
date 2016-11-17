@@ -58,7 +58,7 @@ struct CCoin {
     }
 };
 
-extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry);
+//extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry);
 extern UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool txDetails = false);
 extern UniValue mempoolInfoToJSON();
 extern UniValue mempoolToJSON(bool fVerbose = false);
@@ -350,7 +350,8 @@ static bool rest_mempool_contents(HTTPRequest* req, const std::string& strURIPar
 
 static bool rest_tx(HTTPRequest* req, const std::string& strURIPart)
 {
-    if (!CheckWarmup(req))
+#if 0
+	if (!CheckWarmup(req))
         return false;
     std::string hashStr;
     const RetFormat rf = ParseDataFormat(hashStr, strURIPart);
@@ -395,13 +396,14 @@ static bool rest_tx(HTTPRequest* req, const std::string& strURIPart)
         return RESTERR(req, HTTP_NOT_FOUND, "output format not found (available: " + AvailableDataFormatsString() + ")");
     }
     }
-
+#endif
     // not reached
     return true; // continue to process further HTTP reqs on this cxn
 }
 
 static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
 {
+#if 0
     if (!CheckWarmup(req))
         return false;
     std::string param;
@@ -592,6 +594,7 @@ static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
     }
     }
 
+#endif
     // not reached
     return true; // continue to process further HTTP reqs on this cxn
 }

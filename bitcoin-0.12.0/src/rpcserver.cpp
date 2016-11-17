@@ -272,7 +272,7 @@ static const CRPCCommand vRPCCommands[] =
     { "network",            "setban",                 &setban,                 true  },
     { "network",            "listbanned",             &listbanned,             true  },
     { "network",            "clearbanned",            &clearbanned,            true  },
-
+#if 0
     /* Block chain and UTXO */
     { "blockchain",         "getblockchaininfo",      &getblockchaininfo,      true  },
     { "blockchain",         "getbestblockhash",       &getbestblockhash,       true  },
@@ -301,13 +301,13 @@ static const CRPCCommand vRPCCommands[] =
     { "generating",         "getgenerate",            &getgenerate,            true  },
     { "generating",         "setgenerate",            &setgenerate,            true  },
     { "generating",         "generate",               &generate,               true  },
-
+#endif
     /* add by sdk begin */
     { "rawtransactions",    "send_data_to_sys",       &send_data_to_sys,       true  },
     { "rawtransactions",    "get_data_from_sys",      &get_data_from_sys,      true  },
     { "rawtransactions",    "get_new_key",              &get_new_key,               true  },
     /* add by sdk end */
-
+#if 0
     /* Raw transactions */
     { "rawtransactions",    "createrawtransaction",   &createrawtransaction,   true  },
     { "rawtransactions",    "decoderawtransaction",   &decoderawtransaction,   true  },
@@ -327,7 +327,7 @@ static const CRPCCommand vRPCCommands[] =
     { "util",               "estimatepriority",       &estimatepriority,       true  },
     { "util",               "estimatesmartfee",       &estimatesmartfee,       true  },
     { "util",               "estimatesmartpriority",  &estimatesmartpriority,  true  },
-
+#endif
     /* Not shown in help */
     { "hidden",             "invalidateblock",        &invalidateblock,        true  },
     { "hidden",             "reconsiderblock",        &reconsiderblock,        true  },

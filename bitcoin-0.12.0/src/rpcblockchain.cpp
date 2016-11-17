@@ -25,7 +25,7 @@
 
 using namespace std;
 
-extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry);
+//extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry);
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, UniValue& out, bool fIncludeHex);
 
 double GetDifficulty(const CBlockIndex* blockindex)
@@ -99,19 +99,19 @@ UniValue blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool tx
     result.push_back(Pair("height", blockindex->nHeight));
     result.push_back(Pair("version", block.nVersion));
     result.push_back(Pair("merkleroot", block.hashMerkleRoot.GetHex()));
-    UniValue txs(UniValue::VARR);
-    BOOST_FOREACH(const CTransaction&tx, block.vtx)
-    {
-        if(txDetails)
-        {
-            UniValue objTx(UniValue::VOBJ);
-            TxToJSON(tx, uint256(), objTx);
-            txs.push_back(objTx);
-        }
-        else
-            txs.push_back(tx.GetHash().GetHex());
-    }
-    result.push_back(Pair("tx", txs));
+//    UniValue txs(UniValue::VARR);
+//    BOOST_FOREACH(const CTransaction&tx, block.vtx)
+//    {
+//        if(txDetails)
+//        {
+//            UniValue objTx(UniValue::VOBJ);
+//            TxToJSON(tx, uint256(), objTx);
+//            txs.push_back(objTx);
+//        }
+//        else
+//            txs.push_back(tx.GetHash().GetHex());
+//    }
+//    result.push_back(Pair("tx", txs));
     result.push_back(Pair("time", block.GetBlockTime()));
     result.push_back(Pair("mediantime", (int64_t)blockindex->GetMedianTimePast()));
 //******************begin delete by mengqg 20161109******************************************************************************
@@ -182,7 +182,8 @@ UniValue getdifficulty(const UniValue& params, bool fHelp)
 
 UniValue mempoolToJSON(bool fVerbose = false)
 {
-    if (fVerbose)
+#if 0
+	if (fVerbose)
     {
         LOCK(mempool.cs);
         UniValue o(UniValue::VOBJ);
@@ -230,6 +231,7 @@ UniValue mempoolToJSON(bool fVerbose = false)
 
         return a;
     }
+#endif
 }
 
 UniValue getrawmempool(const UniValue& params, bool fHelp)
@@ -432,7 +434,8 @@ UniValue getblock(const UniValue& params, bool fHelp)
 
 UniValue gettxoutsetinfo(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() != 0)
+#if 0
+	if (fHelp || params.size() != 0)
         throw runtime_error(
             "gettxoutsetinfo\n"
             "\nReturns statistics about the unspent transaction output set.\n"
@@ -466,11 +469,14 @@ UniValue gettxoutsetinfo(const UniValue& params, bool fHelp)
         ret.push_back(Pair("total_amount", ValueFromAmount(stats.nTotalAmount)));
     }
     return ret;
+#endif
+    return 0;
 }
 
 UniValue gettxout(const UniValue& params, bool fHelp)
 {
-    if (fHelp || params.size() < 2 || params.size() > 3)
+#if 0
+	if (fHelp || params.size() < 2 || params.size() > 3)
         throw runtime_error(
             "gettxout \"txid\" n ( includemempool )\n"
             "\nReturns details about an unspent transaction output.\n"
@@ -544,8 +550,9 @@ UniValue gettxout(const UniValue& params, bool fHelp)
     ret.push_back(Pair("scriptPubKey", o));
     ret.push_back(Pair("version", coins.nVersion));
     ret.push_back(Pair("coinbase", coins.fCoinBase));
-
     return ret;
+#endif
+    return 0;
 }
 
 UniValue verifychain(const UniValue& params, bool fHelp)
@@ -783,12 +790,12 @@ UniValue getchaintips(const UniValue& params, bool fHelp)
 UniValue mempoolInfoToJSON()
 {
     UniValue ret(UniValue::VOBJ);
-    ret.push_back(Pair("size", (int64_t) mempool.size()));
-    ret.push_back(Pair("bytes", (int64_t) mempool.GetTotalTxSize()));
-    ret.push_back(Pair("usage", (int64_t) mempool.DynamicMemoryUsage()));
+//    ret.push_back(Pair("size", (int64_t) qmempool.get_total_size()));
+//    ret.push_back(Pair("bytes", (int64_t) mempool.GetTotalTxSize()));
+//    ret.push_back(Pair("usage", (int64_t) mempool.DynamicMemoryUsage()));
     size_t maxmempool = GetArg("-maxmempool", DEFAULT_MAX_MEMPOOL_SIZE) * 1000000;
     ret.push_back(Pair("maxmempool", (int64_t) maxmempool));
-    ret.push_back(Pair("mempoolminfee", ValueFromAmount(mempool.GetMinFee(maxmempool).GetFeePerK())));
+//    ret.push_back(Pair("mempoolminfee", ValueFromAmount(mempool.GetMinFee(maxmempool).GetFeePerK())));
 
     return ret;
 }
@@ -891,3 +898,4 @@ UniValue reconsiderblock(const UniValue& params, bool fHelp)
 
     return NullUniValue;
 }
+

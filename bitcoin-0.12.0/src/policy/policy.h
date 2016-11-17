@@ -9,10 +9,9 @@
 #include "consensus/consensus.h"
 #include "script/interpreter.h"
 #include "script/standard.h"
-
+#include"coins.h"
 #include <string>
 
-class CCoinsViewCache;
 
 /** Default for -blockmaxsize and -blockminsize, which control the range of sizes the mining code will create **/
 static const unsigned int DEFAULT_BLOCK_MAX_SIZE = 750000;
@@ -27,6 +26,7 @@ static const unsigned int MAX_P2SH_SIGOPS = 15;
 static const unsigned int MAX_STANDARD_TX_SIGOPS = MAX_BLOCK_SIGOPS/5;
 /** Default for -maxmempool, maximum megabytes of mempool memory usage */
 static const unsigned int DEFAULT_MAX_MEMPOOL_SIZE = 300;
+
 /**
  * Standard script verification flags that standard transactions will comply
  * with. However scripts violating these flags may still be present in valid
@@ -48,6 +48,11 @@ static const unsigned int STANDARD_NOT_MANDATORY_VERIFY_FLAGS = STANDARD_SCRIPT_
 /** Used as the flags parameter to CheckFinalTx() in non-consensus code */
 static const unsigned int STANDARD_LOCKTIME_VERIFY_FLAGS = LOCKTIME_MEDIAN_TIME_PAST;
 
+#if 0
+//************begin delete by mengqg 20161117****************************************************************************
+class CCoinsViewCache;
+//************end delete by mengqg 20161117******************************************************************************
+
 bool IsStandard(const CScript& scriptPubKey, txnouttype& whichType);
     /**
      * Check for standard transaction types
@@ -59,6 +64,8 @@ bool IsStandardTx(const CTransaction& tx, std::string& reason);
      * @param[in] mapInputs    Map of previous transactions that have outputs we're spending
      * @return True if all inputs (scriptSigs) use only standard transaction forms
      */
+
 bool AreInputsStandard(const CTransaction& tx, const CCoinsViewCache& mapInputs);
 
-#endif // BITCOIN_POLICY_POLICY_H
+#endif
+#endif  // BITCOIN_POLICY_POLICY_H

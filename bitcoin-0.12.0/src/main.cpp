@@ -584,7 +584,7 @@ CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& loc
     return chain.Genesis();
 }
 
-CCoinsViewCache *pcoinsTip = NULL;
+//CCoinsViewCache *pcoinsTip = NULL;
 CBlockTreeDB *pblocktree = NULL;
 CBestBlock  *pbestblock=NULL;
 
@@ -1944,11 +1944,15 @@ void static FlushBlockFile(bool fFinalize = false)
 
 bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigned int nAddSize);
 
-static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
+//************begin delete by mengqg  20161117 *************************************************************************
+//static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
+//************end   delete by mengqg  20161117*************************************************************************
 
 void ThreadScriptCheck() {
     RenameThread("bitcoin-scriptch");
+#if 0
     scriptcheckqueue.Thread();
+#endif
 }
 
 //

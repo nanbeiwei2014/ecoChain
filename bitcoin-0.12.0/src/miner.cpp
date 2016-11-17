@@ -48,18 +48,19 @@ uint64_t nLastBlockSize = 0;
 static const int DEFAULT_GENERATE_PERIOD = 0.5*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
 //*************end modify by mengqg 20161104*************************
-
-class ScoreCompare
-{
-public:
-    ScoreCompare() {}
-
-    bool operator()(const CTxMemPool::txiter a, const CTxMemPool::txiter b)
-    {
-        return CompareTxMemPoolEntryByScore()(*b,*a); // Convert to less than
-    }
-};
-
+#if 0
+//class ScoreCompare
+//{
+//public:
+//    ScoreCompare() {}
+//
+//    bool operator()(const CTxMemPool::txiter a, const CTxMemPool::txiter b)
+//    {
+//        return CompareTxMemPoolEntryByScore()(*b,*a); // Convert to less than
+//    }
+//};
+#endif
+//*************end modify by mengqg 20161104*************************
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev)
 {
     int64_t nOldTime = pblock->nTime;
