@@ -592,7 +592,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
             //
             // Create new block
             //
-            unsigned int nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
+            unsigned int nTransactionsUpdatedLast = qmempool.get_data_updated();
             CBlockIndex* pindexPrev = chainActive.Tip();
 
             std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);

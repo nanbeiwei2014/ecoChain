@@ -27,6 +27,8 @@ static const int64_t nMaxDbCache = sizeof(void*) > 4 ? 16384 : 1024;
 static const int64_t nMinDbCache = 4;
 
 /** CCoinsView backed by the coin database (chainstate/) */
+//***********begin by mengqg pause 20161116***********************************************************************
+/************
 class CCoinsViewDB : public CCoinsView
 {
 protected:
@@ -40,7 +42,8 @@ public:
     bool BatchWrite(CCoinsMap &mapCoins, const uint256 &hashBlock);
     bool GetStats(CCoinsStats &stats) const;
 };
-
+************/
+//*************end by mengqg pause 20161116*************************************************************
 /** Access to the block database (blocks/index/) */
 class CBlockTreeDB : public CDBWrapper
 {

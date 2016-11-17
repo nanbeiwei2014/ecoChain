@@ -137,29 +137,30 @@ bool ShutdownRequested()
 {
     return fRequestShutdown;
 }
-
-class CCoinsViewErrorCatcher : public CCoinsViewBacked
-{
-public:
-    CCoinsViewErrorCatcher(CCoinsView* view) : CCoinsViewBacked(view) {}
-    bool GetCoins(const uint256 &txid, CCoins &coins) const {
-        try {
-            return CCoinsViewBacked::GetCoins(txid, coins);
-        } catch(const std::runtime_error& e) {
-            uiInterface.ThreadSafeMessageBox(_("Error reading from database, shutting down."), "", CClientUIInterface::MSG_ERROR);
-            LogPrintf("Error reading from database: %s\n", e.what());
-            // Starting the shutdown sequence and returning false to the caller would be
-            // interpreted as 'entry not found' (as opposed to unable to read data), and
-            // could lead to invalid interpretation. Just exit immediately, as we can't
-            // continue anyway, and all writes should be atomic.
-            abort();
-        }
-    }
-    // Writes do not need similar protection, as failure to write is handled by the caller.
-};
-
-static CCoinsViewDB *pcoinsdbview = NULL;
-static CCoinsViewErrorCatcher *pcoinscatcher = NULL;
+//**************begin by mengqg pause 20161116*********************************************************************
+//class CCoinsViewErrorCatcher : public CCoinsViewBacked
+//{
+//public:
+//    CCoinsViewErrorCatcher(CCoinsView* view) : CCoinsViewBacked(view) {}
+//    bool GetCoins(const uint256 &txid, CCoins &coins) const {
+//        try {
+//            return CCoinsViewBacked::GetCoins(txid, coins);
+//        } catch(const std::runtime_error& e) {
+//            uiInterface.ThreadSafeMessageBox(_("Error reading from database, shutting down."), "", CClientUIInterface::MSG_ERROR);
+//            LogPrintf("Error reading from database: %s\n", e.what());
+//            // Starting the shutdown sequence and returning false to the caller would be
+//            // interpreted as 'entry not found' (as opposed to unable to read data), and
+//            // could lead to invalid interpretation. Just exit immediately, as we can't
+//            // continue anyway, and all writes should be atomic.
+//            abort();
+//        }
+//    }
+//    // Writes do not need similar protection, as failure to write is handled by the caller.
+//};
+//
+//static CCoinsViewDB *pcoinsdbview = NULL;
+//static CCoinsViewErrorCatcher *pcoinscatcher = NULL;
+//**************end by mengqg pause 20161116*********************************************************************
 static boost::scoped_ptr<ECCVerifyHandle> globalVerifyHandle;
 
 void Interrupt(boost::thread_group& threadGroup)
@@ -185,8 +186,10 @@ void Shutdown()
     /// Be sure that anything that writes files or flushes caches only does this if the respective
     /// module was initialized.
     RenameThread("bitcoin-shutoff");
-    mempool.AddTransactionsUpdated(1);
-
+//**************begin modify by mengqg pause 20161116*********************************************************************
+//    mempool.AddTransactionsUpdated(1);
+     qmempool.add_data_updated(1);
+//**************end modify by mengqg pause 20161116*********************************************************************
     StopHTTPRPC();
     StopREST();
     StopRPC();
@@ -199,31 +202,33 @@ void Shutdown()
     StopNode();
     StopTorControl();
     UnregisterNodeSignals(GetNodeSignals());
-
-    if (fFeeEstimatesInitialized)
-    {
-        boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
-        CAutoFile est_fileout(fopen(est_path.string().c_str(), "wb"), SER_DISK, CLIENT_VERSION);
-        if (!est_fileout.IsNull())
-            mempool.WriteFeeEstimates(est_fileout);
-        else
-            LogPrintf("%s: Failed to write fee estimates to %s\n", __func__, est_path.string());
-        fFeeEstimatesInitialized = false;
-    }
-
+//**************begin by mengqg pause 20161116*********************************************************************
+//    if (fFeeEstimatesInitialized)
+//    {
+//        boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
+//        CAutoFile est_fileout(fopen(est_path.string().c_str(), "wb"), SER_DISK, CLIENT_VERSION);
+//        if (!est_fileout.IsNull())
+//            mempool.WriteFeeEstimates(est_fileout);
+//        else
+//            LogPrintf("%s: Failed to write fee estimates to %s\n", __func__, est_path.string());
+//        fFeeEstimatesInitialized = false;
+//    }
+//**************end by mengqg pause 20161116*********************************************************************
     {
         LOCK(cs_main);
-        if (pcoinsTip != NULL) {
+//        if (pcoinsTip != NULL) {
             FlushStateToDisk();
-        }
-        delete pcoinsTip;
-        pcoinsTip = NULL;
-        delete pcoinscatcher;
-        pcoinscatcher = NULL;
-        delete pcoinsdbview;
-        pcoinsdbview = NULL;
-        delete pblocktree;
-        pblocktree = NULL;
+//        }
+//**************begin by mengqg pause 20161116*********************************************************************
+//        delete pcoinsTip;
+//        pcoinsTip = NULL;
+//        delete pcoinscatcher;
+//        pcoinscatcher = NULL;
+//        delete pcoinsdbview;
+//        pcoinsdbview = NULL;
+//        delete pblocktree;
+//        pblocktree = NULL;
+//**************end by mengqg pause 20161116*********************************************************************
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
@@ -900,11 +905,13 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (GetBoolArg("-whitelistalwaysrelay", false))
         InitWarning(_("Unsupported argument -whitelistalwaysrelay ignored, use -whitelistrelay and/or -whitelistforcerelay."));
 
-    // Checkmempool and checkblockindex default to true in regtest mode
-    int ratio = std::min<int>(std::max<int>(GetArg("-checkmempool", chainparams.DefaultConsistencyChecks() ? 1 : 0), 0), 1000000);
-    if (ratio != 0) {
-        mempool.setSanityCheck(1.0 / ratio);
-    }
+//**************begin by mengqg pause 20161116*********************************************************************
+//    // Checkmempool and checkblockindex default to true in regtest mode
+//    int ratio = std::min<int>(std::max<int>(GetArg("-checkmempool", chainparams.DefaultConsistencyChecks() ? 1 : 0), 0), 1000000);
+//    if (ratio != 0) {
+//        mempool.setSanityCheck(1.0 / ratio);
+//    }
+//**************begin by mengqg pause 20161116*********************************************************************
     fCheckBlockIndex = GetBoolArg("-checkblockindex", chainparams.DefaultConsistencyChecks());
     fCheckpointsEnabled = GetBoolArg("-checkpoints", DEFAULT_CHECKPOINTS_ENABLED);
 
@@ -1333,15 +1340,19 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
         do {
             try {
                 UnloadBlockIndex();
-                delete pcoinsTip;
-                delete pcoinsdbview;
-                delete pcoinscatcher;
+//               delete pcoinsTip;
+//                delete pcoinsdbview;
+//                delete pcoinscatcher;
                 delete pblocktree;
 
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
-                pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex);
-                pcoinscatcher = new CCoinsViewErrorCatcher(pcoinsdbview);
-                pcoinsTip = new CCoinsViewCache(pcoinscatcher);
+//*******************begin by mengqg pause 20161116************************************************************************************
+/******
+//                pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex);
+//                pcoinscatcher = new CCoinsViewErrorCatcher(pcoinsdbview);
+//                pcoinsTip = new CCoinsViewCache(pcoinscatcher);
+******/
+//*******************end by mengqg pause 20161116************************************************************************************
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
@@ -1395,12 +1406,15 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
                         break;
                     }
                 }
-
-                if (!CVerifyDB().VerifyDB(chainparams, pcoinsdbview, GetArg("-checklevel", DEFAULT_CHECKLEVEL),
+//*******************begin by mengqg pause 20161116************************************************************************************
+ /******               if (!CVerifyDB().VerifyDB(chainparams, pcoinsdbview, GetArg("-checklevel", DEFAULT_CHECKLEVEL),
                               GetArg("-checkblocks", DEFAULT_CHECKBLOCKS))) {
                     strLoadError = _("Corrupted block database detected");
                     break;
+
                 }
+*****/
+//*******************end by mengqg pause 20161116************************************************************************************
             } catch (const std::exception& e) {
                 if (fDebug) LogPrintf("%s\n", e.what());
                 strLoadError = _("Error opening block database");
@@ -1439,13 +1453,14 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     }
     LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
 
-    boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
-    CAutoFile est_filein(fopen(est_path.string().c_str(), "rb"), SER_DISK, CLIENT_VERSION);
-    // Allowed to fail as this file IS missing on first startup.
-    if (!est_filein.IsNull())
-        mempool.ReadFeeEstimates(est_filein);
-    fFeeEstimatesInitialized = true;
-
+//**************begin by mengqg pause 20161116*********************************************************************
+//    boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
+//    CAutoFile est_filein(fopen(est_path.string().c_str(), "rb"), SER_DISK, CLIENT_VERSION);
+//    // Allowed to fail as this file IS missing on first startup.
+//    if (!est_filein.IsNull())
+//        mempool.ReadFeeEstimates(est_filein);
+//    fFeeEstimatesInitialized = true;
+//**************begin by mengqg pause 20161116*********************************************************************
     // ********************************************************* Step 8: load wallet
 /* Begin Noted by syl 2016-11-14===============================================
 #ifdef ENABLE_WALLET

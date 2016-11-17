@@ -33,8 +33,11 @@ class CBlockTreeDB;
 class CBloomFilter;
 class CChainParams;
 class CInv;
-class CScriptCheck;
-class CTxMemPool;
+//**************begin by mengqg pause 20161116*********************************************************************
+//class CScriptCheck;
+
+//class CTxMemPool;
+//**************end by mengqg pause 20161116*********************************************************************
 /* add by sdk begin */
 class Cqkgj_mempool;
 /* add by sdk end */
@@ -121,13 +124,16 @@ struct BlockHasher
 {
     size_t operator()(const uint256& hash) const { return hash.GetCheapHash(); }
 };
-
+//******add  by mengqg 20161107****************************
+class CBestBlock ;
+extern CBestBlock *pbestblock;
+//******add  by mengqg 20161107****************************
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
 
 //******modify  by mengqg 20161107****************************
 extern Cqkgj_mempool qmempool;
-extern CTxMemPool mempool;   //delete by mengqg
+//extern CTxMemPool mempool;   //delete by mengqg
 //***********************************
 typedef boost::unordered_map<uint256, CBlockIndex*, BlockHasher> BlockMap;
 extern BlockMap mapBlockIndex;
@@ -283,9 +289,10 @@ bool get_transaction( const uint256 &hash, Cqkgj_basic_data &data );
 /* add by sdk end */
 
 /** (try to) add transaction to memory pool **/
-bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
-                        bool* pfMissingInputs, bool fOverrideMempoolLimit=false, bool fRejectAbsurdFee=false);
-
+//**************begin by mengqg pause 20161116*********************************************************************
+//bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
+//                        bool* pfMissingInputs, bool fOverrideMempoolLimit=false, bool fRejectAbsurdFee=false);
+//**************end by mengqg pause 20161116*********************************************************************
 /** Convert CValidationState to a human-readable message for logging */
 std::string FormatStateMessage(const CValidationState &state);
 
@@ -336,27 +343,28 @@ unsigned int GetLegacySigOpCount(const CTransaction& tx);
  * @return maximum number of sigops required to validate this transaction's inputs
  * @see CTransaction::FetchInputs
  */
-unsigned int GetP2SHSigOpCount(const CTransaction& tx, const CCoinsViewCache& mapInputs);
+//****************begin by mengqg 20161116***********************************************************************************
+/*************
+//unsigned int GetP2SHSigOpCount(const CTransaction& tx, const CCoinsViewCache& mapInputs);
 
-
-/**
+//**
  * Check whether all inputs of this transaction are valid (no double spends, scripts & sigs, amounts)
  * This does not modify the UTXO set. If pvChecks is not NULL, script checks are pushed onto it
  * instead of being performed inline.
- */
+ *
 bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsViewCache &view, bool fScriptChecks,
                  unsigned int flags, bool cacheStore, std::vector<CScriptCheck> *pvChecks = NULL);
 
-/** Apply the effects of this transaction on the UTXO set represented by view */
+//** Apply the effects of this transaction on the UTXO set represented by view *
 void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCache &inputs, int nHeight);
 
-/** Context-independent validity checks */
+//** Context-independent validity checks *
 bool CheckTransaction(const CTransaction& tx, CValidationState& state);
 
 /**
  * Check if transaction is final and can be included in a block with the
  * specified height and time. Consensus critical.
- */
+ *
 bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime);
 
 /**
@@ -365,13 +373,13 @@ bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime);
  * Calls IsFinalTx() with current block height and appropriate block time.
  *
  * See consensus/consensus.h for flag definitions.
- */
+ *
 bool CheckFinalTx(const CTransaction &tx, int flags = -1);
 
 /** 
  * Closure representing one script verification
  * Note that this stores references to the spending transaction 
- */
+ *
 class CScriptCheck
 {
 private:
@@ -401,6 +409,8 @@ public:
 
     ScriptError GetScriptError() const { return error; }
 };
+*************/
+//****************end by mengqg 20161116***********************************************************************************
 
 
 /** Functions for disk access for blocks */
@@ -414,11 +424,12 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
  *  In case pfClean is provided, operation will try to be tolerant about errors, and *pfClean
  *  will be true if no problems were found. Otherwise, the return value will be false in case
  *  of problems. Note that in any case, coins may be modified. */
-bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& coins, bool* pfClean = NULL);
+//******************begin delete by mengqg 20161116*****************************************************************************************************************************
+//bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& coins, bool* pfClean = NULL);
 
 /** Apply the effects of this block (with given index) on the UTXO set represented by coins */
-bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& coins, bool fJustCheck = false);
-
+//bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& coins, bool fJustCheck = false);
+//******************end  delete by mengqg 20161116***************************************************************************************************
 /** Context-independent validity checks */
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool fCheckPOW = false);
 bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW = false, bool fCheckMerkleRoot = true);
@@ -486,12 +497,16 @@ public:
 };
 
 /** RAII wrapper for VerifyDB: Verify consistency of the block and coin databases */
+//****************begin by mengqg pause 20161116 *******************************************************************************************************
+/*****
 class CVerifyDB {
 public:
     CVerifyDB();
     ~CVerifyDB();
     bool VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview, int nCheckLevel, int nCheckDepth);
 };
+*****/
+//****************begin by mengqg pause 20161116 *******************************************************************************************************
 
 /** Find the last common block between the parameter chain and a locator. */
 CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& locator);
@@ -506,7 +521,7 @@ bool ReconsiderBlock(CValidationState& state, CBlockIndex *pindex);
 extern CChain chainActive;
 
 /** Global variable that points to the active CCoinsView (protected by cs_main) */
-extern CCoinsViewCache *pcoinsTip;
+//extern CCoinsViewCache *pcoinsTip;
 
 /** Global variable that points to the active block tree (protected by cs_main) */
 extern CBlockTreeDB *pblocktree;
@@ -516,7 +531,11 @@ extern CBlockTreeDB *pblocktree;
  * While checking, GetBestBlock() refers to the parent block. (protected by cs_main)
  * This is also true for mempool checks.
  */
+//****************begin by mengqg pause 20161116 *******************************************************************************************************
+/*****
 int GetSpendHeight(const CCoinsViewCache& inputs);
+*****/
+//****************end by mengqg pause 20161116 *******************************************************************************************************
 
 /** Reject codes greater or equal to this can be returned by AcceptToMemPool
  * for transactions, to signal internal conditions. They cannot and should not

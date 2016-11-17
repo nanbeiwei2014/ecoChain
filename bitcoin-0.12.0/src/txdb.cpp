@@ -151,7 +151,7 @@ bool CBlockTreeDB::WriteBatchSync(const std::vector<std::pair<int, const CBlockF
     }
     return WriteBatch(batch, true);
 }
-
+//************begin  wait for edit by mengqg  20161116**  txid  modify to dataId*****************************************************************************
 bool CBlockTreeDB::ReadTxIndex(const uint256 &txid, CDiskTxPos &pos) {
     return Read(make_pair(DB_TXINDEX, txid), pos);
 }
@@ -162,7 +162,7 @@ bool CBlockTreeDB::WriteTxIndex(const std::vector<std::pair<uint256, CDiskTxPos>
         batch.Write(make_pair(DB_TXINDEX, it->first), it->second);
     return WriteBatch(batch);
 }
-
+//***********end wait for edit by mengqg  20161116*********************************************************************************
 bool CBlockTreeDB::WriteFlag(const std::string &name, bool fValue) {
     return Write(std::make_pair(DB_FLAG, name), fValue ? '1' : '0');
 }
