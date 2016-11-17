@@ -639,9 +639,9 @@ public:
     }
 
     int64_t get_time() const { return m_time; }
-    size_t get_data_size(){ return m_data_size; }
+    size_t get_data_size() const { return m_data_size; }
     double get_priority( unsigned int cur_height ) const;
-    size_t get_size() const { return m_data_size; }
+    //size_t get_size() const { return m_data_size; }
     unsigned int get_height() const { return m_height; }
     const Cqkgj_basic_data& get_data(){ return this->m_data;}
     unsigned int get_sign_op_count() const{ return m_sign_op_count; }
@@ -650,11 +650,22 @@ public:
     int get_state( )  const;
 };
 
-struct mempool_hash
+/* extracts a Cqkgj_process_data's data hash */
+struct processdata_id
 {
-    uint256 operator()(const Cqkgj_process_data &data ) const
+    typedef uint256 result_type;
+    result_type operator() ( const Cqkgj_process_data &entry ) const
     {
-        return data.get_data().get_hash();
+        return entry.get_data().get_hash();
+    }
+};
+
+class CompareMempoolByEntryTime
+{
+public:
+    bool operator()(const Cqkgj_process_data &a, const Cqkgj_process_data &b )
+    {
+        return a.get_time() < b.get_time();
     }
 };
 
@@ -669,13 +680,36 @@ public:
     std::map< uint32_t,std::vector<Cqkgj_process_data> > map_state_data;
 public:
 
+    typedef boost::multi_index_container<
+        Cqkgj_process_data,
+        boost::multi_index::indexed_by<
+            //sorted by txid
+            boost::multi_index::ordered_unique<processdata_id>,
+            //sorted by entry time
+            boost::multi_index::ordered_non_unique<
+                boost::multi_index::identity<Cqkgj_process_data>,
+                CompareMempoolByEntryTime
+            >
+        >
+    >indexed_data_set;
+
+    mutable CCriticalSection cs;
+    indexed_data_set map_data;
+    typedef indexed_data_set::nth_index<0>::type::iterator data_it;
+    struct CompareIterByHash{
+        bool operator() (const data_it &a, const data_it &b )const{
+            return a->get_data().get_hash() < b->get_data().get_hash();
+        }
+    };
+
+    typedef std::set<data_it, CompareIterByHash> set_entries;
 
     typedef std::map<uint256,Cqkgj_process_data>::iterator it_hash;
     typedef std::map<uint32_t,std::vector<Cqkgj_process_data> >::iterator it_state;
 
     Cqkgj_mempool();
     ~Cqkgj_mempool();
-    mutable CCriticalSection cs;
+
     std::string get_address( uint256 &hash );
     Cqkgj_basic_data get_data_by_hash( uint256 hash );
     std::vector< Cqkgj_process_data > get_data_by_state( int state );	//获取指定状态数据集合
@@ -683,19 +717,24 @@ public:
     bool exists( uint256 hash ) const
     {
         LOCK(cs);
-        return (map_hash_data.count(hash) > 0?true:false);
+        return (map_data.count(hash) != 0 );
     }
 
     void clear();
     void _clear();
 
-    bool lookup( const uint256& hash, Cqkgj_basic_data& resultl ) ;
+    void remove_staged( set_entries &stage );
+
+    bool lookup( const uint256& hash, Cqkgj_basic_data& result ) ;
 
     bool add_to_mempool(const uint256 &hash, Cqkgj_process_data &data );
 
     void add_data_updated( unsigned int n);
+    uint64_t get_total_size();
     unsigned int get_data_updated() const;
-
+private:
+    void remove_unchecked( data_it entry );
+public:
     void remove( const Cqkgj_basic_data& origData, std::list<Cqkgj_basic_data>& removed, bool bRecur);
     void remove_from_block( const std::vector<Cqkgj_basic_data>& vData,unsigned int uiBlockHeight,
                             std::list<Cqkgj_basic_data>& conflicts);
@@ -717,8 +756,8 @@ class CompareCqkgjMemPoolProcessDataByScore
 public:
     bool operator()(const Cqkgj_process_data& a, const Cqkgj_process_data& b)
     {
-        size_t f1 = b.get_size();
-        size_t f2 = a.get_size();
+        size_t f1 = b.get_data_size();
+        size_t f2 = a.get_data_size();
         if (f1 == f2) {
             return b.get_data().get_hash() < a.get_data().get_hash();
         }

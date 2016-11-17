@@ -834,6 +834,8 @@ bool AddToMempool( Cqkgj_mempool& pool, const Cqkgj_basic_data &data )
 
     // is it already in the memory pool?
     uint256 hash = data.get_hash();
+    if( pool.exists( hash ))
+        return false;
 
     double dPriority = 0.0;
     unsigned int n_sig_ops = 0;
