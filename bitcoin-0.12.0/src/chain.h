@@ -403,4 +403,36 @@ public:
     const CBlockIndex *FindFork(const CBlockIndex *pindex) const;
 };
 
+
+class CBestBlock
+{
+protected:
+    /* Whether this cache has an active modifier. */
+    bool hasModifier;
+
+    /**
+     * Make mutable so that we can "fill the cache" even from Get-methods
+     * declared as "const".
+     */
+    mutable uint256 hashBlock;
+
+public:
+    CBestBlock(){
+    	hasModifier=false;
+    }
+    ~CBestBlock(){
+    	assert(!hasModifier);
+    }
+
+    uint256 GetBestBlock() const{
+    	if (hashBlock.IsNull())
+        hashBlock = uint256();
+    return hashBlock;
+    }
+    void SetBestBlock(const uint256 &hashBlockIn){
+        hashBlock = hashBlockIn;
+    }
+
+};
+
 #endif // BITCOIN_CHAIN_H
