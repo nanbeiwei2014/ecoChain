@@ -369,8 +369,8 @@ static void MutateTxSign(CMutableTransaction& tx, const string& flagStr)
     // starts as a clone of the raw tx:
     CMutableTransaction mergedTx(txVariants[0]);
     bool fComplete = true;
-    CCoinsView viewDummy;
-    CCoinsViewCache view(&viewDummy);
+    //CCoinsView viewDummy;
+    //CCoinsViewCache view(&viewDummy);
 
     if (!registers.count("privatekeys"))
         throw runtime_error("privatekeys register variable must be set.");
@@ -410,7 +410,7 @@ static void MutateTxSign(CMutableTransaction& tx, const string& flagStr)
             int nOut = atoi(prevOut["vout"].getValStr());
             if (nOut < 0)
                 throw runtime_error("vout must be positive");
-
+#if 0
             vector<unsigned char> pkData(ParseHexUV(prevOut["scriptPubKey"], "scriptPubKey"));
             CScript scriptPubKey(pkData.begin(), pkData.end());
 
@@ -437,13 +437,14 @@ static void MutateTxSign(CMutableTransaction& tx, const string& flagStr)
                 CScript redeemScript(rsData.begin(), rsData.end());
                 tempKeystore.AddCScript(redeemScript);
             }
+#endif
         }
     }
 
     const CKeyStore& keystore = tempKeystore;
 
     bool fHashSingle = ((nHashType & ~SIGHASH_ANYONECANPAY) == SIGHASH_SINGLE);
-
+#if 0
     // Sign what we can:
     for (unsigned int i = 0; i < mergedTx.vin.size(); i++) {
         CTxIn& txin = mergedTx.vin[i];
@@ -466,7 +467,7 @@ static void MutateTxSign(CMutableTransaction& tx, const string& flagStr)
         if (!VerifyScript(txin.scriptSig, prevPubKey, STANDARD_SCRIPT_VERIFY_FLAGS, MutableTransactionSignatureChecker(&mergedTx, i)))
             fComplete = false;
     }
-
+#endif
     if (fComplete) {
         // do nothing... for now
         // perhaps store this for later optional JSON output
