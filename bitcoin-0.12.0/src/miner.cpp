@@ -513,7 +513,7 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
     }
 
     // Inform about the new block
-    GetMainSignals().BlockFound(pblock->GetHash());
+    //GetMainSignals().BlockFound(pblock->GetHash());
 
     // Process this block the same as if we had received it from another node
     CValidationState state;
@@ -566,16 +566,16 @@ void static BitcoinMiner(const CChainParams& chainparams)
             if (chainparams.MiningRequiresPeers()) {
                 // Busy-wait for the network to come online so we don't waste time mining
                 // on an obsolete chain. In regtest mode we expect to fly solo.
-                do {
-                    bool fvNodesEmpty;
-                    {
-                        LOCK(cs_vNodes);
-                        fvNodesEmpty = vNodes.empty();
-                    }
-                    if (!fvNodesEmpty && !IsInitialBlockDownload())
-                        break;
-                    MilliSleep(1000);
-                } while (true);
+//                do {
+//                    bool fvNodesEmpty;
+//                    {
+//                        LOCK(cs_vNodes);
+//                        fvNodesEmpty = vNodes.empty();
+//                    }
+//                    if (!fvNodesEmpty && !IsInitialBlockDownload())
+//                        break;
+//                    MilliSleep(1000);
+//                } while (true);
             }
 
             //

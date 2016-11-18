@@ -1985,10 +1985,6 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
         LogPrintf("DNS seeding disabled\n");
     else
         threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "dnsseed", &ThreadDNSAddressSeed));
-    //Begin Noted by syl 2016-11-14==================================================
-    //Map ports with UPnP
-    //MapPort(GetBoolArg("-upnp", DEFAULT_UPNP));
-    //End Noted by syl 2016-11-14====================================================
 
     // Send and receive from sockets, accept connections
     threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "net", &ThreadSocketHandler));
