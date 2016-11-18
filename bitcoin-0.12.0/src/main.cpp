@@ -1851,8 +1851,9 @@ static bool ApplyTxInUndo(const CTxInUndo& undo, CCoinsViewCache& view, const CO
 
     return fClean;
 }
-
-bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& view, bool* pfClean)
+******/
+//*******************end by mengqg pause 20161116************************************************************************************
+bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CBestBlock& view, bool* pfClean)
 {
     assert(pindex->GetBlockHash() == view.GetBestBlock());
 
@@ -1861,53 +1862,53 @@ bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockI
 
     bool fClean = true;
 
-    CBlockUndo blockUndo;
-    CDiskBlockPos pos = pindex->GetUndoPos();
-    if (pos.IsNull())
-        return error("DisconnectBlock(): no undo data available");
-    if (!UndoReadFromDisk(blockUndo, pos, pindex->pprev->GetBlockHash()))
-        return error("DisconnectBlock(): failure reading undo data");
-
-    if (blockUndo.vtxundo.size() + 1 != block.vtx.size())
-        return error("DisconnectBlock(): block and undo data inconsistent");
+//    CBlockUndo blockUndo;
+//    CDiskBlockPos pos = pindex->GetUndoPos();
+//    if (pos.IsNull())
+//        return error("DisconnectBlock(): no undo data available");
+//    if (!UndoReadFromDisk(blockUndo, pos, pindex->pprev->GetBlockHash()))
+//        return error("DisconnectBlock(): failure reading undo data");
+//
+//    if (blockUndo.vtxundo.size() + 1 != block.vtx.size())
+//        return error("DisconnectBlock(): block and undo data inconsistent");
 
     // undo transactions in reverse order
-    for (int i = block.vtx.size() - 1; i >= 0; i--) {
-        const CTransaction &tx = block.vtx[i];
-        uint256 hash = tx.GetHash();
-
-        // Check that all outputs are available and match the outputs in the block itself
-        // exactly.
-        {
-        CCoinsModifier outs = view.ModifyCoins(hash);
-        outs->ClearUnspendable();
-
-        CCoins outsBlock(tx, pindex->nHeight);
-        // The CCoins serialization does not serialize negative numbers.
-        // No network rules currently depend on the version here, so an inconsistency is harmless
-        // but it must be corrected before txout nversion ever influences a network rule.
-        if (outsBlock.nVersion < 0)
-            outs->nVersion = outsBlock.nVersion;
-        if (*outs != outsBlock)
-            fClean = fClean && error("DisconnectBlock(): added transaction mismatch? database corrupted");
-
-        // remove outputs
-        outs->Clear();
-        }
-
-        // restore inputs
-        if (i > 0) { // not coinbases
-            const CTxUndo &txundo = blockUndo.vtxundo[i-1];
-            if (txundo.vprevout.size() != tx.vin.size())
-                return error("DisconnectBlock(): transaction and undo data inconsistent");
-            for (unsigned int j = tx.vin.size(); j-- > 0;) {
-                const COutPoint &out = tx.vin[j].prevout;
-                const CTxInUndo &undo = txundo.vprevout[j];
-                if (!ApplyTxInUndo(undo, view, out))
-                    fClean = false;
-            }
-        }
-    }
+//    for (int i = block.vtx.size() - 1; i >= 0; i--) {
+//        const CTransaction &tx = block.vtx[i];
+//        uint256 hash = tx.GetHash();
+//
+//        // Check that all outputs are available and match the outputs in the block itself
+//        // exactly.
+//        {
+//        CCoinsModifier outs = view.ModifyCoins(hash);
+//        outs->ClearUnspendable();
+//
+//        CCoins outsBlock(tx, pindex->nHeight);
+//        // The CCoins serialization does not serialize negative numbers.
+//        // No network rules currently depend on the version here, so an inconsistency is harmless
+//        // but it must be corrected before txout nversion ever influences a network rule.
+//        if (outsBlock.nVersion < 0)
+//            outs->nVersion = outsBlock.nVersion;
+//        if (*outs != outsBlock)
+//            fClean = fClean && error("DisconnectBlock(): added transaction mismatch? database corrupted");
+//
+//        // remove outputs
+//        outs->Clear();
+//        }
+//
+//        // restore inputs
+//        if (i > 0) { // not coinbases
+//            const CTxUndo &txundo = blockUndo.vtxundo[i-1];
+//            if (txundo.vprevout.size() != tx.vin.size())
+//                return error("DisconnectBlock(): transaction and undo data inconsistent");
+//            for (unsigned int j = tx.vin.size(); j-- > 0;) {
+//                const COutPoint &out = tx.vin[j].prevout;
+//                const CTxInUndo &undo = txundo.vprevout[j];
+//                if (!ApplyTxInUndo(undo, view, out))
+//                    fClean = false;
+//            }
+//        }
+//    }
 
     // move best block pointer to prevout block
     view.SetBestBlock(pindex->pprev->GetBlockHash());
@@ -1919,8 +1920,7 @@ bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockI
 
     return fClean;
 }
-******/
-//*******************end by mengqg pause 20161116************************************************************************************
+
 void static FlushBlockFile(bool fFinalize = false)
 {
     LOCK(cs_LastBlockFile);
@@ -2028,32 +2028,32 @@ static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
 
 //*******************begin by mengqg pause 20161116******************************************************************************************
-/********
-//bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, bool fJustCheck)
-//{
-//    const CChainParams& chainparams = Params();
-//    AssertLockHeld(cs_main);
-//
-//    int64_t nTimeStart = GetTimeMicros();
-//
+
+bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CBestBlock& view, bool fJustCheck)
+{
+    const CChainParams& chainparams = Params();
+    AssertLockHeld(cs_main);
+
+    int64_t nTimeStart = GetTimeMicros();
+
 //    // Check it again in case a previous version let a bad block in
-//    if (!CheckBlock(block, state, !fJustCheck, !fJustCheck))
-//        return false;
+    if (!CheckBlock(block, state, !fJustCheck, !fJustCheck))
+        return false;
 //
 //    // verify that the view's current state corresponds to the previous block
-//    uint256 hashPrevBlock = pindex->pprev == NULL ? uint256() : pindex->pprev->GetBlockHash();
-//    std::string str1="",str2="";
-//    str1=hashPrevBlock.ToString();
-//    str2=view.GetBestBlock().ToString();
-//    assert(hashPrevBlock == view.GetBestBlock());
+    uint256 hashPrevBlock = pindex->pprev == NULL ? uint256() : pindex->pprev->GetBlockHash();
+    std::string str1="",str2="";
+    str1=hashPrevBlock.ToString();
+    str2=view.GetBestBlock().ToString();
+    assert(hashPrevBlock == view.GetBestBlock());
 //
 //    // Special case for the genesis block, skipping connection of its transactions
 //    // (its coinbase is unspendable)
-//    if (block.GetHash() == chainparams.GetConsensus().hashGenesisBlock) {
-//        if (!fJustCheck)
-//            view.SetBestBlock(pindex->GetBlockHash());
-//        return true;
-//    }
+    if (block.GetHash() == chainparams.GetConsensus().hashGenesisBlock) {
+        if (!fJustCheck)
+            view.SetBestBlock(pindex->GetBlockHash());
+        return true;
+    }
 //
 //    bool fScriptChecks = true;
 //    if (fCheckpointsEnabled) {
@@ -2248,9 +2248,9 @@ static int64_t nTimeTotal = 0;
 ////******************end delete by mengqg 20161111******************************************************************************************
 //    int64_t nTime6 = GetTimeMicros(); nTimeCallbacks += nTime6 - nTime5;
 //    LogPrint("bench", "    - Callbacks: %.2fms [%.2fs]\n", 0.001 * (nTime6 - nTime5), nTimeCallbacks * 0.000001);
-//
-//    return true;
-//}
+
+    return true;
+}
 //******
 //*******************end by mengqg pause 20161116************************************************************************************
 enum FlushStateMode {
@@ -2445,8 +2445,8 @@ bool static DisconnectTip(CValidationState& state, const Consensus::Params& cons
 
 //    {
 //        CCoinsViewCache view(pcoinsTip);
-//        if (!DisconnectBlock(block, state, pindexDelete, view))
-//            return error("DisconnectTip(): DisconnectBlock %s failed", pindexDelete->GetBlockHash().ToString());
+       if (!DisconnectBlock(block, state, pindexDelete, *pbestblock))
+            return error("DisconnectTip(): DisconnectBlock %s failed", pindexDelete->GetBlockHash().ToString());
 //        assert(view.Flush());
 //    }
 
@@ -2514,13 +2514,13 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     {
 //****************begin delete by mengqg pause 20161116 *******************************************************************************************************
 //        CCoinsViewCache view(pcoinsTip);
-//        bool rv = ConnectBlock(*pblock, state, pindexNew, view);
-//        GetMainSignals().BlockChecked(*pblock, state);
-//        if (!rv) {
-//            if (state.IsInvalid())
-//                InvalidBlockFound(pindexNew, state);
-//            return error("ConnectTip(): ConnectBlock %s failed", pindexNew->GetBlockHash().ToString());
-//        }
+        bool rv = ConnectBlock(*pblock, state, pindexNew, *pbestblock);
+        GetMainSignals().BlockChecked(*pblock, state);
+        if (!rv) {
+            if (state.IsInvalid())
+                InvalidBlockFound(pindexNew, state);
+            return error("ConnectTip(): ConnectBlock %s failed", pindexNew->GetBlockHash().ToString());
+        }
 //        mapBlockSource.erase(pindexNew->GetBlockHash());
 //        nTime3 = GetTimeMicros(); nTimeConnectTotal += nTime3 - nTime2;
 //        LogPrint("bench", "  - Connect total: %.2fms [%.2fs]\n", (nTime3 - nTime2) * 0.001, nTimeConnectTotal * 0.000001);

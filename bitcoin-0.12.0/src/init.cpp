@@ -1344,8 +1344,10 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 //                delete pcoinsdbview;
 //                delete pcoinscatcher;
                 delete pblocktree;
-
+                delete pbestblock;
+                pbestblock =new CBestBlock();
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
+
 //*******************begin by mengqg pause 20161116************************************************************************************
 /******
 //                pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex);
