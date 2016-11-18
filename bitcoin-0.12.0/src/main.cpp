@@ -828,6 +828,14 @@ std::string FormatStateMessage(const CValidationState &state)
 }
 
 /* add by sdk begin */
+void limit_mempool_size( Cqkgj_mempool& pool, size_t limit, unsigned long age )
+{
+    int expired = pool.expire( GetTime() - age );
+    if( expired != 0 )
+    {
+        LogPrint("mempool","Expired %i transaction from the memory pool\n",expired);
+    }
+}
 bool AddToMempool( Cqkgj_mempool& pool, const Cqkgj_basic_data &data )
 {
     AssertLockHeld( cs_main );
@@ -3664,10 +3672,10 @@ bool static LoadBlockIndexDB()
     LogPrintf("%s: transaction index %s\n", __func__, fTxIndex ? "enabled" : "disabled");
 
     // Load pointer to end of best chain
-    BlockMap::iterator it = mapBlockIndex.find(pbestblock->GetBestBlock());
-    if (it == mapBlockIndex.end())
-        return true;
-    chainActive.SetTip(it->second);
+    //BlockMap::iterator it = mapBlockIndex.find(pbestblock->GetBestBlock());
+    //if (it == mapBlockIndex.end())
+    //    return true;
+    //chainActive.SetTip(it->second);
 
     PruneBlockIndexCandidates();
 
