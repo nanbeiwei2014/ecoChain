@@ -48,19 +48,7 @@ uint64_t nLastBlockSize = 0;
 static const int DEFAULT_GENERATE_PERIOD = 0.5*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
 //*************end modify by mengqg 20161104*************************
-#if 0
-//class ScoreCompare
-//{
-//public:
-//    ScoreCompare() {}
-//
-//    bool operator()(const CTxMemPool::txiter a, const CTxMemPool::txiter b)
-//    {
-//        return CompareTxMemPoolEntryByScore()(*b,*a); // Convert to less than
-//    }
-//};
-#endif
-//*************end modify by mengqg 20161104*************************
+
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev)
 {
     int64_t nOldTime = pblock->nTime;
@@ -666,7 +654,8 @@ void static BitcoinMiner(const CChainParams& chainparams)
             if (UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev) < 0)
               	continue; // Recreate the block if the clock has run backwards,
                            // so that we can use the correct time.
-
+            if(nTransactionsUpdatedLast != qmempool.get_data_updated())
+            	continue;
             SetThreadPriority(THREAD_PRIORITY_NORMAL);
             LogPrintf("QKGJMiner:\n");
             LogPrintf("proof-of-idleTime found  \n  hash: %s  \n", pblock->GetHash().GetHex());
