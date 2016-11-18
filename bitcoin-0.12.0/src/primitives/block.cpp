@@ -20,18 +20,19 @@ std::string CBlock::ToString() const
     std::stringstream s;
     s << strprintf("CBlock(hash=%s, ver=%d, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, "\
     		//"nBits=%08x,"
-    		" nNonce=%u, vtx=%u)\n",
+    		//" nNonce=%u, q"
+    		"vtx=%u)\n",
         GetHash().ToString(),
         nVersion,
         hashPrevBlock.ToString(),
         hashMerkleRoot.ToString(),
         nTime,
 		//nBits,
-		nNonce,
-        vtx.size());
-    for (unsigned int i = 0; i < vtx.size(); i++)
+		//nNonce,
+        qvtx.size());
+    for (unsigned int i = 0; i < qvtx.size(); i++)
     {
-        s << "  " << vtx[i].ToString() << "\n";
+        s << "  " << qvtx[i].to_string() << "\n";
     }
     return s.str();
 }

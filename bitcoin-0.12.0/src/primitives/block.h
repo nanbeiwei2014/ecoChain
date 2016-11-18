@@ -29,7 +29,7 @@ public:
     //int  nHeight;
  //****************begin delete by mengqg 20161105******************************************
     //uint32_t nBits;
-    uint32_t nNonce;
+    //uint32_t nNonce;
  //****************end delete by mengqg 20161105******************************************
     CBlockHeader()
     {
