@@ -426,9 +426,10 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
  *  of problems. Note that in any case, coins may be modified. */
 //******************begin delete by mengqg 20161116*****************************************************************************************************************************
 //bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& coins, bool* pfClean = NULL);
-
+bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CBestBlock& coins, bool* pfClean = NULL);
 /** Apply the effects of this block (with given index) on the UTXO set represented by coins */
 //bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& coins, bool fJustCheck = false);
+bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CBestBlock& coins, bool fJustCheck = false);
 //******************end  delete by mengqg 20161116***************************************************************************************************
 /** Context-independent validity checks */
 bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool fCheckPOW = false);

@@ -183,7 +183,7 @@ public:
         hashMerkleRoot = block.hashMerkleRoot;
         nTime          = block.nTime;
        // nBits          = block.nBits;
-        nNonce         = block.nNonce;
+//        nNonce         = block.nNonce;
     }
 
     CDiskBlockPos GetBlockPos() const {
@@ -213,7 +213,7 @@ public:
         block.hashMerkleRoot = hashMerkleRoot;
         block.nTime          = nTime;
        // block.nBits          = nBits;
-        block.nNonce         = nNonce;
+//        block.nNonce         = nNonce;
         return block;
     }
 
