@@ -675,6 +675,8 @@ class Cqkgj_mempool
 private:
     uint64_t m_total_size;
     unsigned int m_data_update;
+
+	uint64_t cached_usage; //! sum of dynamic memory usage of all the map elements(NOT the maps themselves)
 public:
     std::map< uint256, Cqkgj_process_data > map_hash_data;
     std::map< uint32_t,std::vector<Cqkgj_process_data> > map_state_data;
@@ -722,6 +724,14 @@ public:
 
     void clear();
     void _clear();
+
+	size_t dynamic_mem_usage() const;
+
+	void trim_to_size(size_t size_limit, std::vector<uint256>* pvNoSpendsRemaining = NULL);
+
+    /* expire all transaction(and their dependencies) in the mempool older than time,Return the number of
+removed transactions. */
+    int expire( int64_t time );
 
     void remove_staged( set_entries &stage );
 

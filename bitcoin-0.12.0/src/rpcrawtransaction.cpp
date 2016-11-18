@@ -848,12 +848,15 @@ UniValue sendrawtransaction(const UniValue& params, bool fHelp)
 //*************end delete by  mengqg   20161115*************************************************************************************************
 
 /* add by sdk begin */
+/*********************************************************************
+ * 上层应用调用，根据hash查询该hash相应的数据
+ *********************************************************************/
 UniValue get_data_from_sys( const UniValue& params, bool bHelp )
 {
     if( bHelp || params.size() != 1 )
     {
         throw runtime_error(
-             "get_data_to_sys  \"txid\" ( verbose )\n"
+             "get_data_to_sys  \"txid\" \n"
              "\nGet a transaction data spending the given inputs and creating new outputs.\n"
              "Outputs can be addresses or data.\n"
              "Returns hex-encoded raw transaction hash.\n"
@@ -938,23 +941,11 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
             "it is not stored in the wallet or transmitted to the network.\n"
 
             "\nArguments:\n"
-            "1. \"transactions\"        (string, required) A json array of json objects\n"
-            "     [\n"
-            "       {\n"
-            "         \"txid\":\"id\",    (string, required) The transaction id\n"
-            "         \"vout\":n        (numeric, required) The output number\n"
-            "       }\n"
-            "       ,...\n"
-            "     ]\n"
-            "2. \"outputs\"             (string, required) a json object with outputs\n"
-            "    {\n"
-            "      \"address\": x.xxx   (numeric or string, required) The key is the bitcoin address, the numeric value (can be string) is the " + CURRENCY_UNIT + " amount\n"
-            "      \"data\": \"hex\",     (string, required) The key is \"data\", the value is hex encoded data\n"
-            "      ...\n"
-            "    }\n"
-            "3. locktime                (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
+            "1. \"address\"        (string, required) A json string of json objects\n"
+            "2. \"data\"           (string, required) a json object with outputs\n"
+            "3. \"sign\"           (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
             "\nResult:\n"
-            "\"transaction\"            (string) hex string of the transaction\n"
+            "\"transaction\"       (string) hex string of the transaction\n"
 
             "\nExamples\n"
             + HelpExampleCli("send_data_to_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"address\\\":0.01}\"")
@@ -965,16 +956,40 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     }
 
     LOCK( cs_main );
-    //RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR), true );
-    //if ( params.isNull() )
-   // {
-    //    throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
-    //}
+    RPCTypeCheck( params, boost::assign::list_of(UniValue::VARR)(UniValue::VOBJ)(UniValue::VSTR), true );
+    if ( params.isNull() )
+    {
+        throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
+    }
 
+    //Cqkgj_basic_data data;
+    string str_data;
+    string str_addr;
+    string str_sign;
     //解析JSON
+    UniValue get_data = params[0].get_obj();
+    std::vector<std::string>vData = get_data.getKeys();
+    BOOST_FOREACH( const string &name, vData )
+    {
+        if( "data" == name )
+        {
+            //data.m_data(get_data[name]);
+            str_data = get_data[name].get_str();
+        }
+        else if ( "address" == name )
+        {
+            //data.m_address(get_data[name]);
+            str_addr = get_data[name].get_str();
+        }
+        else
+        {
+            //data.m_sign(get_data[name]);
+            str_sign = get_data[name].get_str();
+        }
+    }
 
-
-    Cqkgj_basic_data data("qukuaiguoji", "abcdefg", "123456");
+    Cqkgj_basic_data data(str_addr,str_data,str_sign);
+    //Cqkgj_basic_data data("qukuaiguoji", "abcdefg", "123456");
     //if ( !QKGJ_DecodeHexTx( data, params[0].get_str()))
     //{
     //    throw JSONRPCError( RPC_DESERIALIZATION_ERROR, "basic data decode failed!");
@@ -990,7 +1005,7 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     }
 
     //写入内存池
-    Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
+    //Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
     AddToMempool(qmempool,data);
 
     //if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) != qmempool.map_hash_data.end())
@@ -1005,7 +1020,12 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     //触发广播数据到其他节点的广播消息
     RelayQkgjMsg(data);
 
-    return UniValue(UniValue::VNUM, "{\"resutl\":\"success\"}");
+    UniValue result;
+    //result.push_back(Pair("hash",data.get_hash().GetHash());
+    //return result;
+    uint256 hash_data = data.get_hash();
+    return hash_data.GetHex();
+    //return UniValue(UniValue::VNUM, "{\"resutl\":\"success\"}");
 }
 /* add by sdk end */
 

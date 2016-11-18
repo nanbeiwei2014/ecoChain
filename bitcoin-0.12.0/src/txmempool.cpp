@@ -1074,6 +1074,34 @@ void Cqkgj_mempool::clear()
 }
 
 
+void Cqkgj_mempool::trim_to_size(size_t size_limit, std::vector<uint256>* pvNoSpendsRemaining)
+{
+	LOCK( cs );
+	unsigned nDataRemoved = 0;
+	while ( dynamic_mem_usage() > size_limit )
+	{
+        indexed_data_set::nth_index<1>::type::iterator it = map_data.get<1>().begin();
+        set_entries stage;
+        stage.insert(map_data.project<0>(it));
+        remove_staged( stage );
+	}
+}
+
+int Cqkgj_mempool::expire( int64_t time )
+{
+    LOCK( cs );
+    indexed_data_set::nth_index<1>::type::iterator it = map_data.get<1>().begin();
+    set_entries to_remove;
+    while ( it != map_data.get<1>().end() && it->get_time() < time )
+    {
+        to_remove.insert(map_data.project<0>(it));
+        it++;
+    }
+
+    remove_staged( to_remove );
+    return to_remove.size();
+}
+
 void Cqkgj_mempool::add_data_updated( unsigned int n)
 {
     LOCK( cs );
@@ -1098,6 +1126,12 @@ void Cqkgj_mempool::remove_unchecked( data_it entry )
     m_total_size -= entry->get_data_size();
     map_data.erase( entry );
     m_data_update++;
+}
+
+size_t Cqkgj_mempool::dynamic_mem_usage() const
+{
+	LOCK( cs );
+	return memusage::MallocUsage(sizeof(Cqkgj_process_data)+12*sizeof(void*))*map_data.size()+cached_usage;
 }
 
 void Cqkgj_mempool::remove_staged( set_entries &stage )

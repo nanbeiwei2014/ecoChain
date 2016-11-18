@@ -305,7 +305,7 @@ static const CRPCCommand vRPCCommands[] =
     /* add by sdk begin */
     { "rawtransactions",    "send_data_to_sys",       &send_data_to_sys,       true  },
     { "rawtransactions",    "get_data_from_sys",      &get_data_from_sys,      true  },
-    { "rawtransactions",    "get_new_key",              &get_new_key,               true  },
+    { "rawtransactions",    "get_new_key",            &get_new_key,            true  },
     /* add by sdk end */
 #if 0
     /* Raw transactions */
