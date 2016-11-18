@@ -180,8 +180,5 @@ int main(int argc, char* argv[])
 {
     SetupEnvironment();
 
-    // Connect bitcoind signal handlers
-    //noui_connect();		//Noted by syl 2016-11-14=================================
-
     return (AppInit(argc, argv) ? 0 : 1);
 }
