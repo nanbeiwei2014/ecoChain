@@ -1362,12 +1362,12 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
                     if (fPruneMode)
                         CleanupBlockRevFiles();
                 }
-//Begin Noted by syl 2016-11-17=================================
-//                if (!LoadBlockIndex()) {
-//                    strLoadError = _("Error loading block database");
-//                    break;
-//                }
-//End	Noted by syl 2016-11-17=================================
+
+                if (!LoadBlockIndex()) {
+                    strLoadError = _("Error loading block database");
+                    break;
+                }
+
                 // If the loaded chain has a wrong genesis, bail out immediately
                 // (we're likely using a testnet datadir, or the other way around).
                 if (!mapBlockIndex.empty() && mapBlockIndex.count(chainparams.GetConsensus().hashGenesisBlock) == 0)
