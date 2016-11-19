@@ -1369,10 +1369,10 @@ End Noted by syl 2016-11-14===============================================*/
                         CleanupBlockRevFiles();
                 }
 
-//                if (!LoadBlockIndex()) {
-//                    strLoadError = _("Error loading block database");
-//                    break;
-//                }
+                if (!LoadBlockIndex()) {
+                    strLoadError = _("Error loading block database");
+                    break;
+                }
 
                 // If the loaded chain has a wrong genesis, bail out immediately
                 // (we're likely using a testnet datadir, or the other way around).
