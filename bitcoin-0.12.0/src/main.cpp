@@ -2723,16 +2723,8 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
  * that is already loaded (to avoid loading it again from disk).
  */
 bool ActivateBestChain(CValidationState &state, const CChainParams& chainparams, const CBlock *pblock) {
-////Begin Add by syl 2016-11-18=============================
-//  LOCK(cs_vNodes);
-//  BOOST_FOREACH(CNode* pnode, vNodes)
-//  {
-//    pnode->PushBlockHash(pblock->GetHash());
-//  }
-////End Add by syl 2016-11-18===============================
 
-//Begin Noted by syl 2016-11-18==============================================
-    CBlockIndex *pindexMostWork = NULL;
+	CBlockIndex *pindexMostWork = NULL;
     do {
         boost::this_thread::interruption_point();
 
@@ -2802,7 +2794,7 @@ bool ActivateBestChain(CValidationState &state, const CChainParams& chainparams,
     if (!FlushStateToDisk(state, FLUSH_STATE_PERIODIC)) {
         return false;
     }
-//End Noted by syl 2016-11-18==============================================*/
+
     return true;
 }
 
@@ -3672,10 +3664,10 @@ bool static LoadBlockIndexDB()
     LogPrintf("%s: transaction index %s\n", __func__, fTxIndex ? "enabled" : "disabled");
 
     // Load pointer to end of best chain
-    //BlockMap::iterator it = mapBlockIndex.find(pbestblock->GetBestBlock());
-    //if (it == mapBlockIndex.end())
-    //    return true;
-    //chainActive.SetTip(it->second);
+    BlockMap::iterator it = mapBlockIndex.find(pbestblock->GetBestBlock());
+    if (it == mapBlockIndex.end())
+        return true;
+    chainActive.SetTip(it->second);
 
     PruneBlockIndexCandidates();
 

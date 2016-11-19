@@ -226,9 +226,12 @@ void Shutdown()
 //        pcoinscatcher = NULL;
 //        delete pcoinsdbview;
 //        pcoinsdbview = NULL;
-//        delete pblocktree;
-//        pblocktree = NULL;
+        delete pbestblock;
+        pbestblock=NULL;
 //**************end by mengqg pause 20161116*********************************************************************
+        delete pblocktree;
+        pblocktree = NULL;
+
     }
 #ifdef ENABLE_WALLET
     if (pwalletMain)
