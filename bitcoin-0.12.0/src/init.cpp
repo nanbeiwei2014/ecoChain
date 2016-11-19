@@ -855,19 +855,20 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     const CChainParams& chainparams = Params();
 
     // also see: InitParameterInteraction()
-
+/* Begin Noted by syl 2016-11-19============================================
     // if using block pruning, then disable txindex
     if (GetArg("-prune", 0)) {
         if (GetBoolArg("-txindex", DEFAULT_TXINDEX))
             return InitError(_("Prune mode is incompatible with -txindex."));
+ End Noted by syl 2016-11-19==============================================*/
 /* Begin Noted by syl 2016-11-14============================================
 #ifdef ENABLE_WALLET
         if (GetBoolArg("-rescan", false)) {
             return InitError(_("Rescans are not possible in pruned mode. You will need to use -reindex which will download the whole blockchain again."));
         }
 #endif
- Begin Noted by syl 2016-11-14============================================*/
     }
+End Noted by syl 2016-11-14===============================================*/
 
     // Make sure enough file descriptors are available
     int nBind = std::max((int)mapArgs.count("-bind") + (int)mapArgs.count("-whitebind"), 1);
@@ -963,14 +964,16 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
     // a transaction spammer can cheaply fill blocks using
     // 1-satoshi-fee transactions. It should be set above the real
     // cost to you of processing a transaction.
-    if (mapArgs.count("-minrelaytxfee"))
-    {
-        CAmount n = 0;
-        if (ParseMoney(mapArgs["-minrelaytxfee"], n) && n > 0)
-            ::minRelayTxFee = CFeeRate(n);
-        else
-            return InitError(strprintf(_("Invalid amount for -minrelaytxfee=<amount>: '%s'"), mapArgs["-minrelaytxfee"]));
-    }
+//Begin Noted by syl 2016-11-19=====================================
+//    if (mapArgs.count("-minrelaytxfee"))
+//    {
+//        CAmount n = 0;
+//        if (ParseMoney(mapArgs["-minrelaytxfee"], n) && n > 0)
+//            ::minRelayTxFee = CFeeRate(n);
+//        else
+//            return InitError(strprintf(_("Invalid amount for -minrelaytxfee=<amount>: '%s'"), mapArgs["-minrelaytxfee"]));
+//    }
+//End Noted by syl 2016-11-19=======================================
 
     fRequireStandard = !GetBoolArg("-acceptnonstdtxn", !Params().RequireStandard());
     if (Params().RequireStandard() && !fRequireStandard)
