@@ -5441,34 +5441,7 @@ bool SendMessages(CNode* pto)
         // Try sending block announcements via headers
         //
         {
-//        //Begin Add by syl 2016-11-18=================================================
-//          LOCK(pto->cs_inventory);
-//          vector<CBlock> vHeaders;
-
-//          CBlockIndex *pBestIndex = NULL; // last header queued for delivery
-//          BOOST_FOREACH(const uint256 &hash, pto->vBlockHashesToAnnounce) {
-//              BlockMap::iterator mi = mapBlockIndex.find(hash);
-//              assert(mi != mapBlockIndex.end());
-//              CBlockIndex *pindex = mi->second;
-//              if (chainActive[pindex->nHeight] != pindex)
-//              {
-//                  break;
-//              }
-//              assert(pBestIndex == NULL || pindex->pprev == pBestIndex);
-//              pBestIndex = pindex;
-//              if (pindex->pprev == NULL || PeerHasHeader(&state, pindex->pprev))
-//              {
-//                  vHeaders.push_back(pindex->GetBlockHeader());
-//              }
-//          }
-//          if(vHeaders.size() > 0)
-//          {
-//            pto->PushMessage(NetMsgType::HEADERS, vHeaders);
-//            state.pindexBestHeaderSent = pBestIndex;
-//            pto->vBlockHashesToAnnounce.clear();
-//          }
-//        //End Add by syl 2016-11-18===================================================
-        /*Begin Noted by syl 2016-11-18===============================================
+        //Begin Noted by syl 2016-11-18===============================================
             // If we have less than MAX_BLOCKS_TO_ANNOUNCE in our
             // list of block hashes we're relaying, and our peer wants
             // headers announcements, then find the first header
@@ -5557,7 +5530,7 @@ bool SendMessages(CNode* pto)
                 state.pindexBestHeaderSent = pBestIndex;
             }
             pto->vBlockHashesToAnnounce.clear();
-        Begin Noted by syl 2016-11-18===================================================*/
+        //Begin Noted by syl 2016-11-18===================================================*/
         }
 
 

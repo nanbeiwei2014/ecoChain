@@ -1980,11 +1980,12 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
     //
     // Start threads
     //
-
-    if (!GetBoolArg("-dnsseed", true))
-        LogPrintf("DNS seeding disabled\n");
-    else
-        threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "dnsseed", &ThreadDNSAddressSeed));
+//Begin Noted syl 2016-11-19=========================================================
+//    if (!GetBoolArg("-dnsseed", true))
+//        LogPrintf("DNS seeding disabled\n");
+//    else
+//        threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "dnsseed", &ThreadDNSAddressSeed));
+//End	Noted syl 2016-11-19=========================================================
 
     // Send and receive from sockets, accept connections
     threadGroup.create_thread(boost::bind(&TraceThread<void (*)()>, "net", &ThreadSocketHandler));
