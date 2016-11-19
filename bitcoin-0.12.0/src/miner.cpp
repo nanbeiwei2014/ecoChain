@@ -575,6 +575,8 @@ void static BitcoinMiner(const CChainParams& chainparams)
                     if (!fvNodesEmpty && !IsInitialBlockDownload())
                         break;
                     MilliSleep(1000);
+                    if(!IsInitialBlockDownload())
+                    	LogPrintf("fdsafafafasQKGJBlockChafasfasfasfasfasdfinMiner started\n");
                 } while (true);
             }
 
