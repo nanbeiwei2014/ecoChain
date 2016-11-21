@@ -4842,14 +4842,18 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         	vector<Cqkgj_basic_data>::iterator iIter;
         	for(iIter = vQkgjMsg.begin(); iIter != vQkgjMsg.end(); iIter++)
         	{
-        		//写入内存池
-                Cqkgj_basic_data  newBasicData = *iIter;
-                Cqkgj_process_data	newProData(*iIter, GetTime(), 10.0, 100,0);
+        		CValidationState state;
 
-        		if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) == qmempool.map_hash_data.end())
-        		{
-        			qmempool.add_to_mempool(newProData.m_data.get_hash(), newProData);
-        		}
+        		//写入内存池
+        		Cqkgj_basic_data  newBasicData = *iIter;
+        		AddToMempool(qmempool, state, newBasicData);
+//                Cqkgj_basic_data  newBasicData = *iIter;
+//                Cqkgj_process_data	newProData(*iIter, GetTime(), 10.0, 100,0);
+//
+//        		if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) == qmempool.map_hash_data.end())
+//        		{
+//        			qmempool.add_to_mempool(newProData.m_data.get_hash(), newProData);
+//        		}
         	}
         }
     	//End	Add by syl 2016-11-08==========================================================
