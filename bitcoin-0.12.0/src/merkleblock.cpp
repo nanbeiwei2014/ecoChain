@@ -10,7 +10,7 @@
 #include "utilstrencodings.h"
 
 using namespace std;
-
+#if 0
 CMerkleBlock::CMerkleBlock(const CBlock& block, CBloomFilter& filter)
 {
     header = block.GetBlockHeader();
@@ -179,3 +179,4 @@ uint256 CPartialMerkleTree::ExtractMatches(std::vector<uint256> &vMatch) {
         return uint256();
     return hashMerkleRoot;
 }
+#endif

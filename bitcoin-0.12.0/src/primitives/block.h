@@ -80,7 +80,7 @@ class CBlock : public CBlockHeader
 public:
     // network and disk
 //**********************begin modify by mengqg 20161104****************************
-    std::vector<CTransaction> vtx;
+    //std::vector<CTransaction> vtx;
     std::vector<Cqkgj_basic_data> qvtx;
 //***********************end modify by mengqg 20161104****************************
     // memory only
@@ -102,14 +102,15 @@ public:
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
         READWRITE(*(CBlockHeader*)this);
-        READWRITE(vtx);
+    //    READWRITE(vtx);
         READWRITE(qvtx);
     }
 
     void SetNull()
     {
         CBlockHeader::SetNull();
-        vtx.clear();
+//        vtx.clear();
+        qvtx.clear();
         fChecked = false;
     }
 
