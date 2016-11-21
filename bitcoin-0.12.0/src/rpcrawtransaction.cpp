@@ -856,37 +856,20 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     if( bHelp || params.size() != 1 )
     {
         throw runtime_error(
-             "get_data_to_sys  \"txid\" \n"
-             "\nGet a transaction data spending the given inputs and creating new outputs.\n"
-             "Outputs can be addresses or data.\n"
-             "Returns hex-encoded raw transaction hash.\n"
-             "Note that the transaction's inputs are not signed, and\n"
-             "it is not stored in the wallet or transmitted to the network.\n"
+             "get_data_from_sys  \"data_id\" \n"
+             "\nNOTE:By default this function only works is when the data is in the mempool.\n"
+             "Returns the data you have been puts in mempool.\n"
 
              "\nArguments:\n"
-             "1. \"transactions\"        (string, required) A json array of json objects\n"
-             "     [\n"
-             "       {\n"
-             "         \"txid\":\"id\",    (string, required) The transaction id\n"
-             "         \"vout\":n        (numeric, required) The output number\n"
-             "       }\n"
-             "       ,...\n"
-             "     ]\n"
-             "2. \"outputs\"             (string, required) a json object with outputs\n"
-             "    {\n"
-             "      \"address\": x.xxx   (numeric or string, required) The key is the bitcoin address, the numeric value (can be string) is the " + CURRENCY_UNIT + " amount\n"
-             "      \"data\": \"hex\",     (string, required) The key is \"data\", the value is hex encoded data\n"
-             "      ...\n"
-             "    }\n"
-             "3. locktime                (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
+             "1. \"data_id\"        (string, required) A json objects about this data's hash\n"
              "\nResult:\n"
-             "\"transaction\"            (string) hex string of the transaction\n"
+             "\"address\"         (string) string of address\n"
+             "\"data\"            (string) string of the data\n"
+             "\"sign\"            (string) string of the sign\n"
 
              "\nExamples\n"
-             + HelpExampleCli("get_data_from_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"address\\\":0.01}\"")
-             + HelpExampleCli("get_data_from_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"data\\\":\\\"00010203\\\"}\"")
-             + HelpExampleRpc("get_data_from_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"address\\\":0.01}\"")
-             + HelpExampleRpc("get_data_from_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"data\\\":\\\"00010203\\\"}\"")
+             + HelpExampleCli("get_data_from_sys", "\"[{\\\"data_id\\\":\\\"myid\\\"}]\"")
+             + HelpExampleRpc("get_data_from_sys", "\"[{\\\"data_id\\\":\\\"myid\\\"}]\"")
         );
     }
     LOCK( cs_main );
@@ -894,7 +877,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     Cqkgj_basic_data data;
     if( !get_transaction(hash,data))
     {
-        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"No information avaliable about qkgj_basic_data");
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"No information avaliable about the data you want get it");
     }
 
     UniValue result(UniValue::VOBJ);
@@ -908,56 +891,91 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
 /* get private key and public key */
 UniValue get_new_key( const UniValue& params,bool bHelp )
 {
+    if( bHelp || params.size() > 1 )
+    {
+        throw runtime_error(
+             "get_new_key  \"[string]\" \n"
+             "\nGet the private key and public key.\n"
+             "If  the parameters is null,the system can generate a private/public key pair.\n"
+             "But if the parameters is set ,you must make sure the length of the string equale 32.\n"
+
+             "\nArguments:\n"
+             "1. \"string\"        (string, option) the private seed.\n"
+             "\nResult:\n"
+             "{\n"
+             "\"privateKey\":\"private value\"    (string) hex string of the private value\n"
+             "\"publicKey\":\"public value\" (string) hex string of the public value\n"
+             "\nExamples\n"
+             + HelpExampleCli("get_new_key", "")
+             + HelpExampleCli("get_new_key", "\"string of seed\"")
+             + HelpExampleRpc("get_new_key", "")
+             + HelpExampleRpc("get_new_key", "\"string of seed\"")
+        );
+    }
     LOCK( cs_main );
+    RPCTypeCheck(params, boost::assign::list_of(UniValue::VSTR)(UniValue::VARR)(UniValue::VARR)(UniValue::VSTR), true);
+
     bool b_compress = true; //CanSupportFeature(FEATURE_COMPRPUBKEY );
     CKey secret;
-    secret.MakeNewKey( b_compress );
+
+	/* 如果没有参数，则使用系统种子,否则，使用传过来的参数作为种子 */
+    if ( params.size() < 1 )
+    {
+        secret.MakeNewKey( b_compress );
+    }
+    else
+    {
+        std::string str(params[0].get_str());
+        vector<unsigned char> vch;
+        int len = str.length();
+        vch.resize(len);
+        vch.assign(str.begin(),str.end());
+        if( len != 32 ) /* 传过来的种子参数必须是32位，则否返回错误*/
+        {
+            throw JSONRPCError(RPC_INVALID_PARAMETER,"Invalid parameter,parameter 1's length must equals 32");
+        }
+        secret.Set( &vch[0], &vch[vch.size()], b_compress );
+    }
+
+	/*获得公钥*/
     CPubKey pub_key = secret.GetPubKey();
     assert( secret.VerifyPubKey( pub_key ) );
-    CPrivKey pri_key = secret.GetPrivKey();
+
+	/* 获得私钥*/
+    string pri_key(CBitcoinSecret(secret).ToString());
 
     UniValue result(UniValue::VOBJ);
-    //std::vector<unsigned char> vch_key;
-    //vch_key.insert(vch_key.begin(),pri_key.begin(),pri_key.end());
-    std::string str;
-    str.insert(str.begin(), pri_key.begin(), pri_key.end());
-    //str.insert(str.begin(), vch_key.begin(), vch_key.end());
-    result.push_back(Pair("PriKey",str));
-    result.push_back(Pair("PubKey",pub_key.GetHash().ToString()));
+    result.push_back(Pair("PriKey",pri_key));
+    result.push_back(Pair("PubKey",pub_key.GetID().ToString()));
 
     return result;
 }
 
 UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 {
-    if ( bHelp || params.size() != 1)
+    if ( bHelp )//|| params.size() != 3)
     {
         throw runtime_error(
-            "send_data_to_sys \"{\"user_address\":\"data\"}[{\"txid\":\"id\",\"vout\":n},...] {\"address\":amount,\"data\":\"hex\",...} ( signature )\"\n"
-            "\nSend a transaction data spending the given inputs and creating new outputs.\n"
-            "Outputs can be addresses or data.\n"
-            "Returns hex-encoded raw transaction hash.\n"
-            "Note that the transaction's inputs are not signed, and\n"
-            "it is not stored in the wallet or transmitted to the network.\n"
+            "send_data_to_sys \"{\"address\":\"address info\",\"data\":\"data info\",\"sign\":\"sign value\"}\"\n"
+            "\nSend a application data to mempool .\n"
+            "Returns hex-encoded data's hash.\n"
 
             "\nArguments:\n"
             "1. \"address\"        (string, required) A json string of json objects\n"
             "2. \"data\"           (string, required) a json object with outputs\n"
             "3. \"sign\"           (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
             "\nResult:\n"
-            "\"transaction\"       (string) hex string of the transaction\n"
+            "\"transaction\"       (string) data's hash\n"
 
             "\nExamples\n"
-            + HelpExampleCli("send_data_to_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"address\\\":0.01}\"")
-            + HelpExampleCli("send_data_to_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\" \"{\\\"data\\\":\\\"00010203\\\"}\"")
-            + HelpExampleRpc("send_data_to_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"address\\\":0.01}\"")
-            + HelpExampleRpc("send_data_to_sys", "\"[{\\\"txid\\\":\\\"myid\\\",\\\"vout\\\":0}]\", \"{\\\"data\\\":\\\"00010203\\\"}\"")
+            + HelpExampleCli("send_data_to_sys", "\"{\\\"address\\\":\\\"address\\\",\\\"data\\\":\\\"data\\\",\\\"sign\\\":\\\"sign value\\\"}\"")
+            + HelpExampleRpc("send_data_to_sys", "\"{\\\"address\\\":\\\"address\\\",\\\"data\\\":\\\"data\\\",\\\"sign\\\":\\\"sign value\\\"}\"")
         );
     }
 
     LOCK( cs_main );
-    RPCTypeCheck( params, boost::assign::list_of(UniValue::VARR)(UniValue::VOBJ)(UniValue::VSTR), true );
-    if ( params.isNull() )
+    //RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR), true );
+    if ( params[0].isNull() )
     {
         throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
     }
@@ -997,11 +1015,14 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 
     //uint256 hash_data = data.get_hash();
     vector<unsigned char> vch_pub_key;
+    vch_pub_key.resize(str_addr.length());
+    vch_pub_key.assign(str_addr.begin(),str_addr.end());
+
     CScript script;
 
     if (!check_sign(data, vch_pub_key, script))
     {
-        return UniValue(UniValue::VNUM, "{\"resutl\":\"data exist !\"}");
+        return UniValue(UniValue::VNUM, "{\"result\":\"data verify failure!\"}");
     }
 
     //写入内存池

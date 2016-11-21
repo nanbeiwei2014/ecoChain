@@ -2630,12 +2630,12 @@ static CBlockIndex* FindMostWorkChain() {
 static void PruneBlockIndexCandidates() {
     // Note that we can't delete the current block itself, as we may need to return to it later in case a
     // reorganization to a better block fails.
-    std::set<CBlockIndex*, CBlockIndexWorkComparator>::iterator it = setBlockIndexCandidates.begin();
-    while (it != setBlockIndexCandidates.end() && setBlockIndexCandidates.value_comp()(*it, chainActive.Tip())) {
-        setBlockIndexCandidates.erase(it++);
-    }
+    //std::set<CBlockIndex*, CBlockIndexWorkComparator>::iterator it = setBlockIndexCandidates.begin();
+    //while (it != setBlockIndexCandidates.end() && setBlockIndexCandidates.value_comp()(*it, chainActive.Tip())) {
+    //    setBlockIndexCandidates.erase(it++);
+    //}
     // Either the current tip or a successor of it we're working towards is left in setBlockIndexCandidates.
-    assert(!setBlockIndexCandidates.empty());
+    //assert(!setBlockIndexCandidates.empty());
 }
 
 /**
@@ -3671,10 +3671,10 @@ bool static LoadBlockIndexDB()
 
     PruneBlockIndexCandidates();
 
-    LogPrintf("%s: hashBestChain=%s height=%d date=%s progress=%f\n", __func__,
-        chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(),
-        DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
-        Checkpoints::GuessVerificationProgress(chainparams.Checkpoints(), chainActive.Tip()));
+    //LogPrintf("%s: hashBestChain=%s height=%d date=%s progress=%f\n", __func__,
+    //    chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(),
+    //    DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
+    //    Checkpoints::GuessVerificationProgress(chainparams.Checkpoints(), chainActive.Tip()));
 
     return true;
 }
