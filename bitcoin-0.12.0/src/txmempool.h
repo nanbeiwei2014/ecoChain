@@ -782,7 +782,7 @@ struct DataAgePriorityCompare
     bool operator()(const DataAgePriority& a, const DataAgePriority& b)
     {
         if (a.first == b.first)
-            return CompareCqkgjMemPoolProcessDataByScore()((b.second), (a.second)); //Reverse order to make sort less than
+            return CompareCqkgjMemPoolProcessDataByScore()(*(b.second), *(a.second)); //Reverse order to make sort less than
         return a.first < b.first;
     }
 };
