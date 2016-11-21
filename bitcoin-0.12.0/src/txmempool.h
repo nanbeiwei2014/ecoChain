@@ -775,7 +775,7 @@ public:
     }
 };
 
-typedef std::pair<double, Cqkgj_mempool::it_hash> DataAgePriority;
+typedef std::pair<double, Cqkgj_mempool::data_it> DataAgePriority;
 
 struct DataAgePriorityCompare
 {

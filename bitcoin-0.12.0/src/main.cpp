@@ -1586,6 +1586,16 @@ void static InvalidBlockFound(CBlockIndex *pindex, const CValidationState &state
         InvalidChainFound(pindex);
     }
 }
+
+
+
+
+int GetSpendHeight(const CBestBlock& inputs)
+{
+    LOCK(cs_main);
+    CBlockIndex* pindexPrev = mapBlockIndex.find(inputs.GetBestBlock())->second;
+    return pindexPrev->nHeight + 1;
+}
 //*******************begin by mengqg pause 20161116************************************************************************************
  /******
 
@@ -2461,20 +2471,21 @@ bool static DisconnectTip(CValidationState& state, const Consensus::Params& cons
 //
 //    LogPrint("bench", "- Disconnect block: %.2fms\n", (GetTimeMicros() - nStart) * 0.001);
 //    // Write the chain state to disk, if necessary.
-//    if (!FlushStateToDisk(state, FLUSH_STATE_IF_NEEDED))
-//        return false;
-//    // Resurrect mempool transactions from the disconnected block.
-//    std::vector<uint256> vHashUpdate;
-//    BOOST_FOREACH(const CTransaction &tx, block.vtx) {
-//        // ignore validation errors in resurrected transactions
-//        list<CTransaction> removed;
-//        CValidationState stateDummy;
+    if (!FlushStateToDisk(state, FLUSH_STATE_IF_NEEDED))
+        return false;
+    // Resurrect mempool transactions from the disconnected block.
+    std::vector<uint256> vHashUpdate;
+    BOOST_FOREACH(const Cqkgj_basic_data &tx, block.qvtx) {
+        // ignore validation errors in resurrected transactions
+        list<Cqkgj_basic_data> removed;
+        CValidationState stateDummy;
 //        if (tx.IsCoinBase() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL, true)) {
-//            mempool.remove(tx, removed, true);
-//        } else if (mempool.exists(tx.GetHash())) {
-//            vHashUpdate.push_back(tx.GetHash());
-//        }
-//    }
+        if (!AcceptToMemoryPool(qmempool, stateDummy, tx, false, NULL, true)) {
+            qmempool.remove(tx, removed, true);
+        } else if (qmempool.exists(tx.GetHash())) {
+            vHashUpdate.push_back(tx.GetHash());
+        }
+    }
 //    // AcceptToMemoryPool/addUnchecked all assume that new mempool entries have
 //    // no in-mempool children, which is generally not true when adding
 //    // previously-confirmed transactions back to the mempool.
@@ -2734,8 +2745,9 @@ bool ActivateBestChain(CValidationState &state, const CChainParams& chainparams,
         {
             LOCK(cs_main);
             CBlockIndex *pindexOldTip = chainActive.Tip();
+//############begin delete by  mengqg  20161121########################################################
             pindexMostWork = FindMostWorkChain();
-
+//###########end delete by  mengqg  20161121 ##################################################
             // Whether we have anything to do at all.
             if (pindexMostWork == NULL || pindexMostWork == chainActive.Tip())
                 return true;
@@ -4014,7 +4026,7 @@ void static CheckBlockIndex(const Consensus::Params& consensusParams)
             assert(pindex->GetBlockHash() == consensusParams.hashGenesisBlock); // Genesis block's hash must match.
             assert(pindex == chainActive.Genesis()); // The current active chain's genesis block must be this block.
         }
-   //     if (pindex->nChainTx == 0) assert(pindex->nSequenceId == 0);  // nSequenceId can't be set for blocks that aren't linked
+        if (pindex->nChainTx == 0) assert(pindex->nSequenceId == 0);  // nSequenceId can't be set for blocks that aren't linked
         // VALID_TRANSACTIONS is equivalent to nTx > 0 for all nodes (whether or not pruning has occurred).
         // HAVE_DATA is only equivalent to nTx > 0 (or VALID_TRANSACTIONS) if no pruning has occurred.
         if (!fHavePruned) {
@@ -4085,6 +4097,8 @@ void static CheckBlockIndex(const Consensus::Params& consensusParams)
             //    tip.
             // So if this block is itself better than chainActive.Tip() and it wasn't in
             // setBlockIndexCandidates, then it must be in mapBlocksUnlinked.
+//#####################begin  note by mengqg   compute work ###################################################################
+//#####################end  note by mengqg   compute work #######################################################################
             if (!CBlockIndexWorkComparator()(pindex, chainActive.Tip()) && setBlockIndexCandidates.count(pindex) == 0) {
                 if (pindexFirstInvalid == NULL) {
                     assert(foundInUnlinked);

@@ -321,7 +321,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
 
     // Collect memory pool transactions into the block
 
-    Cqkgj_mempool::setEntries inBlock;
+    Cqkgj_mempool::set_entries inBlock;
 
     // This vector will be sorted into a priority queue:
     vector<DataAgePriority> vecPriority;
@@ -349,20 +349,21 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
 
         bool fPriorityBlock = nBlockMaxSize > 0;
         if (fPriorityBlock) {
-            vecPriority.reserve(qmempool.map_hash_data.size());
-            for (Cqkgj_mempool::it_hash mi = qmempool.map_hash_data.begin();
-                 mi != qmempool.map_hash_data.end(); ++mi)
-            {
-                double dPriority = mi->second.get_priority(nHeight);
+            vecPriority.reserve(qmempool.map_data.size());
+            for (Cqkgj_mempool::indexed_data_set::iterator mi = qmempool.map_data.begin();
+                           mi != qmempool.map_data.end(); ++mi)
+             {
+                double dPriority = mi->get_priority(nHeight);
                 vecPriority.push_back(DataAgePriority(dPriority, mi));
-            }
-            std::make_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
+             }
+          std::make_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
         }
 
-        Cqkgj_mempool::it_hash mi  = qmempool.map_hash_data.begin();
-        Cqkgj_mempool::it_hash iter;
+        //Cqkgj_mempool::it_hash mi  = qmempool.map_hash_data.begin();
+        Cqkgj_mempool::indexed_data_set::nth_index<1>::type::iterator mi = qmempool.map_data.get<1>().begin();
+        Cqkgj_mempool::data_it iter;
 
-        while (mi != qmempool.map_hash_data.end() )
+        while (mi != qmempool.map_data.get<1>().end() )
         {
             bool priorityTx = false;
             if (fPriorityBlock && !vecPriority.empty()) { // add a tx from priority queue to fill the blockprioritysize
@@ -377,10 +378,10 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
             if (inBlock.count(iter))
                 continue; // could have been added to the priorityBlock
 
-            const Cqkgj_basic_data& tx = iter->second.get_data();
+            const Cqkgj_basic_data& tx = iter->get_data();
 
 
-            unsigned int nTxSize = iter->second.get_data_size();
+            unsigned int nTxSize = iter->get_data_size();
             if (!priorityTx &&
                 (nBlockSize >= nBlockMinSize)) {
                 break;
@@ -444,21 +445,21 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
 
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce)
 {
-    // Update nExtraNonce
-    static uint256 hashPrevBlock;
-    if (hashPrevBlock != pblock->hashPrevBlock)
-    {
-        nExtraNonce = 0;
-        hashPrevBlock = pblock->hashPrevBlock;
-    }
-    ++nExtraNonce;
-    unsigned int nHeight = pindexPrev->nHeight+1; // Height first in coinbase required for block.version=2
-    CMutableTransaction txCoinbase(pblock->vtx[0]);
-    txCoinbase.vin[0].scriptSig = (CScript() << nHeight << CScriptNum(nExtraNonce)) + COINBASE_FLAGS;
-    assert(txCoinbase.vin[0].scriptSig.size() <= 100);
-
-    pblock->vtx[0] = txCoinbase;
-    pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
+//    // Update nExtraNonce
+//    static uint256 hashPrevBlock;
+//    if (hashPrevBlock != pblock->hashPrevBlock)
+//    {
+//        nExtraNonce = 0;
+//        hashPrevBlock = pblock->hashPrevBlock;
+//    }
+//    ++nExtraNonce;
+//    unsigned int nHeight = pindexPrev->nHeight+1; // Height first in coinbase required for block.version=2
+//    CMutableTransaction txCoinbase(pblock->vtx[0]);
+//    txCoinbase.vin[0].scriptSig = (CScript() << nHeight << CScriptNum(nExtraNonce)) + COINBASE_FLAGS;
+//    assert(txCoinbase.vin[0].scriptSig.size() <= 100);
+//
+//    pblock->vtx[0] = txCoinbase;
+//    pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 }
 
 //////////////////////////////////////////////////////////////////////////////
