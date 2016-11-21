@@ -836,14 +836,15 @@ void limit_mempool_size( Cqkgj_mempool& pool, size_t limit, unsigned long age )
         LogPrint("mempool","Expired %i transaction from the memory pool\n",expired);
     }
 }
-bool AddToMempool( Cqkgj_mempool& pool, const Cqkgj_basic_data &data )
+
+bool AddToMempool( Cqkgj_mempool& pool, CValidationState &state, const Cqkgj_basic_data &data )
 {
     AssertLockHeld( cs_main );
 
     // is it already in the memory pool?
     uint256 hash = data.get_hash();
     if( pool.exists( hash ))
-        return false;
+        return state.Invalid(false,REJECT_ALREADY_KNOWN,"data already in mempool");
 
     double dPriority = 0.0;
     unsigned int n_sig_ops = 0;
