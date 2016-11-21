@@ -79,6 +79,11 @@ uint64_t nPruneTarget = 0;
 bool fAlerts = DEFAULT_ALERTS;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
 
+//Begin Add by syl 2016-11-21==================================
+CCriticalSection 				g_csBroadcastNewBlock;
+std::map<uint256, CBlockHeader> g_unBroBlockHeaderVec;
+//End 	Add by syl 2016-11-21==================================
+
 /** Fees smaller than this (in satoshi) are considered zero fee (for relaying, mining and transaction creation) */
 //CFeeRate minRelayTxFee = CFeeRate(DEFAULT_MIN_RELAY_TX_FEE);    //Noted by syl 2016-11-19=====================
 
@@ -2729,6 +2734,16 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
     return true;
 }
 
+//Begin Add by syl 2016-11-21==================================================
+void BroadcastNewBlockheader(const CBlock* pblock)
+{
+	CBlockHeader newBlockHeader = pblock->GetBlockHeader();
+
+	LOCK(g_csBroadcastNewBlock);
+	g_unBroBlockHeaderVec.insert(make_pair(newBlockHeader.GetHash(), newBlockHeader));
+}
+//End	Add by syl 2016-11-21==================================================
+
 /**
  * Make the best chain active, in multiple steps. The result is either failure
  * or an activated best chain. pblock is either NULL or a pointer to a block
@@ -3377,6 +3392,10 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
 
     if (!ActivateBestChain(state, chainparams, pblock))
         return error("%s: ActivateBestChain failed", __func__);
+
+    //Begin Add by syl 2016-11-21=============================================
+    BroadcastNewBlockheader(pblock);
+    //End	Add by syl 2016-11-21=============================================
 
     return true;
 }
@@ -4836,41 +4855,40 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     	//End	Add by syl 2016-11-08==========================================================
     }
 
-
-    else if (strCommand == NetMsgType::HEADERS && !fImporting && !fReindex) // Ignore headers received while importing
+    else if (strCommand == NetMsgType::HEADERS )//&& !fImporting && !fReindex) // Ignore headers received while importing
     {
-        std::vector<CBlockHeader> headers;
+    	std::vector<CBlockHeader> headers;
 
         // Bypass the normal CBlock deserialization, as we don't want to risk deserializing 2000 full blocks.
         unsigned int nCount = ReadCompactSize(vRecv);
         if (nCount > MAX_HEADERS_RESULTS) {
-            Misbehaving(pfrom->GetId(), 20);
+        	Misbehaving(pfrom->GetId(), 20);
             return error("headers message size = %u", nCount);
         }
         headers.resize(nCount);
         for (unsigned int n = 0; n < nCount; n++) {
-            vRecv >> headers[n];
+        	vRecv >> headers[n];
             ReadCompactSize(vRecv); // ignore tx count; assume it is 0.
         }
 
         LOCK(cs_main);
 
         if (nCount == 0) {
-            // Nothing interesting. Stop asking this peers for more headers.
+        	// Nothing interesting. Stop asking this peers for more headers.
             return true;
         }
 
         CBlockIndex *pindexLast = NULL;
         BOOST_FOREACH(const CBlockHeader& header, headers) {
-            CValidationState state;
+        	CValidationState state;
             if (pindexLast != NULL && header.hashPrevBlock != pindexLast->GetBlockHash()) {
-                Misbehaving(pfrom->GetId(), 20);
-                return error("non-continuous headers sequence");
+            	Misbehaving(pfrom->GetId(), 20);
+            	return error("non-continuous headers sequence");
             }
             if (!AcceptBlockHeader(header, state, chainparams, &pindexLast)) {
-                int nDoS;
+            	int nDoS;
                 if (state.IsInvalid(nDoS)) {
-                    if (nDoS > 0)
+                	if (nDoS > 0)
                         Misbehaving(pfrom->GetId(), nDoS);
                     return error("invalid header received");
                 }
@@ -4878,13 +4896,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         }
 
         if (pindexLast)
-            UpdateBlockAvailability(pfrom->GetId(), pindexLast->GetBlockHash());
+        	UpdateBlockAvailability(pfrom->GetId(), pindexLast->GetBlockHash());
 
         if (nCount == MAX_HEADERS_RESULTS && pindexLast) {
-            // Headers message had its maximum size; the peer may have more headers.
-            // TODO: optimize: if pindexLast is an ancestor of chainActive.Tip or pindexBestHeader, continue
-            // from there instead.
-            LogPrint("net", "more getheaders (%d) to end to peer=%d (startheight:%d)\n", pindexLast->nHeight, pfrom->id, pfrom->nStartingHeight);
+                // Headers message had its maximum size; the peer may have more headers.
+                // TODO: optimize: if pindexLast is an ancestor of chainActive.Tip or pindexBestHeader, continue
+                // from there instead.
+        	LogPrint("net", "more getheaders (%d) to end to peer=%d (startheight:%d)\n", pindexLast->nHeight, pfrom->id, pfrom->nStartingHeight);
             pfrom->PushMessage(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexLast), uint256());
         }
 
@@ -4893,14 +4911,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         // If this set of headers is valid and ends in a block with at least as
         // much work as our tip, download as much as possible.
         if (fCanDirectFetch && pindexLast->IsValid(BLOCK_VALID_TREE) && chainActive.Tip()->nChainWork <= pindexLast->nChainWork) {
-            vector<CBlockIndex *> vToFetch;
+        	vector<CBlockIndex *> vToFetch;
             CBlockIndex *pindexWalk = pindexLast;
             // Calculate all the blocks we'd need to switch to pindexLast, up to a limit.
             while (pindexWalk && !chainActive.Contains(pindexWalk) && vToFetch.size() <= MAX_BLOCKS_IN_TRANSIT_PER_PEER) {
-                if (!(pindexWalk->nStatus & BLOCK_HAVE_DATA) &&
-                        !mapBlocksInFlight.count(pindexWalk->GetBlockHash())) {
+            	if (!(pindexWalk->nStatus & BLOCK_HAVE_DATA) && !mapBlocksInFlight.count(pindexWalk->GetBlockHash())) {
                     // We don't have this block, and it's not yet in flight.
-                    vToFetch.push_back(pindexWalk);
+            		vToFetch.push_back(pindexWalk);
                 }
                 pindexWalk = pindexWalk->pprev;
             }
@@ -4909,28 +4926,28 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             // the main chain -- this shouldn't really happen.  Bail out on the
             // direct fetch and rely on parallel download instead.
             if (!chainActive.Contains(pindexWalk)) {
-                LogPrint("net", "Large reorg, won't direct fetch to %s (%d)\n",
-                        pindexLast->GetBlockHash().ToString(),
+            	LogPrint("net", "Large reorg, won't direct fetch to %s (%d)\n",
+            			pindexLast->GetBlockHash().ToString(),
                         pindexLast->nHeight);
             } else {
-                vector<CInv> vGetData;
+            	vector<CInv> vGetData;
                 // Download as much as possible, from earliest to latest.
                 BOOST_REVERSE_FOREACH(CBlockIndex *pindex, vToFetch) {
-                    if (nodestate->nBlocksInFlight >= MAX_BLOCKS_IN_TRANSIT_PER_PEER) {
-                        // Can't download any more from this peer
+                	if (nodestate->nBlocksInFlight >= MAX_BLOCKS_IN_TRANSIT_PER_PEER) {
+                		// Can't download any more from this peer
                         break;
                     }
                     vGetData.push_back(CInv(MSG_BLOCK, pindex->GetBlockHash()));
                     MarkBlockAsInFlight(pfrom->GetId(), pindex->GetBlockHash(), chainparams.GetConsensus(), pindex);
                     LogPrint("net", "Requesting block %s from  peer=%d\n",
-                            pindex->GetBlockHash().ToString(), pfrom->id);
+                                pindex->GetBlockHash().ToString(), pfrom->id);
                 }
                 if (vGetData.size() > 1) {
-                    LogPrint("net", "Downloading blocks toward %s (%d) via headers direct fetch\n",
-                            pindexLast->GetBlockHash().ToString(), pindexLast->nHeight);
+                	LogPrint("net", "Downloading blocks toward %s (%d) via headers direct fetch\n",
+                			pindexLast->GetBlockHash().ToString(), pindexLast->nHeight);
                 }
                 if (vGetData.size() > 0) {
-                    pfrom->PushMessage(NetMsgType::GETDATA, vGetData);
+                	pfrom->PushMessage(NetMsgType::GETDATA, vGetData);
                 }
             }
         }
@@ -5456,95 +5473,119 @@ bool SendMessages(CNode* pto)
         // Try sending block announcements via headers
         //
         {
+        //Begin Add by syl 2016-11-21=================================================
+        	if(g_unBroBlockHeaderVec.size() > 0)
+        	{
+        		LOCK(g_csBroadcastNewBlock);
+        		vector<CBlockHeader> vHeaders;
+
+        		//
+        		std::map<uint256, CBlockHeader>::iterator iIter;
+        		for(iIter = g_unBroBlockHeaderVec.begin();
+        			iIter != g_unBroBlockHeaderVec.end();
+        			iIter++)
+        		{
+        			CBlockHeader blkHeader= iIter->second;
+        			vHeaders.push_back(blkHeader);
+        		}
+
+        		//Send New BlockHeader Message
+        		if (vHeaders.size() > 0)
+        		{
+        			pto->PushMessage(NetMsgType::HEADERS, vHeaders);
+        		}
+        		g_unBroBlockHeaderVec.clear();
+        	}
+        //End	Add by syl 2016-11-21=================================================
         //Begin Noted by syl 2016-11-18===============================================
-            // If we have less than MAX_BLOCKS_TO_ANNOUNCE in our
-            // list of block hashes we're relaying, and our peer wants
-            // headers announcements, then find the first header
-            // not yet known to our peer but would connect, and send.
-            // If no header would connect, or if we have too many
-            // blocks, or if the peer doesn't want headers, just
-            // add all to the inv queue.
-            LOCK(pto->cs_inventory);
-            vector<CBlock> vHeaders;
-            bool fRevertToInv = (!state.fPreferHeaders || pto->vBlockHashesToAnnounce.size() > MAX_BLOCKS_TO_ANNOUNCE);
-            CBlockIndex *pBestIndex = NULL; // last header queued for delivery
-            ProcessBlockAvailability(pto->id); // ensure pindexBestKnownBlock is up-to-date
-
-            if (!fRevertToInv) {
-                bool fFoundStartingHeader = false;
-                // Try to find first header that our peer doesn't have, and
-                // then send all headers past that one.  If we come across any
-                // headers that aren't on chainActive, give up.
-                BOOST_FOREACH(const uint256 &hash, pto->vBlockHashesToAnnounce) {
-                    BlockMap::iterator mi = mapBlockIndex.find(hash);
-                    assert(mi != mapBlockIndex.end());
-                    CBlockIndex *pindex = mi->second;
-                    if (chainActive[pindex->nHeight] != pindex) {
-                        // Bail out if we reorged away from this block
-                        fRevertToInv = true;
-                        break;
-                    }
-                    assert(pBestIndex == NULL || pindex->pprev == pBestIndex);
-                    pBestIndex = pindex;
-                    if (fFoundStartingHeader) {
-                        // add this to the headers message
-                        vHeaders.push_back(pindex->GetBlockHeader());
-                    } else if (PeerHasHeader(&state, pindex)) {
-                        continue; // keep looking for the first new block
-                    } else if (pindex->pprev == NULL || PeerHasHeader(&state, pindex->pprev)) {
-                        // Peer doesn't have this header but they do have the prior one.
-                        // Start sending headers.
-                        fFoundStartingHeader = true;
-                        vHeaders.push_back(pindex->GetBlockHeader());
-                    } else {
-                        // Peer doesn't have this header or the prior one -- nothing will
-                        // connect, so bail out.
-                        fRevertToInv = true;
-                        break;
-                    }
-                }
-            }
-            if (fRevertToInv) {
-                // If falling back to using an inv, just try to inv the tip.
-                // The last entry in vBlockHashesToAnnounce was our tip at some point
-                // in the past.
-                if (!pto->vBlockHashesToAnnounce.empty()) {
-                    const uint256 &hashToAnnounce = pto->vBlockHashesToAnnounce.back();
-                    BlockMap::iterator mi = mapBlockIndex.find(hashToAnnounce);
-                    assert(mi != mapBlockIndex.end());
-                    CBlockIndex *pindex = mi->second;
-
-                    // Warn if we're announcing a block that is not on the main chain.
-                    // This should be very rare and could be optimized out.
-                    // Just log for now.
-                    if (chainActive[pindex->nHeight] != pindex) {
-                        LogPrint("net", "Announcing block %s not on main chain (tip=%s)\n",
-                            hashToAnnounce.ToString(), chainActive.Tip()->GetBlockHash().ToString());
-                    }
-
-                    // If the peer announced this block to us, don't inv it back.
-                    // (Since block announcements may not be via inv's, we can't solely rely on
-                    // setInventoryKnown to track this.)
-                    if (!PeerHasHeader(&state, pindex)) {
-                        pto->PushInventory(CInv(MSG_BLOCK, hashToAnnounce));
-                        LogPrint("net", "%s: sending inv peer=%d hash=%s\n", __func__,
-                            pto->id, hashToAnnounce.ToString());
-                    }
-                }
-            } else if (!vHeaders.empty()) {
-                if (vHeaders.size() > 1) {
-                    LogPrint("net", "%s: %u headers, range (%s, %s), to peer=%d\n", __func__,
-                            vHeaders.size(),
-                            vHeaders.front().GetHash().ToString(),
-                            vHeaders.back().GetHash().ToString(), pto->id);
-                } else {
-                    LogPrint("net", "%s: sending header %s to peer=%d\n", __func__,
-                            vHeaders.front().GetHash().ToString(), pto->id);
-                }
-                pto->PushMessage(NetMsgType::HEADERS, vHeaders);
-                state.pindexBestHeaderSent = pBestIndex;
-            }
-            pto->vBlockHashesToAnnounce.clear();
+//            // If we have less than MAX_BLOCKS_TO_ANNOUNCE in our
+//            // list of block hashes we're relaying, and our peer wants
+//            // headers announcements, then find the first header
+//            // not yet known to our peer but would connect, and send.
+//            // If no header would connect, or if we have too many
+//            // blocks, or if the peer doesn't want headers, just
+//            // add all to the inv queue.
+//            LOCK(pto->cs_inventory);
+//            vector<CBlock> vHeaders;
+//            bool fRevertToInv = (!state.fPreferHeaders || pto->vBlockHashesToAnnounce.size() > MAX_BLOCKS_TO_ANNOUNCE);
+//            CBlockIndex *pBestIndex = NULL; // last header queued for delivery
+//            ProcessBlockAvailability(pto->id); // ensure pindexBestKnownBlock is up-to-date
+//
+//            if (!fRevertToInv) {
+//                bool fFoundStartingHeader = false;
+//                // Try to find first header that our peer doesn't have, and
+//                // then send all headers past that one.  If we come across any
+//                // headers that aren't on chainActive, give up.
+//                BOOST_FOREACH(const uint256 &hash, pto->vBlockHashesToAnnounce) {
+//                    BlockMap::iterator mi = mapBlockIndex.find(hash);
+//                    assert(mi != mapBlockIndex.end());
+//                    CBlockIndex *pindex = mi->second;
+//                    if (chainActive[pindex->nHeight] != pindex) {
+//                        // Bail out if we reorged away from this block
+//                        fRevertToInv = true;
+//                        break;
+//                    }
+//                    assert(pBestIndex == NULL || pindex->pprev == pBestIndex);
+//                    pBestIndex = pindex;
+//                    if (fFoundStartingHeader) {
+//                        // add this to the headers message
+//                        vHeaders.push_back(pindex->GetBlockHeader());
+//                    } else if (PeerHasHeader(&state, pindex)) {
+//                        continue; // keep looking for the first new block
+//                    } else if (pindex->pprev == NULL || PeerHasHeader(&state, pindex->pprev)) {
+//                        // Peer doesn't have this header but they do have the prior one.
+//                        // Start sending headers.
+//                        fFoundStartingHeader = true;
+//                        vHeaders.push_back(pindex->GetBlockHeader());
+//                    } else {
+//                        // Peer doesn't have this header or the prior one -- nothing will
+//                        // connect, so bail out.
+//                        fRevertToInv = true;
+//                        break;
+//                    }
+//                }
+//            }
+//            if (fRevertToInv) {
+//                // If falling back to using an inv, just try to inv the tip.
+//                // The last entry in vBlockHashesToAnnounce was our tip at some point
+//                // in the past.
+//                if (!pto->vBlockHashesToAnnounce.empty()) {
+//                    const uint256 &hashToAnnounce = pto->vBlockHashesToAnnounce.back();
+//                    BlockMap::iterator mi = mapBlockIndex.find(hashToAnnounce);
+//                    assert(mi != mapBlockIndex.end());
+//                    CBlockIndex *pindex = mi->second;
+//
+//                    // Warn if we're announcing a block that is not on the main chain.
+//                    // This should be very rare and could be optimized out.
+//                    // Just log for now.
+//                    if (chainActive[pindex->nHeight] != pindex) {
+//                        LogPrint("net", "Announcing block %s not on main chain (tip=%s)\n",
+//                            hashToAnnounce.ToString(), chainActive.Tip()->GetBlockHash().ToString());
+//                    }
+//
+//                    // If the peer announced this block to us, don't inv it back.
+//                    // (Since block announcements may not be via inv's, we can't solely rely on
+//                    // setInventoryKnown to track this.)
+//                    if (!PeerHasHeader(&state, pindex)) {
+//                        pto->PushInventory(CInv(MSG_BLOCK, hashToAnnounce));
+//                        LogPrint("net", "%s: sending inv peer=%d hash=%s\n", __func__,
+//                            pto->id, hashToAnnounce.ToString());
+//                    }
+//                }
+//            } else if (!vHeaders.empty()) {
+//                if (vHeaders.size() > 1) {
+//                    LogPrint("net", "%s: %u headers, range (%s, %s), to peer=%d\n", __func__,
+//                            vHeaders.size(),
+//                            vHeaders.front().GetHash().ToString(),
+//                            vHeaders.back().GetHash().ToString(), pto->id);
+//                } else {
+//                    LogPrint("net", "%s: sending header %s to peer=%d\n", __func__,
+//                            vHeaders.front().GetHash().ToString(), pto->id);
+//                }
+//                pto->PushMessage(NetMsgType::HEADERS, vHeaders);
+//                state.pindexBestHeaderSent = pBestIndex;
+//            }
+//            pto->vBlockHashesToAnnounce.clear();
         //Begin Noted by syl 2016-11-18===================================================*/
         }
 

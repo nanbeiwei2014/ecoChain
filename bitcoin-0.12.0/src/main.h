@@ -156,6 +156,11 @@ extern CFeeRate minRelayTxFee;
 extern bool fAlerts;
 extern bool fEnableReplacement;
 
+//Begin Add by syl 2016-11-21==================================
+extern CCriticalSection 			g_csBroadcastNewBlock;
+extern std::map<uint256, CBlockHeader> 	g_unBroBlockHeaderVec;
+//End 	Add by syl 2016-11-21==================================
+
 /** Best header we've seen so far (used for getheaders queries' starting points). */
 extern CBlockIndex *pindexBestHeader;
 
@@ -246,6 +251,10 @@ bool GetTransaction(const uint256 &hash, CTransaction &tx, const Consensus::Para
 /** Find the best known block, and make it the tip of the block chain */
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, const CBlock* pblock = NULL);
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams);
+
+//Begin Add by syl 2016-11-21==================================================
+extern void BroadcastNewBlockheader(const CBlock* pblock);
+//End	Add by syl 2016-11-21==================================================
 
 /**
  * Prune block and undo files (blk???.dat and undo???.dat) so that the disk space used is less than a user-defined target.
