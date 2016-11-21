@@ -883,7 +883,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("address",data.m_address));
     result.push_back(Pair("data",data.m_data));
-    result.push_back(Pair("data",data.m_sign));
+    result.push_back(Pair("sign",data.m_sign));
 
     return result;
 }
@@ -953,7 +953,7 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
 
 UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 {
-    if ( bHelp )//|| params.size() != 3)
+    if ( bHelp  || params.size() != 1)
     {
         throw runtime_error(
             "send_data_to_sys \"{\"address\":\"address info\",\"data\":\"data info\",\"sign\":\"sign value\"}\"\n"
@@ -965,7 +965,7 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
             "2. \"data\"           (string, required) a json object with outputs\n"
             "3. \"sign\"           (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
             "\nResult:\n"
-            "\"transaction\"       (string) data's hash\n"
+            "\"data_id\"       (string) data's hash\n"
 
             "\nExamples\n"
             + HelpExampleCli("send_data_to_sys", "\"{\\\"address\\\":\\\"address\\\",\\\"data\\\":\\\"data\\\",\\\"sign\\\":\\\"sign value\\\"}\"")
@@ -974,7 +974,7 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     }
 
     LOCK( cs_main );
-    //RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR), true );
+    RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR), true );
     if ( params[0].isNull() )
     {
         throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
@@ -1007,36 +1007,26 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     }
 
     Cqkgj_basic_data data(str_addr,str_data,str_sign);
-    //Cqkgj_basic_data data("qukuaiguoji", "abcdefg", "123456");
-    //if ( !QKGJ_DecodeHexTx( data, params[0].get_str()))
-    //{
-    //    throw JSONRPCError( RPC_DESERIALIZATION_ERROR, "basic data decode failed!");
-    //}
 
-    //uint256 hash_data = data.get_hash();
     vector<unsigned char> vch_pub_key;
     vch_pub_key.resize(str_addr.length());
     vch_pub_key.assign(str_addr.begin(),str_addr.end());
 
     CScript script;
 
-    if (!check_sign(data, vch_pub_key, script))
-    {
-        return UniValue(UniValue::VNUM, "{\"result\":\"data verify failure!\"}");
-    }
+    //if (!check_sign(data, vch_pub_key, script))
+    //{
+    //    return UniValue(UniValue::VNUM, "{\"result\":\"data verify failure!\"}");
+    //}
 
     //写入内存池
     //Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
-    AddToMempool(qmempool,data);
-
-    //if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) != qmempool.map_hash_data.end())
-    //{
-    //	return UniValue(UniValue::VNUM, "{\"resutl\":\"data exist !\"}");
-    //}
-    //else
-    //{
-    //	qmempool.add_to_mempool(newProData.m_data.get_hash(), newProData);
-    //}
+    CValidationState state;
+    bool bRet = AddToMempool( qmempool, state, data );
+    if ( false == bRet )
+    {
+        throw JSONRPCError(RPC_TRANSACTION_REJECTED,strprintf("%i:%s",state.GetRejectCode(),state.GetRejectReason()));
+    }
 
     //触发广播数据到其他节点的广播消息
     RelayQkgjMsg(data);
