@@ -2476,17 +2476,17 @@ bool static DisconnectTip(CValidationState& state, const Consensus::Params& cons
         return false;
     // Resurrect mempool transactions from the disconnected block.
     std::vector<uint256> vHashUpdate;
-    BOOST_FOREACH(const Cqkgj_basic_data &tx, block.qvtx) {
-        // ignore validation errors in resurrected transactions
-        list<Cqkgj_basic_data> removed;
-        CValidationState stateDummy;
-//        if (tx.IsCoinBase() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL, true)) {
-        if (!AcceptToMemoryPool(qmempool, stateDummy, tx, false, NULL, true)) {
-            qmempool.remove(tx, removed, true);
-        } else if (qmempool.exists(tx.GetHash())) {
-            vHashUpdate.push_back(tx.GetHash());
-        }
-    }
+//    BOOST_FOREACH(const Cqkgj_basic_data &tx, block.qvtx) {
+//        // ignore validation errors in resurrected transactions
+//        list<Cqkgj_basic_data> removed;
+//        CValidationState stateDummy;
+////        if (tx.IsCoinBase() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL, true)) {
+//        if (!AcceptToMemoryPool(qmempool, stateDummy, tx, false, NULL, true)) {
+//            qmempool.remove(tx, removed, true);
+//        } else if (qmempool.exists(tx.GetHash())) {
+//            vHashUpdate.push_back(tx.GetHash());
+//        }
+//    }
 //    // AcceptToMemoryPool/addUnchecked all assume that new mempool entries have
 //    // no in-mempool children, which is generally not true when adding
 //    // previously-confirmed transactions back to the mempool.
