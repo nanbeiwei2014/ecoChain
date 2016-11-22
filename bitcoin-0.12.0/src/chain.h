@@ -166,8 +166,8 @@ public:
         nVersion       = 0;
         hashMerkleRoot = uint256();
         nTime          = 0;
-        nBits          = 0;
-        nNonce         = 0;
+        nBits = 0x1d00ffff;
+        nNonce =0x01;
     }
 
     CBlockIndex()
@@ -182,8 +182,8 @@ public:
         nVersion       = block.nVersion;
         hashMerkleRoot = block.hashMerkleRoot;
         nTime          = block.nTime;
-       // nBits          = block.nBits;
-//        nNonce         = block.nNonce;
+        nBits          = block.nBits;
+        nNonce         = block.nNonce;
     }
 
     CDiskBlockPos GetBlockPos() const {
@@ -212,8 +212,8 @@ public:
             block.hashPrevBlock = pprev->GetBlockHash();
         block.hashMerkleRoot = hashMerkleRoot;
         block.nTime          = nTime;
-       // block.nBits          = nBits;
-//        block.nNonce         = nNonce;
+        block.nBits          = nBits;
+        block.nNonce         = nNonce;
         return block;
     }
 
@@ -318,7 +318,7 @@ public:
         READWRITE(hashPrev);
         READWRITE(hashMerkleRoot);
         READWRITE(nTime);
-       // READWRITE(nBits);
+        READWRITE(nBits);
         READWRITE(nNonce);
     }
 
@@ -329,8 +329,8 @@ public:
         block.hashPrevBlock   = hashPrev;
         block.hashMerkleRoot  = hashMerkleRoot;
         block.nTime           = nTime;
-        //block.nBits           = nBits;
-        //block.nNonce          = nNonce;
+        block.nBits           = nBits;
+        block.nNonce          = nNonce;
         return block.GetHash();
     }
 

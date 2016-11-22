@@ -37,8 +37,8 @@ static CBlock CreateGenesisBlock(const char* pszTimestamp, const CScript& genesi
 
     CBlock genesis;
     genesis.nTime    = nTime;
-   //enesis.nBits    = nBits;
-   //enesis.nNonce   = nNonce;
+    genesis.nBits    = nBits;
+    genesis.nNonce   = nNonce;
     genesis.nVersion = nVersion;
 //****************begin delete by mengqg 20161111*******************************************************************************************
     //genesis.vtx.push_back(txNew);
@@ -73,12 +73,14 @@ static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits
 //****************end delete by mengqg 20161111*******************************************************************************************
 
 //****************begin add by mengqg 20161111*******************************************************************************************
-static CBlock CreateGenesisBlock(uint32_t nTime,  int32_t nVersion)
+static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion)
 {
 	Cqkgj_basic_data   qtxNew(std::string("I am qukuaiguoji_jinliankeji"),std::string("The Times 11/NOV/2016 create first blockChain for futureBusinessMall"),std::string("false signature"));
 
         CBlock genesis;
         genesis.nTime    = nTime;
+        genesis.nBits    = nBits;
+        genesis.nNonce   = nNonce;
         genesis.nVersion = nVersion;
         genesis.qvtx.push_back(qtxNew);
         genesis.hashPrevBlock.SetNull();
@@ -105,8 +107,10 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.BIP34Height = 227931;
-        consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
+//        consensus.BIP34Height = 227931;
+//        consensus.BIP34Hash = uint256S("0x000000000000024b89b42a942fe0d9fea3bb44ab7bd1b19115dd6a759c0808b8");
+        consensus.BIP34Height = -1; // BIP34 has not necessarily activated on regtest
+        consensus.BIP34Hash = uint256();
         consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 14 * 24 * 60 * 60; // two weeks
         consensus.nPowTargetSpacing = 10 * 60;
@@ -131,15 +135,18 @@ public:
         nPruneAfterHeight = 100000;
 
         //genesis = CreateGenesisBlock(1231006505, 2083236893, 0x1d00ffff, 1, 50 * COIN);
-        genesis = CreateGenesisBlock(1479539354,  1);
+        genesis = CreateGenesisBlock(1479539354, 0x1d00ffff,0x01, 1);
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
-//std::string str1 =consensus.hashGenesisBlock.ToString();
-//std::cout<<"second str1's value:"<<str1<<std::endl;
-//
-//std::string str2 =genesis.hashMerkleRoot.ToString();
-//std::cout<<"second str2's value:"<<str2<<std::endl;
+std::string str1 =consensus.hashGenesisBlock.ToString();
+std::cout<<"second str1's value:"<<str1<<std::endl;
+
+std::string str2 =genesis.hashMerkleRoot.ToString();
+std::cout<<"second str2's value:"<<str2<<std::endl;
+
+int  valueee=GetTime();
+std::cout<<"thrid str1's value:"<<GetTime()<<std::endl;
 
         assert(consensus.hashGenesisBlock == uint256S("0x438179e27696990ec458fe9293e68ca049d666959db6b9f98be76d10260ba797"));
         assert(genesis.hashMerkleRoot == uint256S("0x9175f9c1dc3d4a6d5f24f76aab1b3b056ddcde52db4afec6a822fc71a2d08fea"));
