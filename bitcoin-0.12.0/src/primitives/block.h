@@ -28,8 +28,8 @@ public:
     uint32_t nTime;
     //int  nHeight;
  //****************begin delete by mengqg 20161105******************************************
-    //uint32_t nBits;
-    //uint32_t nNonce;
+    uint32_t nBits;
+    uint32_t nNonce;
  //****************end delete by mengqg 20161105******************************************
     CBlockHeader()
     {
@@ -46,8 +46,8 @@ public:
         READWRITE(hashMerkleRoot);
         READWRITE(nTime);
        // READWRITE(nHeight);
-       //READWRITE(nBits);
-       //READWRITE(nNonce);
+       READWRITE(nBits);
+       READWRITE(nNonce);
     }
 
     void SetNull()
@@ -57,8 +57,8 @@ public:
         hashMerkleRoot.SetNull();
         nTime = 0;
         //nHeight=0;
-        //nBits = 0;
-        //nNonce = 0;
+        nBits = 0x1d00ffff;
+        nNonce =0x01;
     }
 
     bool IsNull() const
@@ -122,8 +122,8 @@ public:
         block.hashMerkleRoot = hashMerkleRoot;
         block.nTime          = nTime;
         //block.nHeight		 = nHeight;
-        //block.nBits          = nBits;
-        //block.nNonce         = nNonce;
+        block.nBits          = nBits;
+        block.nNonce         = nNonce;
         return block;
     }
 

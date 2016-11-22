@@ -2481,22 +2481,23 @@ bool static DisconnectTip(CValidationState& state, const Consensus::Params& cons
         return false;
     // Resurrect mempool transactions from the disconnected block.
     std::vector<uint256> vHashUpdate;
-//    BOOST_FOREACH(const Cqkgj_basic_data &tx, block.qvtx) {
-//        // ignore validation errors in resurrected transactions
-//        list<Cqkgj_basic_data> removed;
-//        CValidationState stateDummy;
-////        if (tx.IsCoinBase() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL, true)) {
-//        if (!AcceptToMemoryPool(qmempool, stateDummy, tx, false, NULL, true)) {
-//            qmempool.remove(tx, removed, true);
-//        } else if (qmempool.exists(tx.GetHash())) {
-//            vHashUpdate.push_back(tx.GetHash());
-//        }
-//    }
-//    // AcceptToMemoryPool/addUnchecked all assume that new mempool entries have
-//    // no in-mempool children, which is generally not true when adding
-//    // previously-confirmed transactions back to the mempool.
-//    // UpdateTransactionsFromBlock finds descendants of any transactions in this
-//    // block that were added back and cleans up the mempool state.
+    BOOST_FOREACH(const Cqkgj_basic_data &tx, block.qvtx) {
+        // ignore validation errors in resurrected transactions
+        list<Cqkgj_basic_data> removed;
+        CValidationState stateDummy;
+//        if (tx.IsCoinBase() || !AcceptToMemoryPool(mempool, stateDummy, tx, false, NULL, true)) {
+//        bool AddToMempool( Cqkgj_mempool& pool, CValidationState &state, const Cqkgj_basic_data &data )
+        if (!AddToMempool(qmempool, stateDummy, tx)){
+            qmempool.remove(tx, removed, true);
+        } else if (qmempool.exists(tx.GetHash())) {
+            vHashUpdate.push_back(tx.GetHash());
+        }
+    }
+    // AcceptToMemoryPool/addUnchecked all assume that new mempool entries have
+    // no in-mempool children, which is generally not true when adding
+    // previously-confirmed transactions back to the mempool.
+    // UpdateTransactionsFromBlock finds descendants of any transactions in this
+    // block that were added back and cleans up the mempool state.
 //    mempool.UpdateTransactionsFromBlock(vHashUpdate);
 //****************end delete by mengqg pause 20161116 *******************************************************************************************************
     // Update chainActive and related variables.
@@ -2546,9 +2547,9 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
                 InvalidBlockFound(pindexNew, state);
             return error("ConnectTip(): ConnectBlock %s failed", pindexNew->GetBlockHash().ToString());
         }
-//        mapBlockSource.erase(pindexNew->GetBlockHash());
-//        nTime3 = GetTimeMicros(); nTimeConnectTotal += nTime3 - nTime2;
-//        LogPrint("bench", "  - Connect total: %.2fms [%.2fs]\n", (nTime3 - nTime2) * 0.001, nTimeConnectTotal * 0.000001);
+        mapBlockSource.erase(pindexNew->GetBlockHash());
+        nTime3 = GetTimeMicros(); nTimeConnectTotal += nTime3 - nTime2;
+        LogPrint("bench", "  - Connect total: %.2fms [%.2fs]\n", (nTime3 - nTime2) * 0.001, nTimeConnectTotal * 0.000001);
 //        assert(view.Flush());
  //****************end delete by mengqg pause 20161116 *******************************************************************************************************
     }
@@ -2561,14 +2562,15 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
     LogPrint("bench", "  - Writing chainstate: %.2fms [%.2fs]\n", (nTime5 - nTime4) * 0.001, nTimeChainState * 0.000001);
     // Remove conflicting transactions from the mempool.
 //****************begin  by mengqg pause 20161116 *******************************************************************************************************
-//    list<CTransaction> txConflicted;
+    list<Cqkgj_basic_data> txConflicted;
 //    mempool.removeForBlock(pblock->vtx, pindexNew->nHeight, txConflicted, !IsInitialBlockDownload());
+      qmempool.remove_from_block( pblock->qvtx,pindexNew->nHeight,txConflicted);
 //****************end  by mengqg pause 20161116 *******************************************************************************************************
     // Update chainActive & related variables.
     UpdateTip(pindexNew);
     // Tell wallet about transactions that went from mempool
     // to conflicted:
-//****************begin delete by mengqg pause 20161116 *******************************************************************************************************
+//****************begin delete by mengqg  20161116 *******************************************************************************************************
 /******
     BOOST_FOREACH(const CTransaction &tx, txConflicted) {
         SyncWithWallets(tx, NULL);
@@ -2578,10 +2580,11 @@ bool static ConnectTip(CValidationState& state, const CChainParams& chainparams,
         SyncWithWallets(tx, pblock);
     }
 ******/
-//****************end delete by mengqg pause 20161116 *******************************************************************************************************
-    int64_t nTime6 = GetTimeMicros(); nTimePostConnect += nTime6 - nTime5; nTimeTotal += nTime6 - nTime1;
-    LogPrint("bench", "  - Connect postprocess: %.2fms [%.2fs]\n", (nTime6 - nTime5) * 0.001, nTimePostConnect * 0.000001);
-    LogPrint("bench", "- Connect block: %.2fms [%.2fs]\n", (nTime6 - nTime1) * 0.001, nTimeTotal * 0.000001);
+
+//    int64_t nTime6 = GetTimeMicros(); nTimePostConnect += nTime6 - nTime5; nTimeTotal += nTime6 - nTime1;
+//    LogPrint("bench", "  - Connect postprocess: %.2fms [%.2fs]\n", (nTime6 - nTime5) * 0.001, nTimePostConnect * 0.000001);
+//    LogPrint("bench", "- Connect block: %.2fms [%.2fs]\n", (nTime6 - nTime1) * 0.001, nTimeTotal * 0.000001);
+    //****************end delete by mengqg  20161116 *******************************************************************************************************
     return true;
 }
 
