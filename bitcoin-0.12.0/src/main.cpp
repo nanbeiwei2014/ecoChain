@@ -2069,6 +2069,11 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     std::string str1="",str2="";
     str1=hashPrevBlock.ToString();
     str2=view.GetBestBlock().ToString();
+
+    std::cout<<"second str1's value:"<<str1<<std::endl;
+
+
+    std::cout<<"second str2's value:"<<str2<<std::endl;
     assert(hashPrevBlock == view.GetBestBlock());
 //
 //    // Special case for the genesis block, skipping connection of its transactions
@@ -2256,8 +2261,8 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 //        if (!pblocktree->WriteTxIndex(vPos))
 //            return AbortNode(state, "Failed to write transaction index");
 //
-//    // add this block to the view's block chain
-//    view.SetBestBlock(pindex->GetBlockHash());
+    // add this block to the view's block chain
+    view.SetBestBlock(pindex->GetBlockHash());
 //
 //    int64_t nTime5 = GetTimeMicros(); nTimeIndex += nTime5 - nTime4;
 //    LogPrint("bench", "    - Index writing: %.2fms [%.2fs]\n", 0.001 * (nTime5 - nTime4), nTimeIndex * 0.000001);
