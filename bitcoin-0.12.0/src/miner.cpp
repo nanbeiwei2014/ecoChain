@@ -45,7 +45,7 @@ using namespace std;
 uint64_t nLastBlockTx = 0;
 uint64_t nLastBlockSize = 0;
 //*************begin modify by mengqg 20161104***********************************
-static const int DEFAULT_GENERATE_PERIOD = 0.2*60;  //unit s
+static const int DEFAULT_GENERATE_PERIOD = 0.5*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
 //*************end modify by mengqg 20161104*************************
 
@@ -564,20 +564,20 @@ void static BitcoinMiner(const CChainParams& chainparams)
         // In the latter case, already the pointer is NULL.
 
         while (true) {
-//            if (chainparams.MiningRequiresPeers()) {
-//                // Busy-wait for the network to come online so we don't waste time mining
-//                // on an obsolete chain. In regtest mode we expect to fly solo.
-//                do {
-//                    bool fvNodesEmpty;
-//                    {
-//                        LOCK(cs_vNodes);
-//                        fvNodesEmpty = vNodes.empty();
-//                    }
-//                    if (!fvNodesEmpty && !IsInitialBlockDownload())
-//                        break;
-//                    MilliSleep(1000);
-//                } while (true);
-//            }
+            if (chainparams.MiningRequiresPeers()) {
+                // Busy-wait for the network to come online so we don't waste time mining
+                // on an obsolete chain. In regtest mode we expect to fly solo.
+                do {
+                    bool fvNodesEmpty;
+                    {
+                        LOCK(cs_vNodes);
+                        fvNodesEmpty = vNodes.empty();
+                    }
+                    if (!fvNodesEmpty && !IsInitialBlockDownload())
+                        break;
+                    MilliSleep(1000);
+                } while (true);
+            }
 
             //
             // Create new block
@@ -642,8 +642,8 @@ void static BitcoinMiner(const CChainParams& chainparams)
             // Check for stop or if block needs to be rebuilt
             boost::this_thread::interruption_point();
             // Regtest mode doesn't require peers
-//            if (vNodes.empty() && chainparams.MiningRequiresPeers())
-//              	continue;
+            if (vNodes.empty() && chainparams.MiningRequiresPeers())
+              	continue;
 
 
             if (pindexPrev != chainActive.Tip())
