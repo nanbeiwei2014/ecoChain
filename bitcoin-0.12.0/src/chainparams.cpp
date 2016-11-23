@@ -138,15 +138,15 @@ public:
         genesis = CreateGenesisBlock(1479796488, 0x1d00ffff,0x01, 1);
 
         consensus.hashGenesisBlock = genesis.GetHash();
-
-std::string str1 =consensus.hashGenesisBlock.ToString();
-std::cout<<"second str1's value:"<<str1<<std::endl;
-
-std::string str2 =genesis.hashMerkleRoot.ToString();
-std::cout<<"second str2's value:"<<str2<<std::endl;
-
-int  valueee=GetTime();
-std::cout<<"thrid str1's value:"<<GetTime()<<std::endl;
+//
+//std::string str1 =consensus.hashGenesisBlock.ToString();
+//std::cout<<"second str1's value:"<<str1<<std::endl;
+//
+//std::string str2 =genesis.hashMerkleRoot.ToString();
+//std::cout<<"second str2's value:"<<str2<<std::endl;
+//
+//int  valueee=GetTime();
+//std::cout<<"thrid str1's value:"<<GetTime()<<std::endl;
 
         assert(consensus.hashGenesisBlock == uint256S("0x184f8555e2c1153882039c427b11399813ec65b4cfdf1282f1accbe166a1865c"));
         assert(genesis.hashMerkleRoot == uint256S("0x9175f9c1dc3d4a6d5f24f76aab1b3b056ddcde52db4afec6a822fc71a2d08fea"));
