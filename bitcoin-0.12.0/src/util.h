@@ -17,6 +17,8 @@
 #include "compat.h"
 #include "tinyformat.h"
 #include "utiltime.h"
+#include "serialize.h"
+#include "uint256.h"
 
 #include <exception>
 #include <map>
@@ -246,5 +248,40 @@ template <typename Callable> void TraceThread(const char* name,  Callable func)
         throw;
     }
 }
+
+/*Begin add by syl 2016-11-23============================= */
+class CLocalMacAddr
+{
+private:
+    const uint256 m_hash;       /* data's hash */
+    std::string m_strMacAddr;
+    //void update_hash() const;
+
+public:
+    CLocalMacAddr();
+    ~CLocalMacAddr();
+
+    CLocalMacAddr& operator=(const CLocalMacAddr& data );
+
+//    ADD_SERIALIZE_METHODS;
+
+//    template< typename Stream, typename Operation >
+//    inline void SerializationOp(Stream &s, Operation ser_action, int nType, int nVersion )
+//    {
+//        READWRITE( *const_cast<std::string*>(&m_strMacAddr));
+//        if ( ser_action.ForRead() )
+//        {
+//            update_hash();
+//        }
+//    }
+
+    std::string GetLocalMacFun();
+
+    std::string	GetLocalMac();
+    uint256 GetLocalMacHash();
+};
+
+extern CLocalMacAddr g_localMacInfo;
+/*End add by syl  2016-11-23============================= */
 
 #endif // BITCOIN_UTIL_H
