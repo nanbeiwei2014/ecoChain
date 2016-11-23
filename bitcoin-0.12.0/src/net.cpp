@@ -1972,6 +1972,7 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
     if (pnodeLocalHost == NULL)
     {
         pnodeLocalHost = new CNode(INVALID_SOCKET, CAddress(CService("127.0.0.1", 0), nLocalServices));
+        pnodeLocalHost->m_strMacAddr = g_localMacInfo.GetLocalMac();
 
         //Begin Add by syl 2016-11-04================================================
         g_vAllNodes.push_back(pnodeLocalHost);
@@ -2419,6 +2420,7 @@ CNode::CNode(SOCKET hSocketIn, const CAddress& addrIn, const std::string& addrNa
     m_currTime = GetTime();
     m_creBlockTime = GetTime();
     m_bNetState = true;
+    m_strMacAddr = "";
     //End	Add by syl 2016-11-04=============================
 }
 

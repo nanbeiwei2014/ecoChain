@@ -25,7 +25,7 @@ public:
     int32_t nVersion;
     uint256 hashPrevBlock;
     uint256 hashMerkleRoot;
-    uint32_t nTime;
+    uint64_t nTime;
     //int  nHeight;
  //****************begin delete by mengqg 20161105******************************************
     uint32_t nBits;

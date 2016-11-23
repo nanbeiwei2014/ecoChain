@@ -15,6 +15,7 @@
 #include "sync.h"
 #include "utilstrencodings.h"
 #include "utiltime.h"
+//#include "hash.h"
 
 #include <stdarg.h>
 
@@ -39,6 +40,7 @@
 #include <fcntl.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 
 #else
 
@@ -836,3 +838,72 @@ int GetNumCores()
 #endif
 }
 
+/*Begin add by syl 2016-11-23======================================== */
+CLocalMacAddr::CLocalMacAddr()
+{
+	m_strMacAddr = GetLocalMacFun();
+	//update_hash();
+}
+CLocalMacAddr::~CLocalMacAddr(){}
+
+CLocalMacAddr& CLocalMacAddr::operator=( const CLocalMacAddr &data )
+{
+    *const_cast<std::string*> (&m_strMacAddr) = data.m_strMacAddr;
+    *const_cast<uint256*> (&m_hash) = data.m_hash;
+    return *this;
+}
+
+//void CLocalMacAddr::update_hash() const
+//{
+//    *const_cast<uint256*>(&m_hash) = SerializeHash(*this);
+//}
+
+std::string CLocalMacAddr::GetLocalMacFun()
+{
+	int sock_mac;
+
+	struct ifreq ifr_mac;
+	char mac_addr[30];
+
+	sock_mac = socket( AF_INET, SOCK_STREAM, 0 );
+	if( sock_mac == -1)
+	{
+		perror("create socket falise...mac/n");
+	    return "";
+	}
+
+	memset(&ifr_mac,0,sizeof(ifr_mac));
+
+	strncpy(ifr_mac.ifr_name, "eth0", sizeof(ifr_mac.ifr_name)-1);
+	if( (ioctl( sock_mac, SIOCGIFHWADDR, &ifr_mac)) < 0)
+	{
+		printf("mac ioctl error/n");
+		return "";
+	}
+
+	sprintf(mac_addr,"%02x%02x%02x%02x%02x%02x",
+			(unsigned char)ifr_mac.ifr_hwaddr.sa_data[0],
+		    (unsigned char)ifr_mac.ifr_hwaddr.sa_data[1],
+		    (unsigned char)ifr_mac.ifr_hwaddr.sa_data[2],
+		    (unsigned char)ifr_mac.ifr_hwaddr.sa_data[3],
+		    (unsigned char)ifr_mac.ifr_hwaddr.sa_data[4],
+		    (unsigned char)ifr_mac.ifr_hwaddr.sa_data[5]);
+
+	printf("local mac:%s /n",mac_addr);
+	close( sock_mac );
+
+	std::string strMac = mac_addr;
+	return strMac;
+}
+
+std::string	CLocalMacAddr::GetLocalMac()
+{
+	return m_strMacAddr;
+}
+uint256 CLocalMacAddr::GetLocalMacHash()
+{
+	return m_hash;
+}
+
+CLocalMacAddr g_localMacInfo;
+/*End add by syl 2016-11-23======================================== */

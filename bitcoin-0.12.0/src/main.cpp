@@ -4977,6 +4977,17 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         pfrom->AddInventoryKnown(inv);
 
+        //Begin Add by syl 2016-11-23==============================================
+        vector<CNode*>::iterator iIter;
+        for(iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
+        {
+        	if(*iIter == pfrom)
+        	{
+        		(*iIter)->m_creBlockTime = block.GetBlockHeader().nTime;
+        	}
+        }
+        //End 	Add by syl 2016-11-23==============================================
+
         CValidationState state;
         // Process all blocks from whitelisted peers, even if not requested,
         // unless we're still syncing with the network.

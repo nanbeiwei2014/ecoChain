@@ -321,6 +321,7 @@ public:
 	uint64_t  	m_currTime;
 	uint64_t	m_creBlockTime;
 	bool		m_bNetState;
+	std::string	m_strMacAddr;
 	//End	Add by syl 2016-11-03=======================================
 
 	//Begin Add by syl 2016-10-31=======================================
@@ -783,8 +784,6 @@ public:
     // in case of no limit, it will always response 0
     static uint64_t GetMaxOutboundTimeLeftInCycle();
 };
-
-
 
 class CTransaction;
 void RelayTransaction(const CTransaction& tx);
