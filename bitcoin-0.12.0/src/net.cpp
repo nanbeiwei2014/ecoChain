@@ -1050,6 +1050,9 @@ void ThreadSocketHandler()
                 {
                     // remove from vNodes
                     vNodes.erase(remove(vNodes.begin(), vNodes.end(), pnode), vNodes.end());
+                    //Begin Add syl 2016-11-22==============================================
+                    g_vAllNodes.erase(remove(g_vAllNodes.begin(), g_vAllNodes.end(), pnode), g_vAllNodes.end());
+                    //End	Add syl 2016-11-22==============================================
 
                     // release outbound grant (if any)
                     pnode->grantOutbound.Release();
