@@ -5577,6 +5577,7 @@ bool SendMessages(CNode* pto)
                     pBestIndex = pindex;
                     if (fFoundStartingHeader) {
                         // add this to the headers message
+                    	CBlockHeader tmpHeader = pindex->GetBlockHeader();		//Add by syl 2016-11-24======================
                         vHeaders.push_back(pindex->GetBlockHeader());
                     } else if (PeerHasHeader(&state, pindex)) {
                         continue; // keep looking for the first new block
@@ -5584,6 +5585,7 @@ bool SendMessages(CNode* pto)
                         // Peer doesn't have this header but they do have the prior one.
                         // Start sending headers.
                         fFoundStartingHeader = true;
+                        CBlockHeader tmpHeader = pindex->GetBlockHeader();		//Add by syl 2016-11-24======================
                         vHeaders.push_back(pindex->GetBlockHeader());
                     } else {
                         // Peer doesn't have this header or the prior one -- nothing will
