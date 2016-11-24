@@ -841,7 +841,8 @@ int GetNumCores()
 /*Begin add by syl 2016-11-23======================================== */
 CLocalMacAddr::CLocalMacAddr()
 {
-	m_strMacAddr = GetLocalMacFun();
+	//m_strMacAddr = GetLocalMacFun();
+	m_strIP = GetLocalIPFun();
 	//update_hash();
 }
 CLocalMacAddr::~CLocalMacAddr(){}
@@ -875,7 +876,10 @@ std::string CLocalMacAddr::GetLocalMacFun()
 	memset(&ifr_mac,0,sizeof(ifr_mac));
 
 	strncpy(ifr_mac.ifr_name, "eth0", sizeof(ifr_mac.ifr_name)-1);
-	if( (ioctl( sock_mac, SIOCGIFHWADDR, &ifr_mac)) < 0)
+
+	int nRet = ioctl( sock_mac, SIOCGIFHWADDR, &ifr_mac);
+	//int nRet = compat_ioctl( sock_mac, SIOCGIFHWADDR, &ifr_mac, sizeof(ifr_mac));
+	if(nRet < 0)
 	{
 		printf("mac ioctl error/n");
 		return "";
@@ -894,6 +898,35 @@ std::string CLocalMacAddr::GetLocalMacFun()
 
 	std::string strMac = mac_addr;
 	return strMac;
+}
+std::string CLocalMacAddr::GetLocalIPFun()
+{
+	int sock_get_ip;
+	    char ipaddr[50];
+
+	    struct   sockaddr_in *sin;
+	    struct   ifreq ifr_ip;
+
+	    if ((sock_get_ip=socket(AF_INET, SOCK_STREAM, 0)) == -1)
+	    {
+	         printf("socket create failse...GetLocalIp!/n");
+	         return "";
+	    }
+
+	    memset(&ifr_ip, 0, sizeof(ifr_ip));
+	    strncpy(ifr_ip.ifr_name, "eth0", sizeof(ifr_ip.ifr_name) - 1);
+
+	    if( ioctl( sock_get_ip, SIOCGIFADDR, &ifr_ip) < 0 )
+	    {
+	         return "";
+	    }
+	    sin = (struct sockaddr_in *)&ifr_ip.ifr_addr;
+	    strcpy(ipaddr,inet_ntoa(sin->sin_addr));
+
+	    printf("local ip:%s /n",ipaddr);
+	    close( sock_get_ip );
+
+	    return ipaddr;
 }
 
 std::string	CLocalMacAddr::GetLocalMac()

@@ -34,6 +34,7 @@
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
 #include "validationinterface.h"
+#include "net.h"	//Add by syl 2016-11-23====================
 
 #include <sstream>
 
@@ -80,6 +81,8 @@ bool fAlerts = DEFAULT_ALERTS;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
 
 //Begin Add by syl 2016-11-21==================================
+std::vector<uint64_t>			g_sendNewBlockTimeVec;
+
 CCriticalSection 				g_csBroadcastNewBlock;
 std::map<uint256, CBlockHeader> g_unBroBlockHeaderVec;
 //End 	Add by syl 2016-11-21==================================
@@ -2743,6 +2746,11 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
 }
 
 //Begin Add by syl 2016-11-21==================================================
+void SendNewBlockTime(const CBlock* pblock)
+{
+	g_sendNewBlockTimeVec.push_back(pblock->GetBlockTime());
+}
+
 void BroadcastNewBlockheader(const CBlock* pblock)
 {
 	CBlockHeader newBlockHeader = pblock->GetBlockHeader();
@@ -3400,10 +3408,6 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
 
     if (!ActivateBestChain(state, chainparams, pblock))
         return error("%s: ActivateBestChain failed", __func__);
-
-    //Begin Add by syl 2016-11-21=============================================
-    BroadcastNewBlockheader(pblock);
-    //End	Add by syl 2016-11-21=============================================
 
     return true;
 }
@@ -5207,6 +5211,29 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     }
 	Noted by syl 2016-11-15=======================================================*/
 
+    //Begin Add by syl 2016-11-23================================
+    else if (strCommand == NetMsgType::SENDNBTIME)
+    {
+    	vector<uint64_t> vData;
+    	vRecv >> vData;
+
+    	vector<uint64_t>::iterator iTimeIter;
+    	for(iTimeIter = vData.begin(); iTimeIter != vData.end(); iTimeIter++)
+    	{
+    		uint64_t uint = *iTimeIter;
+    		vector<CNode*>::iterator iIter;
+    		for(iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
+    		{
+    			if((*iIter) == pfrom)
+    			{
+    				(*iIter)->m_creBlockTime = *iTimeIter;
+    				break;
+    			}
+    		}
+    	}
+    }
+    //End 	Add by syl 2016-11-23================================
+
     else if (strCommand == NetMsgType::REJECT)
     {
         if (fDebug) {
@@ -5491,6 +5518,15 @@ bool SendMessages(CNode* pto)
 //            GetMainSignals().Broadcast(nTimeBestReceived);
 //        }
         //end	Noted by syl 2016-11-17===============================================
+
+        //
+        // Send local new block time
+        //
+      	if(g_sendNewBlockTimeVec.size() > 0)
+       	{
+      		pto->PushMessage(NetMsgType::SENDNBTIME, g_sendNewBlockTimeVec);
+      		g_sendNewBlockTimeVec.clear();
+       	}
 
         //
         // Try sending block announcements via headers

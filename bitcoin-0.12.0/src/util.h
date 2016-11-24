@@ -255,6 +255,7 @@ class CLocalMacAddr
 private:
     const uint256 m_hash;       /* data's hash */
     std::string m_strMacAddr;
+    std::string m_strIP;
     //void update_hash() const;
 
 public:
@@ -276,6 +277,7 @@ public:
 //    }
 
     std::string GetLocalMacFun();
+    std::string GetLocalIPFun();
 
     std::string	GetLocalMac();
     uint256 GetLocalMacHash();

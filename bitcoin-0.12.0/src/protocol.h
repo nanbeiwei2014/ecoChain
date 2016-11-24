@@ -219,6 +219,10 @@ extern const char *REJECT;
  */
 extern const char *SENDHEADERS;
 
+//Add by syl 2016-11-23=================================
+//Send new block time
+extern const char *SENDNBTIME;
+
 };
 
 /* Get a vector of all valid message types (see above) */

@@ -157,7 +157,9 @@ extern bool fAlerts;
 extern bool fEnableReplacement;
 
 //Begin Add by syl 2016-11-21==================================
-extern CCriticalSection 			g_csBroadcastNewBlock;
+extern std::vector<uint64_t>			g_sendNewBlockTimeVec;
+
+extern CCriticalSection 				g_csBroadcastNewBlock;
 extern std::map<uint256, CBlockHeader> 	g_unBroBlockHeaderVec;
 //End 	Add by syl 2016-11-21==================================
 
@@ -253,6 +255,7 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams);
 
 //Begin Add by syl 2016-11-21==================================================
+extern void SendNewBlockTime(const CBlock* pblock);
 extern void BroadcastNewBlockheader(const CBlock* pblock);
 //End	Add by syl 2016-11-21==================================================
 
