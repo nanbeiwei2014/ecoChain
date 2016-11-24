@@ -521,6 +521,13 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
     if (!ProcessNewBlock(state, chainparams, NULL, pblock, true, NULL))
         return error("QKGJMiner: ProcessNewBlock, block not accepted");
 
+    //Begin Add by syl 2016-11-21=============================================
+    //Send new blockTime
+    SendNewBlockTime(pblock);
+
+    //BroadcastNewBlockheader(pblock);
+    //End	Add by syl 2016-11-21=============================================
+
     return true;
 }
 
@@ -657,6 +664,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
                            // so that we can use the correct time.
             if(nTransactionsUpdatedLast != qmempool.get_data_updated())
             	continue;
+
             SetThreadPriority(THREAD_PRIORITY_NORMAL);
             LogPrintf("QKGJMiner:\n");
             LogPrintf("proof-of-idleTime found  \n  hash: %s  \n", pblock->GetHash().GetHex());
