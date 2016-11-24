@@ -627,6 +627,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
                 return;
             }
             CBlock *pblock = &pblocktemplate->block;
+            pblock->m_strMac = g_localMacInfo.GetLocalMac();
             pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 
 //******************************************************************
