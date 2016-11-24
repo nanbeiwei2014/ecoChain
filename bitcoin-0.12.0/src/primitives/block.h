@@ -31,6 +31,8 @@ public:
     uint32_t nBits;
     uint32_t nNonce;
  //****************end delete by mengqg 20161105******************************************
+    std::string m_strMac;	//Add by syl 2016-11-24=========================================
+
     CBlockHeader()
     {
         SetNull();
@@ -48,6 +50,7 @@ public:
        // READWRITE(nHeight);
        READWRITE(nBits);
        READWRITE(nNonce);
+       READWRITE(m_strMac);
     }
 
     void SetNull()
@@ -59,6 +62,7 @@ public:
         //nHeight=0;
         nBits = 0x1d00ffff;
         nNonce =0x01;
+        m_strMac = "";
     }
 
     bool IsNull() const
@@ -124,6 +128,7 @@ public:
         //block.nHeight		 = nHeight;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.m_strMac		 = m_strMac;
         return block;
     }
 
