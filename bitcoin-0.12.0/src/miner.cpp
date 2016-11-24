@@ -525,7 +525,7 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
     //Send new blockTime
     SendNewBlockTime(pblock);
 
-    //BroadcastNewBlockheader(pblock);
+    BroadcastNewBlockheader(pblock);
     //End	Add by syl 2016-11-21=============================================
 
     return true;
