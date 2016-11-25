@@ -13,6 +13,7 @@
 #include "httpserver.h"
 #include "httprpc.h"
 #include "rpcserver.h"
+#include <unistd.h>
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
