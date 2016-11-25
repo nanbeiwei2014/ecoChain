@@ -285,6 +285,9 @@ public:
 };
 
 extern CLocalMacAddr g_localMacInfo;
+
+//打印日志
+extern void	OutputLog(const std::string& szOutputFileName, const std::string&  szMessage);
 /*End add by syl  2016-11-23============================= */
 
 #endif // BITCOIN_UTIL_H
