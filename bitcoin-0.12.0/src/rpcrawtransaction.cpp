@@ -951,6 +951,78 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
     return result;
 }
 
+UniValue send_data_for_sign( const UniValue& params, bool bHelp )
+{
+    if( bHelp || params.size() < 1 )
+    {
+        throw runtime_error(
+            "send_data_for_sign \"hexstring\"\n"
+            "\nsign data parameters for data that comes from application.\n"
+            "\nArguments:\n"
+            "{\"pubkey\":\"addr value\",\"data\":\"data value\",\"prikey\":\"prikey value\"}\n"
+            "\nResult:\n"
+            "\"signatures\" (string) the data's sign \n"
+            + HelpExampleCli("send_data_for_sign", "{\"pubkey\":\"public value\",\"data\":\"data value\",\"prikey\":\"prikey value\"}")
+            + HelpExampleRpc("send_data_for_sign", "{\"pubkey\":\"public value\",\"data\":\"data value\",\"prikey\":\"prikey value\"}")
+         );
+    }
+    LOCK( cs_main );
+    RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR),true);
+    if ( params[0].isNull() )
+    {
+        throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
+    }
+
+    string pri_key;
+    string pub_key;
+    string get_data;
+    UniValue data = params[0].get_obj();
+    std::vector<std::string>vData = data.getKeys();
+    BOOST_FOREACH( const string &name, vData )
+    {
+        if ( "prikey" == name )
+        {
+            pri_key = data[name].get_str();
+        }
+        if ( "pubkey" == name )
+        {
+            pub_key = data[name].get_str();
+        }
+        if ( "data" == name )
+        {
+            get_data = data[name].get_str();
+        }
+    }
+    //CPrivKey prikey;
+    //std::vector<unsigned char> vch_key;
+    //vch_key.resize(pri_key.length());
+    //vch_key.assign(pri_key.begin(),pri_key.end());
+    //CPrivKey prikey;//(vch_key);
+    //prikey.assign(pri_key.begin(),pri_key.end());
+
+    std::vector<unsigned char> vch_sign;
+    CKeyID keyid;
+    std::string addr,temp;
+    Cqkgj_basic_data basic_data(addr,get_data,temp);
+
+    CBitcoinSecret vchSecret;
+    bool bFlag = vchSecret.SetString(pri_key);
+    if ( !bFlag )
+    {
+       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,"Invalid private key");
+    }
+    CKey key = vchSecret.GetKey();
+    if ( !key.IsValid() )
+    {
+       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,"Private key outside allowed range");
+    }
+
+    create_sign( key, vch_sign, keyid, basic_data );
+    string ret = EncodeBase58(vch_sign);
+    //ret.insert(ret.begin(),vch_sign.begin(),vch_sign.end());
+    return ret;
+}
+
 UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 {
     if ( bHelp  || params.size() != 1)

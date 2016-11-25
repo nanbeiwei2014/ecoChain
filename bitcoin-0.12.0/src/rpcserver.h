@@ -239,6 +239,7 @@ extern UniValue setmocktime(const UniValue& params, bool fHelp);
 extern UniValue resendwallettransactions(const UniValue& params, bool fHelp);
 
 /* add by sdk begin */
+extern UniValue send_data_for_sign(const UniValue& params, bool bHelp);
 extern UniValue send_data_to_sys(const UniValue& params, bool bHelp);
 extern UniValue get_data_from_sys(const UniValue& params, bool bHelp);
 extern UniValue get_new_key(const UniValue& params, bool bHelp);

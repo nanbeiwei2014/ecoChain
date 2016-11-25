@@ -1454,9 +1454,10 @@ bool IsInitialBlockDownload()
     static bool lockIBDState = false;
     if (lockIBDState)
         return false;
-    bool state = (chainActive.Height() < pindexBestHeader->nHeight - 24 * 6 ||
-            pindexBestHeader->GetBlockTime() < GetTime() - chainParams.MaxTipAge());
-    if (!state)
+    bool state;
+//    bool state = (chainActive.Height() < pindexBestHeader->nHeight - 24 * 6 ||
+//            pindexBestHeader->GetBlockTime() < GetTime() - chainParams.MaxTipAge());
+//    if (!state)
         lockIBDState = true;
     return state;
 }
@@ -3396,18 +3397,19 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
         }
 
         // Store to disk
-        CBlockIndex *pindex = NULL;
-        bool ret = AcceptBlock(*pblock, state, chainparams, &pindex, fRequested, dbp);
-        if (pindex && pfrom) {
-            mapBlockSource[pindex->GetBlockHash()] = pfrom->GetId();
-        }
-        CheckBlockIndex(chainparams.GetConsensus());
-        if (!ret)
-            return error("%s: AcceptBlock FAILED", __func__);
+        //CBlockIndex *pindex = NULL;
+        //bool ret = AcceptBlock(*pblock, state, chainparams, &pindex, fRequested, dbp);
+        //if (pindex && pfrom) {
+        //    mapBlockSource[pindex->GetBlockHash()] = pfrom->GetId();
+        //}
+        //CheckBlockIndex(chainparams.GetConsensus());
+        //if (!ret)
+        //    return error("%s: AcceptBlock FAILED", __func__);
     }
-
-    if (!ActivateBestChain(state, chainparams, pblock))
-        return error("%s: ActivateBestChain failed", __func__);
+    CBlockIndex *blockindex = new CBlockIndex(pblock->GetBlockHeader());
+    UpdateTip(blockindex );
+    //if (!ActivateBestChain(state, chainparams, pblock))
+    //    return error("%s: ActivateBestChain failed", __func__);
 
     return true;
 }

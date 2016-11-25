@@ -164,6 +164,25 @@ static int ecdsa_signature_parse_der_lax(const secp256k1_context* ctx, secp256k1
     return 1;
 }
 
+/* add by sdk begin */
+/* 验证签名 */
+bool CPubKey::qkgj_verify( const uint256 &hash, const std::string &vchSig ) const
+{
+    if ( !IsValid() )
+    {
+        return false;
+    }
+    secp256k1_pubkey pubkey;
+    if ( !secp256k1_ec_pubkey_parse( secp256k1_context_verify, &pubkey, &(*this)[0], size()))
+    {
+        return false;
+    }
+    secp256k1_ecdsa_signature sig;
+    memcpy(sig.data,  vchSig.c_str(),vchSig.length());
+    return secp256k1_ecdsa_verify( secp256k1_context_verify, &sig, hash.begin(), &pubkey );
+}
+/* add by sdk end */
+
 bool CPubKey::Verify(const uint256 &hash, const std::vector<unsigned char>& vchSig) const {
     if (!IsValid())
         return false;
