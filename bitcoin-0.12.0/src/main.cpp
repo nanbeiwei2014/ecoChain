@@ -1454,10 +1454,9 @@ bool IsInitialBlockDownload()
     static bool lockIBDState = false;
     if (lockIBDState)
         return false;
-    bool state;
-//    bool state = (chainActive.Height() < pindexBestHeader->nHeight - 24 * 6 ||
-//            pindexBestHeader->GetBlockTime() < GetTime() - chainParams.MaxTipAge());
-//    if (!state)
+    bool state = (chainActive.Height() < pindexBestHeader->nHeight - 24 * 6 ||
+            pindexBestHeader->GetBlockTime() < GetTime() - chainParams.MaxTipAge());
+    if (!state)
         lockIBDState = true;
     return state;
 }
@@ -2749,7 +2748,6 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
 //Begin Add by syl 2016-11-21==================================================
 void SendNewBlockTime(const CBlock* pblock)
 {
-	g_sendNewBlockTimeVec.clear();
 	g_sendNewBlockTimeVec.push_back(pblock->GetBlockTime());
 }
 
@@ -3398,19 +3396,18 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
         }
 
         // Store to disk
-        //CBlockIndex *pindex = NULL;
-        //bool ret = AcceptBlock(*pblock, state, chainparams, &pindex, fRequested, dbp);
-        //if (pindex && pfrom) {
-        //    mapBlockSource[pindex->GetBlockHash()] = pfrom->GetId();
-        //}
-        //CheckBlockIndex(chainparams.GetConsensus());
-        //if (!ret)
-        //    return error("%s: AcceptBlock FAILED", __func__);
+        CBlockIndex *pindex = NULL;
+        bool ret = AcceptBlock(*pblock, state, chainparams, &pindex, fRequested, dbp);
+        if (pindex && pfrom) {
+            mapBlockSource[pindex->GetBlockHash()] = pfrom->GetId();
+        }
+        CheckBlockIndex(chainparams.GetConsensus());
+        if (!ret)
+            return error("%s: AcceptBlock FAILED", __func__);
     }
-    CBlockIndex *blockindex = new CBlockIndex(pblock->GetBlockHeader());
-    UpdateTip(blockindex );
-    //if (!ActivateBestChain(state, chainparams, pblock))
-    //    return error("%s: ActivateBestChain failed", __func__);
+
+    if (!ActivateBestChain(state, chainparams, pblock))
+        return error("%s: ActivateBestChain failed", __func__);
 
     return true;
 }
@@ -5517,7 +5514,7 @@ bool SendMessages(CNode* pto)
       	if(g_sendNewBlockTimeVec.size() > 0)
        	{
       		pto->PushMessage(NetMsgType::SENDNBTIME, g_sendNewBlockTimeVec);
-      		//g_sendNewBlockTimeVec.clear();
+      		g_sendNewBlockTimeVec.clear();
        	}
 
         //

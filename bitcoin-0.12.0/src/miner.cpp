@@ -45,7 +45,7 @@ using namespace std;
 uint64_t nLastBlockTx = 0;
 uint64_t nLastBlockSize = 0;
 //*************begin modify by mengqg 20161104***********************************
-static const int DEFAULT_GENERATE_PERIOD = 0.2*60;  //unit s
+static const int DEFAULT_GENERATE_PERIOD = 0.5*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
 //*************end modify by mengqg 20161104*************************
 
@@ -602,24 +602,24 @@ void static BitcoinMiner(const CChainParams& chainparams)
             }
 
             vector<CNode*>::iterator iter=g_vAllNodes.begin();
-//            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
-//            {
-//            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
-//            	iter++;
-//            }
-//
-//             std::string strIp=(*iter)->addr.ToStringIP();
-//            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
-//            {
-//        	   if ((GetTime()-pindexPrev->nTime)<(0.9*DEFAULT_GENERATE_PERIOD))
-//        		   continue;
-//
-//            }else{
-//            	continue;
-//            }
-//
-//            (*iter)->m_creBlockTime= GetTime();
-            sleep(10);
+            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
+            {
+            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
+            	iter++;
+            }
+
+             std::string strIp=(*iter)->addr.ToStringIP();
+            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
+            {
+        	   if ((GetTime()-pindexPrev->nTime)<(0.9*DEFAULT_GENERATE_PERIOD))
+        		   continue;
+
+            }else{
+            	continue;
+            }
+
+            (*iter)->m_creBlockTime= GetTime();
+
             auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
             if (!pblocktemplate.get())
             {
