@@ -2749,6 +2749,7 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
 //Begin Add by syl 2016-11-21==================================================
 void SendNewBlockTime(const CBlock* pblock)
 {
+	g_sendNewBlockTimeVec.clear();
 	g_sendNewBlockTimeVec.push_back(pblock->GetBlockTime());
 }
 
@@ -5516,7 +5517,7 @@ bool SendMessages(CNode* pto)
       	if(g_sendNewBlockTimeVec.size() > 0)
        	{
       		pto->PushMessage(NetMsgType::SENDNBTIME, g_sendNewBlockTimeVec);
-      		g_sendNewBlockTimeVec.clear();
+      		//g_sendNewBlockTimeVec.clear();
        	}
 
         //
