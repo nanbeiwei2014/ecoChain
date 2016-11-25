@@ -1094,7 +1094,7 @@ uint256 SignatureHash(const CScript& scriptCode, const CTransaction& txTo, unsig
     return ss.GetHash();
 }
 
-/* add by sdk end */
+/* add by sdk begin */
 namespace {
 class Cqkgj_SignatureSerializer {
 private:
@@ -1112,29 +1112,6 @@ public:
         fHashSingle((nHashTypeIn & 0x1f) == SIGHASH_SINGLE),
         fHashNone((nHashTypeIn & 0x1f) == SIGHASH_NONE) {}
 
-    /** Serialize the passed scriptCode, skipping OP_CODESEPARATORs */
-    //template<typename S>
-    //void SerializeScriptCode(S &s, int nType, int nVersion) const {
-    //    CScript::const_iterator it = scriptCode.begin();
-    //    CScript::const_iterator itBegin = it;
-    //    opcodetype opcode;
-    //    unsigned int nCodeSeparators = 0;
-    //    while (scriptCode.GetOp(it, opcode)) {
-    //        if (opcode == OP_CODESEPARATOR)
-    //            nCodeSeparators++;
-    //    }
-    //    ::WriteCompactSize(s, scriptCode.size() - nCodeSeparators);
-    //    it = itBegin;
-    //    while (scriptCode.GetOp(it, opcode)) {
-    //        if (opcode == OP_CODESEPARATOR) {
-    //            s.write((char*)&itBegin[0], it-itBegin-1);
-    //            itBegin = it;
-    //        }
-    //    }
-    //    if (itBegin != scriptCode.end())
-    //        s.write((char*)&itBegin[0], it-itBegin);
-    //}
-
     /** Serialize an input of txTo */
     template<typename S>
     void SerializeInput(S &s, unsigned int nInput, int nType, int nVersion) const {
@@ -1143,49 +1120,17 @@ public:
             nInput = nIn;
         // Serialize the prevout
         ::Serialize(s, txTo.m_data, nType, nVersion);
-        // Serialize the script
-        //if (nInput != nIn)
-            // Blank out other inputs' signatures
-        //    ::Serialize(s, CScriptBase(), nType, nVersion);
-        //else
-        //    SerializeScriptCode(s, nType, nVersion);
-        // Serialize the nSequence
-        //if (nInput != nIn && (fHashSingle || fHashNone))
-            // let the others update at will
-        //    ::Serialize(s, (int)0, nType, nVersion);
-        //else
-        //    ::Serialize(s, txTo.[nInput].nSequence, nType, nVersion);
     }
-
-    /** Serialize an output of txTo */
-    //template<typename S>
-    //void SerializeOutput(S &s, unsigned int nOutput, int nType, int nVersion) const {
-    //    if (fHashSingle && nOutput != nIn)
-    //        // Do not lock-in the txout payee at other indices as txin
-    //        ::Serialize(s, CTxOut(), nType, nVersion);
-    //    else
-    //        ::Serialize(s, txTo.vout[nOutput], nType, nVersion);
-    //}
 
     /** Serialize txTo */
     template<typename S>
     void Serialize(S &s, int nType, int nVersion) const {
          //Serialize nVersion
         ::Serialize(s, txTo.m_version, nType, nVersion);
+
         // Serialize vin
-        //unsigned int nInputs = fAnyoneCanPay ? 1 : txTo.vin.size();
-        //::WriteCompactSize(s, nInputs);
-        //for (unsigned int nInput = 0; nInput < nInputs; nInput++)
-        //     SerializeInput(s, nInput, nType, nVersion);
         unsigned int nInput = 1;
         SerializeInput(s, nInput, nType, nVersion);
-        // Serialize vout
-        //unsigned int nOutputs = fHashNone ? 0 : (fHashSingle ? nIn+1 : txTo.vout.size());
-        //::WriteCompactSize(s, nOutputs);
-        //for (unsigned int nOutput = 0; nOutput < nOutputs; nOutput++)
-        //     SerializeOutput(s, nOutput, nType, nVersion);
-        // Serialize nLockTime
-        //::Serialize(s, txTo.nLockTime, nType, nVersion);
     }
 };
 } // anon namespace
@@ -1205,16 +1150,22 @@ uint256 sign_hash(const CScript& scriptCode, const Cqkgj_basic_data& data, unsig
 
 bool check_sign(Cqkgj_basic_data& vch_data, vector<unsigned char>&vch_pub_key, CScript& script)
 {
-    CPubKey pub_key( vch_pub_key );
+    vector<unsigned char> pub_key1;
+    pub_key1.resize(vch_data.m_address.length());
+    pub_key1.assign(vch_data.m_address.begin(),vch_data.m_address.end());
+
+    //CPubKey pub_key( vch_pub_key );
+    //CPubKey pub_key( vch_pub_key.begin(),vch_pub_key.end() );
+    CPubKey pub_key( pub_key1.begin(),pub_key1.end() );
     if ( !pub_key.IsValid() )
         return false;
-
 
     std::vector<unsigned char> vchSig;// = (std::vector<unsigned char>)(char*)vch_data.m_data.c_str();
     vchSig.push_back(*(unsigned char*)vch_data.m_data.c_str());
 
     uint256 sig_hash = sign_hash(script,vch_data,1,1);
-    if ( !pub_key.Verify(sig_hash, vchSig ))
+    //if ( !pub_key.Verify(sig_hash, vchSig ))
+    if ( !pub_key.qkgj_verify(sig_hash, vch_data.m_sign))
         return false;
     return true;
 }

@@ -166,6 +166,22 @@ CPubKey CKey::GetPubKey() const {
     return result;
 }
 
+bool CKey::qkgj_sign( const uint256 &hash, std::vector<unsigned char>&vchSig ) const
+{
+    if ( !fValid )
+    {
+        return false;
+    }
+
+    //vchSig.resize( 72 );
+    //size_t nSigLen = 72;
+    secp256k1_ecdsa_signature sign;
+    int ret = secp256k1_ecdsa_sign( secp256k1_context_sign, &sign, hash.begin(), begin(), secp256k1_nonce_function_rfc6979,NULL);
+    assert( ret );
+    vchSig.reserve(sizeof(sign.data)/sizeof(char));
+    vchSig.assign(&sign.data[0],&sign.data[64]);
+}
+
 bool CKey::Sign(const uint256 &hash, std::vector<unsigned char>& vchSig, uint32_t test_case) const {
     if (!fValid)
         return false;

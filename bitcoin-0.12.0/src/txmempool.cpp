@@ -1184,6 +1184,7 @@ void Cqkgj_mempool::remove_from_block( const std::vector<Cqkgj_basic_data>& vDat
     return;
 }
 
+
 Cqkgj_basic_data Cqkgj_mempool::get_data_by_hash( uint256 hash )
 {
     Cqkgj_basic_data data;

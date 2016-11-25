@@ -177,6 +177,10 @@ public:
      */
     bool Verify(const uint256& hash, const std::vector<unsigned char>& vchSig) const;
 
+    /* add by sdk begin*/
+    bool qkgj_verify( const uint256 &hash, const std::string &vchSig ) const;
+    /* add by sdk begin*/
+
     /**
      * Check whether a signature is normalized (lower-S).
      */

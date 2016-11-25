@@ -602,24 +602,24 @@ void static BitcoinMiner(const CChainParams& chainparams)
             }
 
             vector<CNode*>::iterator iter=g_vAllNodes.begin();
-            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
-            {
-            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
-            	iter++;
-            }
-
-             std::string strIp=(*iter)->addr.ToStringIP();
-            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
-            {
-        	   if ((GetTime()-pindexPrev->nTime)<(0.9*DEFAULT_GENERATE_PERIOD))
-        		   continue;
-
-            }else{
-            	continue;
-            }
-
-            (*iter)->m_creBlockTime= GetTime();
-
+//            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
+//            {
+//            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
+//            	iter++;
+//            }
+//
+//             std::string strIp=(*iter)->addr.ToStringIP();
+//            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
+//            {
+//        	   if ((GetTime()-pindexPrev->nTime)<(0.9*DEFAULT_GENERATE_PERIOD))
+//        		   continue;
+//
+//            }else{
+//            	continue;
+//            }
+//
+//            (*iter)->m_creBlockTime= GetTime();
+            sleep(10);
             auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
             if (!pblocktemplate.get())
             {

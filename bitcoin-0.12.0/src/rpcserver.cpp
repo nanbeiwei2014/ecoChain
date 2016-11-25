@@ -303,6 +303,7 @@ static const CRPCCommand vRPCCommands[] =
 //    { "generating",         "generate",               &generate,               true  },
 
     /* add by sdk begin */
+    { "rawtransactions",    "send_data_for_sign",     &send_data_for_sign,     true  },
     { "rawtransactions",    "send_data_to_sys",       &send_data_to_sys,       true  },
     { "rawtransactions",    "get_data_from_sys",      &get_data_from_sys,      true  },
     { "rawtransactions",    "get_new_key",            &get_new_key,            true  },
