@@ -845,8 +845,6 @@ int GetNumCores()
 /*Begin add by syl 2016-11-23======================================== */
 CLocalMacAddr::CLocalMacAddr()
 {
-	//m_strMacAddr = GetLocalMacFun();
-	//m_strIP = GetLocalIPFun();
 	GetNetworkCardName();
 	//update_hash();
 }
