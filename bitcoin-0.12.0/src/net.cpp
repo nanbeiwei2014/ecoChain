@@ -88,6 +88,7 @@ bool fAddressesInitialized = false;
 std::string strSubVersion;
 
 //Begin Add by syl 2016-11-04=====================================
+CCriticalSection g_csAllvNodes;
 vector<CNode*> g_vAllNodes;		//包含本地节点信息
 //End	Add by syl 2016-11-04=====================================
 vector<CNode*> vNodes;
@@ -423,11 +424,13 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest)
         {
             LOCK(cs_vNodes);
             vNodes.push_back(pnode);
-
-            //Begin Add by syl 2016-11-04================================================
-            g_vAllNodes.push_back(pnode);
-            //End	Add by syl 2016-11-04================================================
         }
+        //Begin Add by syl 2016-11-04================================================
+		{
+			LOCK(g_csAllvNodes);
+			g_vAllNodes.push_back(pnode);
+		}
+        //End	Add by syl 2016-11-04================================================
 
         pnode->nTimeConnected = GetTime();
 
@@ -1024,11 +1027,13 @@ static void AcceptConnection(const ListenSocket& hListenSocket) {
     {
         LOCK(cs_vNodes);
         vNodes.push_back(pnode);
-
-        //Begin Add by syl 2016-11-04================================================
-        g_vAllNodes.push_back(pnode);
-        //End	Add by syl 2016-11-04================================================
     }
+	{
+		//Begin Add by syl 2016-11-04================================================
+		LOCK(g_csAllvNodes);
+		g_vAllNodes.push_back(pnode);
+		//End	Add by syl 2016-11-04================================================
+	}
 }
 
 void ThreadSocketHandler()
@@ -1051,6 +1056,7 @@ void ThreadSocketHandler()
                     // remove from vNodes
                     vNodes.erase(remove(vNodes.begin(), vNodes.end(), pnode), vNodes.end());
                     //Begin Add syl 2016-11-22==============================================
+                    LOCK(g_csAllvNodes);
                     g_vAllNodes.erase(remove(g_vAllNodes.begin(), g_vAllNodes.end(), pnode), g_vAllNodes.end());
                     //End	Add syl 2016-11-22==============================================
 
@@ -1974,6 +1980,7 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
         pnodeLocalHost = new CNode(INVALID_SOCKET, CAddress(CService("127.0.0.1", 0), nLocalServices));
 
         //Begin Add by syl 2016-11-04================================================
+        LOCK(g_csAllvNodes);
         g_vAllNodes.push_back(pnodeLocalHost);
         //End	Add by syl 2016-11-04================================================
     }

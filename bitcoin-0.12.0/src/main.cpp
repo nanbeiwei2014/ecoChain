@@ -2749,7 +2749,7 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
 //Begin Add by syl 2016-11-21==================================================
 void SendNewBlockTime(const CBlock* pblock)
 {
-	LOCK(g_csNewBlockTime);
+	//LOCK(g_csNewBlockTime);
 	g_sendNewBlockTimeVec.clear();
 	g_sendNewBlockTimeVec.push_back(pblock->GetBlockTime());
 }
@@ -5212,6 +5212,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     	vector<uint64_t>::iterator iTimeIter;
     	for(iTimeIter = vData.begin(); iTimeIter != vData.end(); iTimeIter++)
     	{
+    		LOCK(g_csAllvNodes);
     		uint64_t uint = *iTimeIter;
     		vector<CNode*>::iterator iIter;
     		for(iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
@@ -5516,7 +5517,7 @@ bool SendMessages(CNode* pto)
         //
       	if(g_sendNewBlockTimeVec.size() > 0)
        	{
-      		LOCK(g_csNewBlockTime);
+      		//LOCK(g_csNewBlockTime);
       		pto->PushMessage(NetMsgType::SENDNBTIME, g_sendNewBlockTimeVec);
        	}
 
