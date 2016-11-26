@@ -157,6 +157,7 @@ extern bool fAlerts;
 extern bool fEnableReplacement;
 
 //Begin Add by syl 2016-11-21==================================
+extern CCriticalSection 				g_csNewBlockTime;
 extern std::vector<uint64_t>			g_sendNewBlockTimeVec;
 
 extern CCriticalSection 				g_csBroadcastNewBlock;

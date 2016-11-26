@@ -81,6 +81,7 @@ bool fAlerts = DEFAULT_ALERTS;
 bool fEnableReplacement = DEFAULT_ENABLE_REPLACEMENT;
 
 //Begin Add by syl 2016-11-21==================================
+CCriticalSection				g_csNewBlockTime;
 std::vector<uint64_t>			g_sendNewBlockTimeVec;
 
 CCriticalSection 				g_csBroadcastNewBlock;
@@ -2748,6 +2749,7 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
 //Begin Add by syl 2016-11-21==================================================
 void SendNewBlockTime(const CBlock* pblock)
 {
+	LOCK(g_csNewBlockTime);
 	g_sendNewBlockTimeVec.clear();
 	g_sendNewBlockTimeVec.push_back(pblock->GetBlockTime());
 }
@@ -5514,8 +5516,8 @@ bool SendMessages(CNode* pto)
         //
       	if(g_sendNewBlockTimeVec.size() > 0)
        	{
+      		LOCK(g_csNewBlockTime);
       		pto->PushMessage(NetMsgType::SENDNBTIME, g_sendNewBlockTimeVec);
-      		//g_sendNewBlockTimeVec.clear();
        	}
 
         //
