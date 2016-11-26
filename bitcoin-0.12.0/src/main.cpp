@@ -2750,7 +2750,7 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
 void SendNewBlockTime(const CBlock* pblock)
 {
 	//LOCK(g_csNewBlockTime);
-	if(g_sendNewBlockTimeVec.size() > 5)
+	//if(g_sendNewBlockTimeVec.size() > 5)
 	{
 		g_sendNewBlockTimeVec.clear();
 	}
@@ -4915,6 +4915,19 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                     return error("invalid header received");
                 }
             }
+
+            //Begin Add by syl 2016-11-26=========================================
+			vector<CNode*>::iterator iIter;
+			for (iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
+			{
+				if ((*iIter)->m_strMacAddr.compare(header.m_strMac) == 0)
+				{
+					LOCK(g_csAllvNodes);
+					(*iIter)->m_creBlockTime = header.nTime;
+					break;
+				}
+			}
+            //End	Add by syl 2016-11-26=========================================
         }
 
         if (pindexLast)
