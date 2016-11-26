@@ -557,7 +557,7 @@ bool SortVNodesBy( const CNode* v1, const CNode* v2)
 {
 	 assert(NULL!=v1);
 	 assert(NULL!=v2);
-	 assert((""!=v1->m_creBlockTime)||(""!=v2->m_creBlockTime));
+
      return (v1->m_creBlockTime <= v2->m_creBlockTime)&&(v1->m_bNetState>=v2->m_bNetState);//Asc
 }
 
