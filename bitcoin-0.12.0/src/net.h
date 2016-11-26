@@ -160,6 +160,7 @@ extern CAddrMan addrman;
 extern int nMaxConnections;
 
 //Begin Add by syl 2016-11-04=====================================
+extern CCriticalSection g_csAllvNodes;
 extern std::vector<CNode*> g_vAllNodes;		//包含本地节点信息
 //End	Add by syl 2016-11-04=====================================
 extern std::vector<CNode*> vNodes;
