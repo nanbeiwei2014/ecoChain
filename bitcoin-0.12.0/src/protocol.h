@@ -274,8 +274,8 @@ public:
             (nVersion >= CADDR_TIME_VERSION && !(nType & SER_GETHASH)))
             READWRITE(nTime);
         READWRITE(nServices);
-        READWRITE(*(CService*)this);
         READWRITE(m_strMacAddr);
+        READWRITE(*(CService*)this);
     }
 
     // TODO: make private (improves encapsulation)
