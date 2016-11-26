@@ -275,6 +275,7 @@ public:
             READWRITE(nTime);
         READWRITE(nServices);
         READWRITE(*(CService*)this);
+        READWRITE(m_strMacAddr);
     }
 
     // TODO: make private (improves encapsulation)
@@ -283,6 +284,8 @@ public:
 
     // disk and network only
     unsigned int nTime;
+
+    std::string m_strMacAddr;	//Add by syl 2016-11-26==================
 };
 
 /** inv message data */

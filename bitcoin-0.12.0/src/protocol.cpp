@@ -145,6 +145,7 @@ void CAddress::Init()
 {
     nServices = NODE_NETWORK;
     nTime = 100000000;
+    m_strMacAddr = "";
 }
 
 CInv::CInv()
