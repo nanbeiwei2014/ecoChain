@@ -8,6 +8,7 @@
 #endif
 
 #include "net.h"
+#include "main.h"
 
 #include "addrman.h"
 #include "chainparams.h"
@@ -1775,10 +1776,18 @@ void ThreadMessageHandler()
             {
                 TRY_LOCK(pnode->cs_vSend, lockSend);
                 if (lockSend)
+                {
                     g_signals.SendMessages(pnode);
+                }
             }
             boost::this_thread::interruption_point();
         }
+        //Begin Add by syl 2016-11-28===============================================
+        {
+        	LOCK(g_csNewBlockTime);
+   			g_sendNewBlockTimeVec.clear();
+        }
+        //End   Add by syl 2016-11-28===============================================
 
         {
             LOCK(cs_vNodes);
