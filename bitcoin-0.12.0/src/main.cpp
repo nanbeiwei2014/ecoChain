@@ -5242,20 +5242,24 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     		{
     			string strMsg="";
 				char temSec[32];
-				sprintf(temSec, "%ld", *iTimeIter);
+				sprintf(temSec, "%ld", (*iIter)->m_creBlockTime);
 				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + temSec + "\r\n";
-				//OutputLog("NodeInfo", strMsg);
 				LogPrintf("%s", strMsg);
 
     			if(pfrom->m_strMacAddr.compare((*iIter)->m_strMacAddr) == 0)
     			{
+					string strMsg = "";
+					char oldSec[32];
+					sprintf(oldSec, "%ld", *iTimeIter);
+					strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + oldSec + "\r\n";
+					LogPrintf("%s", strMsg);
+
     				(*iIter)->m_creBlockTime = *iTimeIter;
 
-    				string strMsg="";
-    				char temSec[32];
-    				sprintf(temSec, "%ld", *iTimeIter);
-    				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==updateNBTime:" + temSec + "\r\n";
-    				//OutputLog("NodeInfo", strMsg);
+    				strMsg="";
+    				char newSec[32];
+    				sprintf(newSec, "%ld", *iTimeIter);
+    				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==updateNBTime:" + newSec + "\r\n";
     				LogPrintf("%s", strMsg);
     				break;
     			}
