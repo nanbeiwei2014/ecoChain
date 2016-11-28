@@ -5240,14 +5240,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     		vector<CNode*>::iterator iIter;
     		for(iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
     		{
-    			string strMsg="";
-				char temSec[32];
-				sprintf(temSec, "%ld", (*iIter)->m_creBlockTime);
-				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + temSec + "\r\n";
-				LogPrintf("%s", strMsg);
-
     			if(pfrom->m_strMacAddr.compare((*iIter)->m_strMacAddr) == 0)
     			{
+    				//
 					string strMsg = "";
 					char oldSec[32];
 					sprintf(oldSec, "%ld", *iTimeIter);
@@ -5256,12 +5251,21 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
     				(*iIter)->m_creBlockTime = *iTimeIter;
 
+    				//
     				strMsg="";
     				char newSec[32];
     				sprintf(newSec, "%ld", *iTimeIter);
     				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==updateNBTime:" + newSec + "\r\n";
     				LogPrintf("%s", strMsg);
     				break;
+    			}
+    			else
+    			{
+					string strMsg = "";
+					char temSec[32];
+					sprintf(temSec, "%ld", (*iIter)->m_creBlockTime);
+					strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + temSec + "\r\n";
+					LogPrintf("%s", strMsg);
     			}
     		}
     	}
