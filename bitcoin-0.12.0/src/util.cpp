@@ -988,7 +988,7 @@ void OutputLog(const std::string& szOutputFileName, const std::string&  szMessag
 	//判断当前目录是否存在，如果不存在则创建
 	if(opendir(strAppPath.c_str()) == NULL)
 	{
-		mkdir(strAppPath.c_str(), 774);
+		mkdir(strAppPath.c_str(), 0774);
 	}
 
 	//保存路径
