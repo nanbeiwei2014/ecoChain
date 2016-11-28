@@ -523,7 +523,7 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
 
     //Begin Add by syl 2016-11-21=============================================
     //Send new blockTime
-    //SendNewBlockTime(pblock);
+    SendNewBlockTime(pblock);
 
     //BroadcastNewBlockheader(pblock);
     //End	Add by syl 2016-11-21=============================================
@@ -583,7 +583,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
                         LOCK(cs_vNodes);
                         fvNodesEmpty = vNodes.empty();
                     }
-                    if (!fvNodesEmpty && !IsInitialBlockDownload())
+                    if (!fvNodesEmpty )//&& !IsInitialBlockDownload())
                         break;
                     MilliSleep(1000);
                 } while (true);
@@ -603,13 +603,13 @@ void static BitcoinMiner(const CChainParams& chainparams)
             {
             	if ((*iter)->m_bNetState) nConnectCount++;
             }
-            vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
-//            vector<CNode*>::iterator iter=g_vAllNodes.begin();
-//            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
-//            {
-//            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
-//            	iter++;
-//            }
+//            vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+            vector<CNode*>::iterator iter=g_vAllNodes.begin();
+            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
+            {
+            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
+            	iter++;
+            }
 
              std::string strIp=(*iter)->addr.ToStringIP();
             if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))

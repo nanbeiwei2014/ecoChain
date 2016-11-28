@@ -2749,7 +2749,7 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
 //Begin Add by syl 2016-11-21==================================================
 void SendNewBlockTime(const CBlock* pblock)
 {
-	//LOCK(g_csNewBlockTime);
+	LOCK(g_csNewBlockTime);
 	//if(g_sendNewBlockTimeVec.size() > 5)
 	{
 		g_sendNewBlockTimeVec.clear();
@@ -4490,6 +4490,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         CAddress addrFrom;
         uint64_t nNonce = 1;
         vRecv >> pfrom->nVersion >> pfrom->nServices >> nTime >> addrMe;
+        pfrom->m_strMacAddr = addrMe.m_strMacAddr;
         if (pfrom->nVersion < MIN_PEER_PROTO_VERSION)
         {
             // disconnect from peers older than this proto version
@@ -4916,18 +4917,18 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 }
             }
 
-            //Begin Add by syl 2016-11-26=========================================
-			vector<CNode*>::iterator iIter;
-			for (iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
-			{
-				if ((*iIter)->m_strMacAddr.compare(header.m_strMac) == 0)
-				{
-					LOCK(g_csAllvNodes);
-					(*iIter)->m_creBlockTime = header.nTime;
-					break;
-				}
-			}
-            //End	Add by syl 2016-11-26=========================================
+//            Begin Add by syl 2016-11-26=========================================
+//			vector<CNode*>::iterator iIter;
+//			for (iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
+//			{
+//				if ((*iIter)->m_strMacAddr.compare(header.m_strMac) == 0)
+//				{
+//					LOCK(g_csAllvNodes);
+//					(*iIter)->m_creBlockTime = header.nTime;
+//					break;
+//				}
+//			}
+//            //End	Add by syl 2016-11-26=========================================
         }
 
         if (pindexLast)
@@ -5233,9 +5234,18 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     		vector<CNode*>::iterator iIter;
     		for(iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
     		{
-    			if((*iIter) == pfrom)
+    			string strMsg = "";
+    			strMsg += "NotedMAC :" + (*iIter)->m_strMacAddr + "===========";
+    			OutputLog("NodeInfo", strMsg);
+
+    			if(pfrom->m_strMacAddr.compare((*iIter)->m_strMacAddr) == 0)
     			{
     				(*iIter)->m_creBlockTime = *iTimeIter;
+    				string strMsg="";
+    				char temSec[32];
+    				sprintf(temSec, "%ld", *iTimeIter);
+    				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==updateNBTime:" + temSec;
+    				OutputLog("NodeInfo", strMsg);
     				break;
     			}
     		}
@@ -5533,7 +5543,7 @@ bool SendMessages(CNode* pto)
         //
       	if(g_sendNewBlockTimeVec.size() > 0)
        	{
-      		//LOCK(g_csNewBlockTime);
+      		LOCK(g_csNewBlockTime);
       		pto->PushMessage(NetMsgType::SENDNBTIME, g_sendNewBlockTimeVec);
        	}
 
