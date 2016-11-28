@@ -135,7 +135,7 @@ public:
         nPruneAfterHeight = 100000;
 
         //genesis = CreateGenesisBlock(1231006505, 2083236893, 0x1d00ffff, 1, 50 * COIN);
-        genesis = CreateGenesisBlock(1480301294, 0x1d00ffff,0x01, 1);
+        genesis = CreateGenesisBlock(1480308475, 0x1d00ffff,0x01, 1);
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
@@ -148,7 +148,7 @@ std::cout<<"second str2's value:"<<str2<<std::endl;
 int  valueee=GetTime();
 std::cout<<"thrid str1's value:"<<GetTime()<<std::endl;
 
-        assert(consensus.hashGenesisBlock == uint256S("0xaccd71aa76ffd314c076448f969fe8f391e483aad95c95521e28a27dcbe88265"));
+        assert(consensus.hashGenesisBlock == uint256S("0xa18194081eb519cb2addd0a71a60b96811264be7a5b354c289cc952e63bfc2ca"));
         assert(genesis.hashMerkleRoot == uint256S("0x9175f9c1dc3d4a6d5f24f76aab1b3b056ddcde52db4afec6a822fc71a2d08fea"));
         //Begin Noted by syl 2016-11-14================================================================
 //        vSeeds.push_back(CDNSSeedData("bitcoin.sipa.be", "seed.bitcoin.sipa.be")); // Pieter Wuille
@@ -189,7 +189,7 @@ std::cout<<"thrid str1's value:"<<GetTime()<<std::endl;
 //            (250000, uint256S("0x000000000000003887df1f29024b06fc2200b55f8af8f35453d7be294df2d214"))
 //            (279000, uint256S("0x0000000000000001ae8c72a0b0c301f67e3afca10e819efa9041e458e9bd7e40"))
 //            (295000, uint256S("0x00000000000000004d9b4ef50f0f9d686fd69db2e03af35a100370c64632a983"))
-            (0, uint256S("0xaccd71aa76ffd314c076448f969fe8f391e483aad95c95521e28a27dcbe88265")),
+            (0, uint256S("0xa18194081eb519cb2addd0a71a60b96811264be7a5b354c289cc952e63bfc2ca")),
 			1479539355, // * UNIX timestamp of last checkpoint block
             1,   // * total number of transactions between genesis and last checkpoint
                         //   (the tx=... number in the SetBestChain debug.log lines)

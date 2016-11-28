@@ -2754,6 +2754,12 @@ void SendNewBlockTime(const CBlock* pblock)
 	{
 		g_sendNewBlockTimeVec.clear();
 	}
+	string strMsg = "";
+	char temSec[32];
+	sprintf(temSec, "%ld", pblock->GetBlockTime());
+	strMsg += "localCreateNewBlockMAC : " + pblock->GetBlockHeader().m_strMac + "==localCreateNewBlockTime:" + temSec;
+	OutputLog("CreatNewBlockTimeInfo", strMsg);
+
 	g_sendNewBlockTimeVec.push_back(pblock->GetBlockTime());
 }
 
