@@ -4923,18 +4923,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 }
             }
 
-//            Begin Add by syl 2016-11-26=========================================
-//			vector<CNode*>::iterator iIter;
-//			for (iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
-//			{
-//				if ((*iIter)->m_strMacAddr.compare(header.m_strMac) == 0)
-//				{
-//					LOCK(g_csAllvNodes);
-//					(*iIter)->m_creBlockTime = header.nTime;
-//					break;
-//				}
-//			}
-//            //End	Add by syl 2016-11-26=========================================
+            //Begin Add by syl 2016-11-28=====================================
+			string strMsg = "";
+			strMsg += "===RecvBlockHeaderHash : " + header.GetHash().ToString() + "\r\n";
+			LogPrintf("%s", strMsg);
+            //End	Add by syl 2016-11-28=====================================
         }
 
         if (pindexLast)
