@@ -557,7 +557,8 @@ bool SortVNodesBy( const CNode* v1, const CNode* v2)
 {
 	 assert(NULL!=v1);
 	 assert(NULL!=v2);
-
+	 if ((fabs(v1->m_creBlockTime - v2->m_creBlockTime)<(0.05*DEFAULT_GENERATE_PERIOD))&&(v1->m_bNetState>=v2->m_bNetState)&&(true==v1->m_bNetState)&&(true==v2->m_bNetState))
+		 return v1->addr.ToStringIP()<v2->addr.ToStringIP();
      return (v1->m_creBlockTime <= v2->m_creBlockTime)&&(v1->m_bNetState>=v2->m_bNetState);//Asc
 }
 
