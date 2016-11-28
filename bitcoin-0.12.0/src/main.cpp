@@ -5232,30 +5232,36 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     	vector<uint64_t> vData;
     	vRecv >> vData;
 
+    	vector<CNode*> cpNodes;
+    	{
+    		LOCK(g_csAllvNodes);
+    		cpNodes = g_vAllNodes;
+    	}
+
+    	//
     	vector<uint64_t>::iterator iTimeIter;
     	for(iTimeIter = vData.begin(); iTimeIter != vData.end(); iTimeIter++)
     	{
-    		LOCK(g_csAllvNodes);
     		uint64_t uint = *iTimeIter;
     		vector<CNode*>::iterator iIter;
-    		for(iIter = g_vAllNodes.begin(); iIter != g_vAllNodes.end(); iIter++)
+    		for(iIter = cpNodes.begin(); iIter != cpNodes.end(); iIter++)
     		{
     			if(pfrom->m_strMacAddr.compare((*iIter)->m_strMacAddr) == 0)
     			{
     				//
 					string strMsg = "";
 					char oldSec[32];
-					sprintf(oldSec, "%ld", *iTimeIter);
-					strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + oldSec + "\r\n";
+					sprintf(oldSec, "%ld", (*iIter)->m_creBlockTime);
+					strMsg += "=============NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + oldSec + "\r\n";
 					LogPrintf("%s", strMsg);
 
-    				(*iIter)->m_creBlockTime = *iTimeIter;
+    				(*iIter)->m_creBlockTime = uint;
 
     				//
     				strMsg="";
     				char newSec[32];
-    				sprintf(newSec, "%ld", *iTimeIter);
-    				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==updateNBTime:" + newSec + "\r\n";
+    				sprintf(newSec, "%ld", (*iIter)->m_creBlockTime);
+    				strMsg += "=============NotedMAC : " + (*iIter)->m_strMacAddr + "==updateNBTime:" + newSec + "\r\n";
     				LogPrintf("%s", strMsg);
     				break;
     			}
@@ -5264,11 +5270,16 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 					string strMsg = "";
 					char temSec[32];
 					sprintf(temSec, "%ld", (*iIter)->m_creBlockTime);
-					strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + temSec + "\r\n";
+					strMsg += "*************NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + temSec + "\r\n";
 					LogPrintf("%s", strMsg);
     			}
     		}
     	}
+    	//re
+//    	{
+//    		LOCK(g_csAllvNodes);
+//    		g_vAllNodes = cpNodes;
+//    	}
     }
     //End 	Add by syl 2016-11-23================================
 
