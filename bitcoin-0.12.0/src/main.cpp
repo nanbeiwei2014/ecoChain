@@ -2757,9 +2757,9 @@ void SendNewBlockTime(const CBlock* pblock)
 	string strMsg = "";
 	char temSec[32];
 	sprintf(temSec, "%ld", pblock->GetBlockTime());
-	strMsg += "localCreateNewBlockMAC : " + pblock->GetBlockHeader().m_strMac + "==localCreateNewBlockTime:" + temSec;
+	strMsg += "localCreateNewBlockMAC : " + pblock->GetBlockHeader().m_strMac + "==localCreateNewBlockTime:" + temSec + "\r\n";
 	//OutputLog("CreatNewBlockTimeInfo", strMsg);
-	LogPrintf(NULL, strMsg);
+	LogPrintf("%s", strMsg);
 
 	g_sendNewBlockTimeVec.push_back(pblock->GetBlockTime());
 }
@@ -5244,9 +5244,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     			string strMsg="";
 				char temSec[32];
 				sprintf(temSec, "%ld", *iTimeIter);
-				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + temSec;
+				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==OldNBTime:" + temSec + "\r\n";
 				//OutputLog("NodeInfo", strMsg);
-				LogPrintf(NULL, strMsg);
+				LogPrintf("%s", strMsg);
 
     			if(pfrom->m_strMacAddr.compare((*iIter)->m_strMacAddr) == 0)
     			{
@@ -5255,9 +5255,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     				string strMsg="";
     				char temSec[32];
     				sprintf(temSec, "%ld", *iTimeIter);
-    				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==updateNBTime:" + temSec;
+    				strMsg += "NotedMAC : " + (*iIter)->m_strMacAddr + "==updateNBTime:" + temSec + "\r\n";
     				//OutputLog("NodeInfo", strMsg);
-    				LogPrintf(NULL, strMsg);
+    				LogPrintf("%s", strMsg);
     				break;
     			}
     		}
