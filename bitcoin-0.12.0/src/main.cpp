@@ -2750,10 +2750,8 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
 void SendNewBlockTime(const CBlock* pblock)
 {
 	LOCK(g_csNewBlockTime);
-	//if(g_sendNewBlockTimeVec.size() > 5)
-	{
-		g_sendNewBlockTimeVec.clear();
-	}
+	g_sendNewBlockTimeVec.clear();
+
 	string strMsg = "";
 	char temSec[32];
 	sprintf(temSec, "%ld", pblock->GetBlockTime());
