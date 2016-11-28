@@ -2759,6 +2759,7 @@ void SendNewBlockTime(const CBlock* pblock)
 	//OutputLog("CreatNewBlockTimeInfo", strMsg);
 	LogPrintf("%s", strMsg);
 
+	uint64_t n64Time = pblock->GetBlockTime();
 	g_sendNewBlockTimeVec.push_back(pblock->GetBlockTime());
 }
 
