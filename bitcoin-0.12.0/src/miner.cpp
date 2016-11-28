@@ -603,13 +603,13 @@ void static BitcoinMiner(const CChainParams& chainparams)
             {
             	if ((*iter)->m_bNetState) nConnectCount++;
             }
-//            vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
-            vector<CNode*>::iterator iter=g_vAllNodes.begin();
-            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
-            {
-            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
-            	iter++;
-            }
+            vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+//            vector<CNode*>::iterator iter=g_vAllNodes.begin();
+//            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
+//            {
+//            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
+//            	iter++;
+//            }
 
              std::string strIp=(*iter)->addr.ToStringIP();
             if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
