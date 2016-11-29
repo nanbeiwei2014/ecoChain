@@ -12,7 +12,7 @@
 
 #include <stdexcept>
 #include <vector>
-
+#include <iostream>
 /** 
  * secp256k1:
  * const unsigned int PRIVATE_KEY_SIZE = 279;
@@ -61,6 +61,7 @@ private:
     }
 
 public:
+    const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
     //! Construct an invalid public key.
     CPubKey()
     {
@@ -71,7 +72,10 @@ public:
     template <typename T>
     void Set(const T pbegin, const T pend)
     {
+        int leng=GetLen(pend[0]);
+        std::cout<<"leng:"<<leng<<std::endl;
         int len = pend == pbegin ? 0 : GetLen(pbegin[0]);
+        std::cout<<"len:"<<len<<std::endl;
         if (len && len == (pend - pbegin))
             memcpy(vch, (unsigned char*)&pbegin[0], len);
         else
@@ -178,6 +182,12 @@ public:
     bool Verify(const uint256& hash, const std::vector<unsigned char>& vchSig) const;
 
     /* add by sdk begin*/
+    bool DecodeBase58(const char* psz,std::vector<unsigned char> &outData);
+    std::string EncodeBase58(const unsigned char* pbegin, const unsigned char* pend);
+    std::string EncodeBase58(const std::vector<unsigned char>& vch);
+    //bool SetString(const std::string& str,std::vector<unsigned char>&outData);
+    bool SetString(const char* psz, std::vector<unsigned char>& outData);
+    std::string ToString(); //const;
     bool qkgj_verify( const uint256 &hash, const std::string &vchSig ) const;
     /* add by sdk begin*/
 
