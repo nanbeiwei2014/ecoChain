@@ -47,7 +47,7 @@ uint64_t nLastBlockSize = 0;
 //*************begin modify by mengqg 20161104***********************************
 static const int DEFAULT_GENERATE_PERIOD = 0.5*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
-static const int MOD_TIMES = 2;//
+static const int MOD_TIMES = 0;//
 static const int NumberOfComputer=2;
 //*************end modify by mengqg 20161104*************************
 
@@ -629,20 +629,17 @@ void static BitcoinMiner(const CChainParams& chainparams)
             int64_t iTime=GetTime();
             int64_t period=0.99*DEFAULT_GENERATE_PERIOD;
 
-           static bool lockIBDState = true;
-           if (0.9*DEFAULT_GENERATE_PERIOD>(iTime-pindexPrev->GetBlockTime()))lockIBDState = false;
-           if (lockIBDState&&((0.05*DEFAULT_GENERATE_PERIOD)<fabs(iTime%period))){
-        	   lockIBDState = false;
-            }else
-            	lockIBDState = true;
+           //static bool lockState = true;
+           if (0.9*DEFAULT_GENERATE_PERIOD>(iTime-pindexPrev->GetBlockTime()))continue;
+           if ((0.05*DEFAULT_GENERATE_PERIOD)<fabs(iTime%period)){
+        	   continue;
+            }
+            if (MOD_TIMES!=((iTime/period)%NumberOfComputer)){
 
-            if (lockIBDState&&(MOD_TIMES!=((iTime/period)%NumberOfComputer))){
+            	continue;
+            }
 
-            	lockIBDState = false;
-            }else
-            	lockIBDState = true;
-
-            if (false==lockIBDState)  continue;
+            //if (false==lockState)  continue;
 
             auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
             if (!pblocktemplate.get())
