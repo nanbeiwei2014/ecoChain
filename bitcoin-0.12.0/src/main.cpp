@@ -5622,7 +5622,8 @@ bool SendMessages(CNode* pto)
                 // Try to find first header that our peer doesn't have, and
                 // then send all headers past that one.  If we come across any
                 // headers that aren't on chainActive, give up.
-                BOOST_FOREACH(const uint256 &hash, pto->vBlockHashesToAnnounce) {
+                BOOST_FOREACH(const uint256 &hash, pto->vBlockHashesToAnnounce)
+                {
                     BlockMap::iterator mi = mapBlockIndex.find(hash);
                     assert(mi != mapBlockIndex.end());
                     CBlockIndex *pindex = mi->second;
@@ -5635,7 +5636,6 @@ bool SendMessages(CNode* pto)
                     pBestIndex = pindex;
                     if (fFoundStartingHeader) {
                         // add this to the headers message
-                    	CBlockHeader tmpHeader = pindex->GetBlockHeader();		//Add by syl 2016-11-24======================
                         vHeaders.push_back(pindex->GetBlockHeader());
                     } else if (PeerHasHeader(&state, pindex)) {
                         continue; // keep looking for the first new block
@@ -5643,7 +5643,6 @@ bool SendMessages(CNode* pto)
                         // Peer doesn't have this header but they do have the prior one.
                         // Start sending headers.
                         fFoundStartingHeader = true;
-                        CBlockHeader tmpHeader = pindex->GetBlockHeader();		//Add by syl 2016-11-24======================
                         vHeaders.push_back(pindex->GetBlockHeader());
                     } else {
                         // Peer doesn't have this header or the prior one -- nothing will
@@ -5690,6 +5689,15 @@ bool SendMessages(CNode* pto)
                     LogPrint("net", "%s: sending header %s to peer=%d\n", __func__,
                             vHeaders.front().GetHash().ToString(), pto->id);
                 }
+				//Begin Add by syl 2016-11-28=====================================
+                vector<CBlock>::iterator iIter;
+                for(iIter = vHeaders.begin(); iIter != vHeaders.begin(); iIter++)
+                {
+					string strMsg = "";
+					strMsg += "=========Send block header : " + (*iIter).GetHash().ToString() + "\r\n";
+					LogPrintf("%s", strMsg);
+                }
+				//End	Add by syl 2016-11-28=====================================
                 pto->PushMessage(NetMsgType::HEADERS, vHeaders);
                 state.pindexBestHeaderSent = pBestIndex;
             }
