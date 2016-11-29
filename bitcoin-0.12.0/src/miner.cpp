@@ -47,7 +47,6 @@ uint64_t nLastBlockSize = 0;
 //*************begin modify by mengqg 20161104***********************************
 static const int DEFAULT_GENERATE_PERIOD = 0.15*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
-static const int MOD_TIMES = 2;//
 //*************end modify by mengqg 20161104*************************
 
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev)
@@ -628,15 +627,26 @@ void static BitcoinMiner(const CChainParams& chainparams)
             int64_t iTime=GetTime();
             int64_t period=DEFAULT_GENERATE_PERIOD;
 
-           //static bool lockState = true;
-           if (0.95*DEFAULT_GENERATE_PERIOD>(iTime-pindexPrev->GetBlockTime()))continue;
-           if ((0.05*DEFAULT_GENERATE_PERIOD)<fabs(iTime%period)){
-        	   continue;
-            }
-            if (MOD_TIMES!=((iTime/period)%(vNodes.size()+1))){
+            //static bool lockState = true;
+			if (0.95 * DEFAULT_GENERATE_PERIOD > (iTime - pindexPrev->GetBlockTime()))
+				continue;
+			if ((0.05 * DEFAULT_GENERATE_PERIOD) < fabs(iTime % period)) {
+				continue;
+			}
 
-            	continue;
-            }
+			int nIndex = -1;
+			if(mapArgs.count("-index"))
+			{
+				nIndex = GetArg("-index",0);
+				if(nIndex == -1)
+				{
+					continue;
+				}
+			}
+			if (nIndex != ((iTime / period) % (vNodes.size() + 1))) {
+
+				continue;
+			}
 
             //if (false==lockState)  continue;
 
