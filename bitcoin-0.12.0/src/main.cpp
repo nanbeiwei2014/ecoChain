@@ -4852,6 +4852,15 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         // headers message). In both cases it's safe to update
         // pindexBestHeaderSent to be our tip.
         nodestate->pindexBestHeaderSent = pindex ? pindex : chainActive.Tip();
+
+        //Begin Add by syl 2016-11-29========================================================
+        BOOST_FOREACH(const CBlockHeader& header, vHeaders)
+        {
+			string strMsg = "";
+			strMsg += "===type:GETHEADERS Send block header : " + header.GetHash().ToString() + "\r\n";
+			LogPrintf("%s", strMsg);
+        }
+		//End Add by syl 2016-11-29========================================================
         pfrom->PushMessage(NetMsgType::HEADERS, vHeaders);
     }
 
@@ -4943,7 +4952,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 // TODO: optimize: if pindexLast is an ancestor of chainActive.Tip or pindexBestHeader, continue
                 // from there instead.
         	LogPrint("net", "more getheaders (%d) to end to peer=%d (startheight:%d)\n", pindexLast->nHeight, pfrom->id, pfrom->nStartingHeight);
-            pfrom->PushMessage(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexLast), uint256());
+
+        	//Begin Add by syl 2016-11-29========================================================
+			string strMsg = "";
+			strMsg += "===pindexLast : " + uint256().ToString() + "\r\n";
+			LogPrintf("%s", strMsg);
+			//End Add by syl 2016-11-29========================================================
+        	pfrom->PushMessage(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexLast), uint256());
         }
 
         bool fCanDirectFetch = CanDirectFetch(chainparams.GetConsensus());
@@ -5552,6 +5567,12 @@ bool SendMessages(CNode* pto)
                 if (pindexStart->pprev)
                     pindexStart = pindexStart->pprev;
                 LogPrint("net", "initial getheaders (%d) to peer=%d (startheight:%d)\n", pindexStart->nHeight, pto->id, pto->nStartingHeight);
+
+                //Begin Add by syl 2016-11-29========================================================
+				string strMsg = "";
+				strMsg += "===pindexStart : " + uint256().ToString() + "\r\n";
+				LogPrintf("%s", strMsg);
+				//End Add by syl 2016-11-29========================================================
                 pto->PushMessage(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexStart), uint256());
             }
         }
