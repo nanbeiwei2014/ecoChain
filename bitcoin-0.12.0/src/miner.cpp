@@ -630,12 +630,13 @@ void static BitcoinMiner(const CChainParams& chainparams)
             int64_t period=0.99*DEFAULT_GENERATE_PERIOD;
 
            static bool lockIBDState = true;
-           if ((0.05*DEFAULT_GENERATE_PERIOD)<fabs(iTime%period)){
+           if (0.9*DEFAULT_GENERATE_PERIOD>(iTime-pindexPrev->GetBlockTime()))lockIBDState = false;
+           if (lockIBDState&&((0.05*DEFAULT_GENERATE_PERIOD)<fabs(iTime%period))){
         	   lockIBDState = false;
             }else
             	lockIBDState = true;
 
-            if (MOD_TIMES!=((iTime/period)%NumberOfComputer)){
+            if (lockIBDState&&(MOD_TIMES!=((iTime/period)%NumberOfComputer))){
 
             	lockIBDState = false;
             }else
