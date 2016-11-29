@@ -4909,19 +4909,18 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         CBlockIndex *pindexLast = NULL;
         BOOST_FOREACH(const CBlockHeader& header, headers) {
+			//Begin Add by syl 2016-11-28=====================================
+			string strMsg = "";
+			strMsg += "===RecvBlockHeaderHash : " + header.GetHash().ToString() + "\r\n";
+			LogPrintf("%s", strMsg);
+			//End	Add by syl 2016-11-28=====================================
+
         	CValidationState state;
             if (pindexLast != NULL && header.hashPrevBlock != pindexLast->GetBlockHash()) {
             	Misbehaving(pfrom->GetId(), 20);
             	return error("non-continuous headers sequence");
             }
             if (!AcceptBlockHeader(header, state, chainparams, &pindexLast)) {
-
-                //Begin Add by syl 2016-11-28=====================================
-    			string strMsg = "";
-    			strMsg += "===RecvBlockHeaderHash : " + header.GetHash().ToString() + "\r\n";
-    			LogPrintf("%s", strMsg);
-                //End	Add by syl 2016-11-28=====================================
-
             	int nDoS;
                 if (state.IsInvalid(nDoS)) {
                 	if (nDoS > 0)
