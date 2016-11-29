@@ -45,9 +45,9 @@ using namespace std;
 uint64_t nLastBlockTx = 0;
 uint64_t nLastBlockSize = 0;
 //*************begin modify by mengqg 20161104***********************************
-static const int DEFAULT_GENERATE_PERIOD = 0.2*60;  //unit s
+static const int DEFAULT_GENERATE_PERIOD = 0.1*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
-static const int MOD_TIMES = 1;//
+static const int MOD_TIMES = 0;//
 static const int NumberOfComputer=2;
 //*************end modify by mengqg 20161104*************************
 
@@ -627,14 +627,14 @@ void static BitcoinMiner(const CChainParams& chainparams)
 //
 //            (*iter)->m_creBlockTime= GetTime();
             int64_t iTime=GetTime();
-            int64_t period=0.99*DEFAULT_GENERATE_PERIOD;
+            int64_t period=0.95*DEFAULT_GENERATE_PERIOD;
 
            //static bool lockState = true;
-           if (0.99*DEFAULT_GENERATE_PERIOD>(iTime-pindexPrev->GetBlockTime()))continue;
-           if ((0.05*DEFAULT_GENERATE_PERIOD)<fabs(iTime%period)){
+           if (0.9*DEFAULT_GENERATE_PERIOD>(iTime-pindexPrev->GetBlockTime()))continue;
+           if ((0.08*DEFAULT_GENERATE_PERIOD)<fabs(iTime%period)){
         	   continue;
             }
-            if (MOD_TIMES!=((iTime/period)%NumberOfComputer)){
+            if (MOD_TIMES!=((iTime/period)%(vNodes.size()+1))){
 
             	continue;
             }
@@ -691,6 +691,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
             LogPrintf("QKGJMiner:\n");
             LogPrintf("proof-of-idleTime found  \n  hash: %s  \n", pblock->GetHash().GetHex());
             ProcessBlockFound(pblock, chainparams);
+            std::cout<<"create block : "<<pblock->GetHash().ToString() <<std::endl;
             SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
  /***************Period average caclulate******************************************
