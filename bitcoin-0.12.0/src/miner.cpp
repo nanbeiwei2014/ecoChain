@@ -47,6 +47,7 @@ uint64_t nLastBlockSize = 0;
 //*************begin modify by mengqg 20161104***********************************
 static const int DEFAULT_GENERATE_PERIOD = 0.5*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
+static const int MOD_TIMES = 1;//
 //*************end modify by mengqg 20161104*************************
 
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev)
@@ -598,32 +599,35 @@ void static BitcoinMiner(const CChainParams& chainparams)
 
 
 
-            unsigned int nConnectCount = 0;
-
-            for(vector<CNode*>::iterator iter=g_vAllNodes.begin();iter!=g_vAllNodes.end();iter++)
-            {
-            	if ((*iter)->m_bNetState) nConnectCount++;
-            }
-            std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
- //           vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
-            vector<CNode*>::iterator iter=g_vAllNodes.begin();
-            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
-            {
-            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
-            	iter++;
-            }
-
-             std::string strIp=(*iter)->addr.ToStringIP();
-            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
-            {
-        	   if ((GetTime()-pindexPrev->nTime)<(0.9*DEFAULT_GENERATE_PERIOD))
-        		   continue;
-
-            }else{
-            	continue;
-            }
-
-            (*iter)->m_creBlockTime= GetTime();
+//            unsigned int nConnectCount = 0;
+//
+//            for(vector<CNode*>::iterator iter=g_vAllNodes.begin();iter!=g_vAllNodes.end();iter++)
+//            {
+//            	if ((*iter)->m_bNetState) nConnectCount++;
+//            }
+//            std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+// //           vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+//            vector<CNode*>::iterator iter=g_vAllNodes.begin();
+//            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
+//            {
+//            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
+//            	iter++;
+//            }
+//
+//             std::string strIp=(*iter)->addr.ToStringIP();
+//            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
+//            {
+//        	   if ((GetTime()-pindexPrev->nTime)<(0.9*DEFAULT_GENERATE_PERIOD))
+//        		   continue;
+//
+//            }else{
+//            	continue;
+//            }
+//
+//            (*iter)->m_creBlockTime= GetTime();
+            int64_t iTime=GetTime();
+            int64_t period=0.999*DEFAULT_GENERATE_PERIOD;
+            if (MOD_TIMES!=iTime%period)continue;
 
             auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
             if (!pblocktemplate.get())
