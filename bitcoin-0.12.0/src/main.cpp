@@ -4915,19 +4915,25 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             	return error("non-continuous headers sequence");
             }
             if (!AcceptBlockHeader(header, state, chainparams, &pindexLast)) {
+
+                //Begin Add by syl 2016-11-28=====================================
+    			string strMsg = "";
+    			strMsg += "===RecvBlockHeaderHash : " + header.GetHash().ToString() + "\r\n";
+    			LogPrintf("%s", strMsg);
+                //End	Add by syl 2016-11-28=====================================
+
             	int nDoS;
                 if (state.IsInvalid(nDoS)) {
                 	if (nDoS > 0)
                         Misbehaving(pfrom->GetId(), nDoS);
                     return error("invalid header received");
                 }
+				//Begin Add by syl 2016-11-28=====================================
+				string strMsg = "";
+				strMsg += "===Error AcceptBlockHeader error : " + header.GetHash().ToString() + "\r\n";
+				LogPrintf("%s", strMsg);
+				//End	Add by syl 2016-11-28=====================================
             }
-
-            //Begin Add by syl 2016-11-28=====================================
-			string strMsg = "";
-			strMsg += "===RecvBlockHeaderHash : " + header.GetHash().ToString() + "\r\n";
-			LogPrintf("%s", strMsg);
-            //End	Add by syl 2016-11-28=====================================
         }
 
         if (pindexLast)
