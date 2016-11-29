@@ -48,7 +48,7 @@ uint64_t nLastBlockSize = 0;
 static const int DEFAULT_GENERATE_PERIOD = 0.5*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
 static const int MOD_TIMES = 1;//
-static const int NumberOfComputer=5;
+static const int NumberOfComputer=2;
 //*************end modify by mengqg 20161104*************************
 
 int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParams, const CBlockIndex* pindexPrev)
