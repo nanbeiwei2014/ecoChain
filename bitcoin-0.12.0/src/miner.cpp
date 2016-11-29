@@ -628,9 +628,20 @@ void static BitcoinMiner(const CChainParams& chainparams)
 //            (*iter)->m_creBlockTime= GetTime();
             int64_t iTime=GetTime();
             int64_t period=0.99*DEFAULT_GENERATE_PERIOD;
-            if (0!=(iTime%period))continue;
-            if (MOD_TIMES!=(iTime/period)%NumberOfComputer))continue;
 
+           static bool lockIBDState = true;
+           if ((0.05*DEFAULT_GENERATE_PERIOD)<fabs(iTime%period)){
+        	   lockIBDState = false;
+            }else
+            	lockIBDState = true;
+
+            if (MOD_TIMES!=((iTime/period)%NumberOfComputer)){
+
+            	lockIBDState = false;
+            }else
+            	lockIBDState = true;
+
+            if (false==lockIBDState)  continue;
 
             auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
             if (!pblocktemplate.get())
