@@ -37,9 +37,6 @@ bool TransactionSignatureCreator::CreateSig(std::vector<unsigned char>& vchSig, 
 //bool create_sign(const CPrivKey &cKey, std::vector<unsigned char>&vchSign, const CKeyID& addr, const Cqkgj_basic_data& data)
 bool create_sign(const CKey &cKey, std::vector<unsigned char>&vchSign, const CKeyID& addr, const Cqkgj_basic_data& data)
 {
-    //CKey key;
-    //key.SetPrivKey( cKey, 1 );
-
     unsigned int nIn = 1;
     CScript script;
     int nHashType = 1;

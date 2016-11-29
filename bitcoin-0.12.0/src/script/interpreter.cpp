@@ -2,7 +2,7 @@
 // Copyright (c) 2009-2015 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
+#include <iostream>
 #include "interpreter.h"
 
 #include "primitives/transaction.h"
@@ -12,7 +12,8 @@
 #include "pubkey.h"
 #include "script/script.h"
 #include "uint256.h"
-
+#include "util.h"
+#include "base58.h"
 using namespace std;
 
 typedef vector<unsigned char> valtype;
@@ -1150,13 +1151,24 @@ uint256 sign_hash(const CScript& scriptCode, const Cqkgj_basic_data& data, unsig
 
 bool check_sign(Cqkgj_basic_data& vch_data, vector<unsigned char>&vch_pub_key, CScript& script)
 {
+    std::cout<<"address:"<<vch_data.m_address<<std::endl;
+    CBitcoinAddress address;
+    address.SetString(vch_data.m_address);
+
+    CKeyID kid;
+    address.GetKeyID(kid);
+
     vector<unsigned char> pub_key1;
     pub_key1.resize(vch_data.m_address.length());
     pub_key1.assign(vch_data.m_address.begin(),vch_data.m_address.end());
 
+    string str;
+    str.assign(pub_key1.begin(),pub_key1.end());
+    std::cout<<"str:"<<str<<std::endl;
     //CPubKey pub_key( vch_pub_key );
-    //CPubKey pub_key( vch_pub_key.begin(),vch_pub_key.end() );
-    CPubKey pub_key( pub_key1.begin(),pub_key1.end() );
+    CPubKey pub_key( vch_pub_key.begin(),vch_pub_key.end() );
+    std::cout<<"pub_key1.begin():"<<pub_key1[0]<<" pub_key1.end():"<<pub_key1[39]<<std::endl;
+    //CPubKey pub_key( pub_key1.begin(),pub_key1.end() );
     if ( !pub_key.IsValid() )
         return false;
 
