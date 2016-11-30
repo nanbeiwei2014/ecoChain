@@ -372,6 +372,9 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
                 actualPriority = vecPriority.front().first;
                 std::pop_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
                 vecPriority.pop_back();
+            }else{
+            	iter = qmempool.map_data.project<0>(mi);
+            	mi++;
             }
 
 
