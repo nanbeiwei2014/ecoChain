@@ -2163,9 +2163,9 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 //    CAmount nFees = 0;
 //    int nInputs = 0;
 //    unsigned int nSigOps = 0;
-//    CDiskTxPos pos(pindex->GetBlockPos(), GetSizeOfCompactSize(block.qvtx.size()));
-//    std::vector<std::pair<uint256, CDiskTxPos> > vPos;
-//    vPos.reserve(block.qvtx.size());
+    CDiskTxPos pos(pindex->GetBlockPos(), GetSizeOfCompactSize(block.qvtx.size()));
+    std::vector<std::pair<uint256, CDiskTxPos> > vPos;
+    vPos.reserve(block.qvtx.size());
 //
 ////********begin edit by mengqg 20161111********************************************************************
 //    //blockundo.vtxundo.reserve(block.vtx.size() - 1);
@@ -2175,10 +2175,10 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 //
 ////******************begin delete by mengqg 20161111******************************************************************************************
 //    /*******
-//    for (unsigned int i = 0; i < block.vtx.size(); i++)
-//    {
-//        const CTransaction &tx = block.vtx[i];
-//
+    for (unsigned int i = 0; i < block.qvtx.size(); i++)
+    {
+        const Cqkgj_basic_data &tx = block.qvtx[i];
+
 //        nInputs += tx.vin.size();
 //        nSigOps += GetLegacySigOpCount(tx);
 //        if (nSigOps > MAX_BLOCK_SIGOPS)
@@ -2218,9 +2218,9 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 //        }
 //        UpdateCoins(tx, state, view, i == 0 ? undoDummy : blockundo.vtxundo.back(), pindex->nHeight);
 //
-//        vPos.push_back(std::make_pair(tx.GetHash(), pos));
-//        pos.nTxOffset += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
-//    }
+        vPos.push_back(std::make_pair(tx.GetHash(), pos));
+        pos.nTxOffset += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
+    }
 //    int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
 //    LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
 //
@@ -2260,11 +2260,11 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 //        pindex->RaiseValidity(BLOCK_VALID_SCRIPTS);
 //        setDirtyBlockIndex.insert(pindex);
 //    }
-//
+
 //    if (fTxIndex)
-//        if (!pblocktree->WriteTxIndex(vPos))
-//            return AbortNode(state, "Failed to write transaction index");
-//
+        if (!pblocktree->WriteTxIndex(vPos))
+            return AbortNode(state, "Failed to write transaction index");
+
     // add this block to the view's block chain
     view.SetBestBlock(pindex->GetBlockHash());
 //
