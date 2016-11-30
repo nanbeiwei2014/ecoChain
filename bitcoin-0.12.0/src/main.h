@@ -298,7 +298,7 @@ void PruneAndFlush();
 bool AddToMempool( Cqkgj_mempool& pool, CValidationState &state, const Cqkgj_basic_data &data );
 
 /* Retrieve a transaction(from memory pool,or from disk,if possible */
-bool get_transaction( const uint256 &hash, Cqkgj_basic_data &data );
+bool get_transaction( const uint256 &hash, Cqkgj_basic_data &data, uint256& hashBlock );
 /* add by sdk end */
 
 /** (try to) add transaction to memory pool **/

@@ -56,9 +56,10 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
              "\nArguments:\n"
              "1. \"data_id\"        (string, required) A json objects about this data's hash\n"
              "\nResult:\n"
-             "\"address\"         (string) string of address\n"
-             "\"data\"            (string) string of the data\n"
-             "\"sign\"            (string) string of the sign\n"
+             "\"address\":\"address\" (string) string of address\n"
+             "\"data\":\"data\"       (string) string of the data\n"
+             "\"sign\":\"signature\"  (string) string of the sign\n"
+             "\"blockhash\":\"hash\", (string) the block hash\n"
 
              "\nExamples\n"
              + HelpExampleCli("get_data_from_sys", "\"[{\\\"data_id\\\":\\\"myid\\\"}]\"")
@@ -68,7 +69,8 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     LOCK( cs_main );
     uint256 hash = ParseHashV( params[0], "parameter 1");
     Cqkgj_basic_data data;
-    if( !get_transaction(hash,data))
+    uint256 hashBlock;
+    if( !get_transaction( hash, data, hashBlock ) )
     {
         throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"No information avaliable about the data you want get it");
     }
@@ -79,6 +81,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     result.push_back(Pair("address",data.m_address));
     result.push_back(Pair("data",data.m_data));
     result.push_back(Pair("sign",data.m_sign));
+    result.push_back(Pair("blockhash",hashBlock.GetHex()));
 
     return result;
 }
@@ -269,7 +272,7 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
         }
     }
 
-    LogPrintf("[%s:%d],addr:%s,data:%s,sign:%s",__FUNCTION__,__LINE__,str_addr,str_data,str_sign);
+    LogPrintf("[%s:%d],addr:%s,data:%s,sign:%s\n",__FUNCTION__,__LINE__,str_addr,str_data,str_sign);
 
     Cqkgj_basic_data data(str_addr,str_data,str_sign);
 
@@ -291,11 +294,16 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 
     //写入内存池
     //Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
-    CValidationState state;
-    bool bRet = AddToMempool( qmempool, state, data );
-    if ( false == bRet )
+    uint256 data_hash = data.get_hash();
+    bool bExists = qmempool.exists(data_hash);
+    if ( !bExists )
     {
-        throw JSONRPCError(RPC_TRANSACTION_REJECTED,strprintf("%i:%s",state.GetRejectCode(),state.GetRejectReason()));
+        CValidationState state;
+        bool bRet = AddToMempool( qmempool, state, data );
+        if ( false == bRet )
+        {
+            throw JSONRPCError(RPC_TRANSACTION_REJECTED,strprintf("%i:%s",state.GetRejectCode(),state.GetRejectReason()));
+        }
     }
 
     //触发广播数据到其他节点的广播消息
