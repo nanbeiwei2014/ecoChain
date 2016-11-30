@@ -1146,6 +1146,7 @@ void Cqkgj_mempool::remove_staged( set_entries &stage )
 void Cqkgj_mempool::remove( const Cqkgj_basic_data& origData, std::list<Cqkgj_basic_data>& removed, bool bRecur)
 {
     LOCK( cs );
+    LogPrintf("[%s:%d],enter function mempool remove\n",__FUNCTION__,__LINE__);
     set_entries data_to_remove;
     data_it origit = map_data.find( origData.get_hash() );
     if ( origit != map_data.end())

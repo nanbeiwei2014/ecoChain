@@ -755,7 +755,7 @@ public:
         }
     };
 
-    typedef std::set<it_hash, CompareIteratorByHash> setEntries;
+    //typedef std::set<it_hash, CompareIteratorByHash> setEntries;
 
 };
 /* add by sdk end */

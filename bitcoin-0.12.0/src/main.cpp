@@ -852,8 +852,13 @@ bool AddToMempool( Cqkgj_mempool& pool, CValidationState &state, const Cqkgj_bas
 
     // is it already in the memory pool?
     uint256 hash = data.get_hash();
+    LogPrintf("[%s:%d],hash to string:%s",__FUNCTION__,__LINE__,hash.ToString());
     if( pool.exists( hash ))
-        return state.Invalid(false,REJECT_ALREADY_KNOWN,"data already in mempool");
+    {
+        LogPrintf("[%s:%d]%s",__FUNCTION__,__LINE__,hash.ToString());
+        //return state.Invalid(false,REJECT_ALREADY_KNOWN,"data already in mempool");
+        return false;
+    }
 
     double dPriority = 0.0;
     unsigned int n_sig_ops = 0;
@@ -861,14 +866,14 @@ bool AddToMempool( Cqkgj_mempool& pool, CValidationState &state, const Cqkgj_bas
 
     //unsigned int ui_size = process.get_size();
 
-    LOCK( pool.cs );
+    //LOCK( pool.cs );
     bool res = pool.add_to_mempool( hash,process);
 
     return res;
 }
 
 /* Retrieve a transaction(from memory pool,or from disk,if possible */
-bool get_transaction( const uint256 &hash, Cqkgj_basic_data &data )
+bool get_transaction( const uint256 &hash, Cqkgj_basic_data &data, uint256& hashBlock )
 {
     LOCK( cs_main );
     uint256 *n_hash = const_cast<uint256*>(&hash);
@@ -876,6 +881,36 @@ bool get_transaction( const uint256 &hash, Cqkgj_basic_data &data )
     {
         return true;
     }
+
+    if ( fTxIndex )
+    {
+        CDiskTxPos postx;
+        if ( pblocktree->ReadTxIndex( hash, postx ))
+        {
+            CAutoFile file( OpenBlockFile( postx, true ), SER_DISK, CLIENT_VERSION );
+            if ( file.IsNull())
+            {
+                return error("%s:OpenBlockFile failed",__func__);
+            }
+            CBlockHeader header;
+            try{
+                file >> header;
+                fseek(file.Get(),postx.nTxOffset,SEEK_CUR);
+                file >> data;
+            }
+            catch ( const std::exception &e )
+            {
+                return error("%s:Deserialize or I/O error - %s",__func__, e.what() );
+            }
+            hashBlock = header.GetHash();
+            if ( data.get_hash() != hash )
+            {
+                return error("%s:data hash mismatch",__func__);
+            }
+            return true;
+        }
+    }
+
     return false;
 }
 /* add by sdk end */

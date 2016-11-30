@@ -297,6 +297,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams, const CScript& s
 
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
 {
+    LogPrintf("[%s:%d],begin enter function step\n",__FUNCTION__,__LINE__);
     // Create new block
     auto_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
     if(!pblocktemplate.get())
@@ -337,7 +338,10 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
     int lastFewTxs = 0;
 
     {
+        LogPrintf("[%s:%d],begin enter LOCK2() step\n",__FUNCTION__,__LINE__);
         LOCK2(cs_main, qmempool.cs);
+        LogPrintf("[%s:%d],end enter LOCK2() step\n",__FUNCTION__,__LINE__);
+
         CBlockIndex* pindexPrev = chainActive.Tip();
         const int nHeight = pindexPrev->nHeight + 1;
         pblock->nTime = GetAdjustedTime();
@@ -347,6 +351,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
                                 ? nMedianTimePast
                                 : pblock->GetBlockTime();
 
+        LogPrintf("[%s:%d],begin enter for() step\n",__FUNCTION__,__LINE__);
         bool fPriorityBlock = nBlockMaxSize > 0;
         if (fPriorityBlock) {
             vecPriority.reserve(qmempool.map_data.size());
@@ -363,10 +368,13 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
         Cqkgj_mempool::indexed_data_set::nth_index<1>::type::iterator mi = qmempool.map_data.get<1>().begin();
         Cqkgj_mempool::data_it iter;
 
+        int i = 0;
+        LogPrintf("[%s:%d],begin enter while() step\n",__FUNCTION__,__LINE__);
         while (mi != qmempool.map_data.get<1>().end() )
         {
             bool priorityTx = false;
             if (fPriorityBlock && !vecPriority.empty()) { // add a tx from priority queue to fill the blockprioritysize
+                LogPrintf("[%s:%d],if (fPriorityBlock && !vecPriority.empty()),%d times,\n",__FUNCTION__,__LINE__,i);
                 priorityTx = true;
                 iter = vecPriority.front().second;
                 actualPriority = vecPriority.front().first;
@@ -379,8 +387,10 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
 
 
             if (inBlock.count(iter))
+            {
+                LogPrintf("[%s:%d],while begin step,%d times\n",__FUNCTION__,__LINE__,i);
                 continue; // could have been added to the priorityBlock
-
+            }
             const Cqkgj_basic_data& tx = iter->get_data();
 
 
@@ -398,6 +408,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
                 if (nBlockSize > nBlockMaxSize - 1000) {
                     lastFewTxs++;
                 }
+                LogPrintf("[%s:%d],after if(nBlockSize + nTxSize >= nBlockMaxSize) \n",__FUNCTION__,__LINE__);
                 continue;
             }
 /****
@@ -414,19 +425,26 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
             }
 *****/
 
+            LogPrintf("[%s:%d],1  step\n",__FUNCTION__,__LINE__);
             // Added
             pblock->qvtx.push_back(tx);
+            LogPrintf("[%s:%d],2 step\n",__FUNCTION__,__LINE__);
             //pblocktemplate->vTxSigOps.push_back(nTxSigOps);
             nBlockSize += nTxSize;
+            LogPrintf("[%s:%d],3 step\n",__FUNCTION__,__LINE__);
             ++nBlockTx;
             //nBlockSigOps += nTxSigOps;
-
+            LogPrintf("[%s:%d],4 step\n",__FUNCTION__,__LINE__);
 
             inBlock.insert(iter);
+            LogPrintf("[%s:%d],5 step\n",__FUNCTION__,__LINE__);
 
             // Add transactions that depend on this one to the priority queue
+            i++;
 
         }
+        LogPrintf("[%s:%d],out step\n",__FUNCTION__,__LINE__);
+
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
         LogPrintf("CreateNewBlock(): total size %u txs: %u  sigops %d\n", nBlockSize, nBlockTx,  nBlockSigOps);
@@ -443,6 +461,7 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
         }
     }
 
+    LogPrintf("[%s:%d],end enter function step\n",__FUNCTION__,__LINE__);
     return pblocktemplate.release();
 }
 
@@ -558,8 +577,8 @@ void GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainpar
 
 bool SortVNodesBy( const CNode* v1, const CNode* v2)
 {
-	 assert(NULL!=v1);
-	 assert(NULL!=v2);
+     assert(NULL!=v1);
+     assert(NULL!=v2);
 //	 if ((fabs(v1->m_creBlockTime - v2->m_creBlockTime)<(0.05*DEFAULT_GENERATE_PERIOD))&&(v1->m_bNetState>=v2->m_bNetState)&&(true==v1->m_bNetState)&&(true==v2->m_bNetState))
 //		 return v1->addr.ToStringIP()<v2->addr.ToStringIP();
      return (v1->m_creBlockTime <= v2->m_creBlockTime)&&(v1->m_bNetState>=v2->m_bNetState);//Asc
@@ -631,25 +650,25 @@ void static BitcoinMiner(const CChainParams& chainparams)
             int64_t period=DEFAULT_GENERATE_PERIOD;
 
             //static bool lockState = true;
-			if (0.95 * DEFAULT_GENERATE_PERIOD > (iTime - pindexPrev->GetBlockTime()))
-				continue;
-			if ((0.05 * DEFAULT_GENERATE_PERIOD) < fabs(iTime % period)) {
-				continue;
-			}
+            if (0.95 * DEFAULT_GENERATE_PERIOD > (iTime - pindexPrev->GetBlockTime()))
+                continue;
+            if ((0.05 * DEFAULT_GENERATE_PERIOD) < fabs(iTime % period)) {
+                continue;
+            }
 
-			int nIndex = -1;
-			if(mapArgs.count("-index"))
-			{
-				nIndex = GetArg("-index",0);
-				if(nIndex == -1)
-				{
-					continue;
-				}
-			}
-			if (nIndex != ((iTime / period) % (vNodes.size() + 1))) {
+            int nIndex = -1;
+            if(mapArgs.count("-index"))
+            {
+                nIndex = GetArg("-index",0);
+                if(nIndex == -1)
+                {
+                    continue;
+                }
+            }
+            if (nIndex != ((iTime / period) % (vNodes.size() + 1))) {
 
-				continue;
-			}
+                continue;
+            }
 
             //if (false==lockState)  continue;
 
@@ -668,7 +687,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
             //define height into blockheader for caculating blockhash
 //**************************************************************************
             LogPrintf("Running QKGJMiner with %u datas in block (%u bytes)\n", pblock->qvtx.size(),
-            		::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
+                    ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
 
             int64_t nStart = GetTime();
@@ -684,7 +703,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
             boost::this_thread::interruption_point();
             // Regtest mode doesn't require peers
             if (vNodes.empty() && chainparams.MiningRequiresPeers())
-              	continue;
+                continue;
 
 
             if (pindexPrev != chainActive.Tip())
@@ -694,10 +713,10 @@ void static BitcoinMiner(const CChainParams& chainparams)
 
             // Update nTime every few seconds
             if (UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev) < 0)
-              	continue; // Recreate the block if the clock has run backwards,
+                continue; // Recreate the block if the clock has run backwards,
                            // so that we can use the correct time.
             if(nTransactionsUpdatedLast != qmempool.get_data_updated())
-            	continue;
+                continue;
 
             SetThreadPriority(THREAD_PRIORITY_NORMAL);
             LogPrintf("QKGJMiner:\n");
