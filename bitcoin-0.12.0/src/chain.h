@@ -167,7 +167,7 @@ public:
         nVersion       = 0;
         hashMerkleRoot = uint256();
         nTime          = 0;
-        nBits = 0x20ffffff;//0x1d00ffff;
+        nBits = 0x1d00ffff;//0x20ffffff;
         nNonce =0x01;
         m_strMac = "";
     }
