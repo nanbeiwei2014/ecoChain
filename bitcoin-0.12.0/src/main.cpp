@@ -4955,7 +4955,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         BOOST_FOREACH(const CBlockHeader& header, headers) {
 			//Begin Add by syl 2016-11-28=====================================
 			string strMsg = "";
-			strMsg += "===RecvBlockHeaderHash : " + header.GetHash().ToString() + "\r\n";
+			strMsg += "===RecvBlockHeaderHash : " + header.GetHash().ToString() + "==from : " + pfrom->m_strMacAddr + "\r\n";
 			LogPrintf("%s", strMsg);
 			//End	Add by syl 2016-11-28=====================================
 
