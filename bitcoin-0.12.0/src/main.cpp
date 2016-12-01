@@ -4360,7 +4360,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
             boost::this_thread::interruption_point();
             it++;
 
-            if (inv.type == MSG_BLOCK || inv.type == MSG_FILTERED_BLOCK)
+            if (inv.type == MSG_BLOCK) //|| inv.type == MSG_FILTERED_BLOCK)
             {
                 bool send = false;
                 BlockMap::iterator mi = mapBlockIndex.find(inv.hash);
@@ -4399,9 +4399,15 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     // Send block from disk
                     CBlock block;
                     if (!ReadBlockFromDisk(block, (*mi).second, consensusParams))
+                    {
+                    	LogPrintf("=============type::BLOCK send error:cannot load block from disk \n");
                         assert(!"cannot load block from disk");
+                    }
                     if (inv.type == MSG_BLOCK)
+                    {
+                    	LogPrintf("=============type::BLOCK hash:%s \n", block.GetHash().GetHex());
                         pfrom->PushMessage(NetMsgType::BLOCK, block);
+                    }
                     else // MSG_FILTERED_BLOCK)
                     {
 //**********************begin delete by mengqg 20161110**********************************************************************
@@ -4794,6 +4800,14 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             LogPrint("net", "received getdata for: %s peer=%d\n", vInv[0].ToString(), pfrom->id);
 
         pfrom->vRecvGetData.insert(pfrom->vRecvGetData.end(), vInv.begin(), vInv.end());
+        //Begin Add by syl 2016-12-01=======================================================
+        std::deque<CInv>::iterator iIter;
+        for(iIter = pfrom->vRecvGetData.begin(); iIter != pfrom->vRecvGetData.end(); iIter++)
+        {
+        	 const CInv &inv = *iIter;
+        	 LogPrintf("=============type::GETDATA === from MAC:%s=== hash:%s \n", pfrom->m_strMacAddr, inv.hash.ToString());
+        }
+        //End   Add by syl 2016-12-01=======================================================
         ProcessGetData(pfrom, chainparams.GetConsensus());
     }
 
@@ -5037,6 +5051,15 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 			pindexLast->GetBlockHash().ToString(), pindexLast->nHeight);
                 }
                 if (vGetData.size() > 0) {
+					//Begin Add by syl 2016-11-29========================================================
+                	vector<CInv>::iterator iIter;
+                	for(iIter = vGetData.begin(); iIter != vGetData.end(); iIter++)
+                	{
+                		string strMsg = "";
+                		strMsg += "===type::GETDATA : " + (*iIter).hash.ToString() + "\r\n";
+                		LogPrintf("%s", strMsg);
+                	}
+					//End Add by syl 2016-11-29========================================================
                 	pfrom->PushMessage(NetMsgType::GETDATA, vGetData);
                 }
             }
@@ -5607,7 +5630,7 @@ bool SendMessages(CNode* pto)
 				string strMsg = "";
 				strMsg += "===pindexStart : " + uint256().ToString() + "\r\n";
 				LogPrintf("%s", strMsg);
-				//End Add by syl 2016-11-29========================================================
+				//End Add by syl 2016-11-29==========================================================
                 pto->PushMessage(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexStart), uint256());
             }
         }
@@ -5635,31 +5658,6 @@ bool SendMessages(CNode* pto)
         // Try sending block announcements via headers
         //
         {
-        //Begin Add by syl 2016-11-21=================================================
-//        	if(g_unBroBlockHeaderVec.size() > 0)
-//        	{
-//        		LOCK(g_csBroadcastNewBlock);
-//        		vector<CBlockHeader> vHeaders;
-//
-//        		//
-//        		std::map<uint256, CBlockHeader>::iterator iIter;
-//        		for(iIter = g_unBroBlockHeaderVec.begin();
-//        			iIter != g_unBroBlockHeaderVec.end();
-//        			iIter++)
-//        		{
-//        			CBlockHeader blkHeader= iIter->second;
-//        			vHeaders.push_back(blkHeader);
-//        		}
-//
-//        		//Send New BlockHeader Message
-//        		if (vHeaders.size() > 0)
-//        		{
-//        			pto->PushMessage(NetMsgType::HEADERS, vHeaders);
-//        		}
-//        		g_unBroBlockHeaderVec.clear();
-//        	}
-        //End	Add by syl 2016-11-21=================================================
-        //Begin Noted by syl 2016-11-18===============================================
             // If we have less than MAX_BLOCKS_TO_ANNOUNCE in our
             // list of block hashes we're relaying, and our peer wants
             // headers announcements, then find the first header
@@ -5747,10 +5745,10 @@ bool SendMessages(CNode* pto)
                 }
 				//Begin Add by syl 2016-11-28=====================================
                 vector<CBlock>::iterator iIter;
-                for(iIter = vHeaders.begin(); iIter != vHeaders.begin(); iIter++)
+                for(iIter = vHeaders.begin(); iIter != vHeaders.end(); iIter++)
                 {
 					string strMsg = "";
-					strMsg += "=========Send block header : " + (*iIter).GetHash().ToString() + "\r\n";
+					strMsg += "=========type::HEADERS Send block header : " + (*iIter).GetHash().ToString() + "\r\n";
 					LogPrintf("%s", strMsg);
                 }
 				//End	Add by syl 2016-11-28=====================================
@@ -5758,7 +5756,6 @@ bool SendMessages(CNode* pto)
                 state.pindexBestHeaderSent = pBestIndex;
             }
             pto->vBlockHashesToAnnounce.clear();
-        //Begin Noted by syl 2016-11-18===================================================*/
         }
 
 
