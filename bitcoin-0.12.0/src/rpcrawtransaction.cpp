@@ -302,8 +302,13 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
         bool bRet = AddToMempool( qmempool, state, data );
         if ( false == bRet )
         {
+            LogPrintf("[%s:%d],add to mempool return false\n",__FUNCTION__,__LINE__);
             throw JSONRPCError(RPC_TRANSACTION_REJECTED,strprintf("%i:%s",state.GetRejectCode(),state.GetRejectReason()));
         }
+    }
+    else
+    {
+        LogPrintf("[%s:%d],data has exists in mempool already!\n",__FUNCTION__,__LINE__);
     }
 
     //触发广播数据到其他节点的广播消息
