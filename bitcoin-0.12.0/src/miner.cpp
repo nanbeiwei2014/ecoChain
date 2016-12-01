@@ -619,7 +619,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
             CBlockIndex* pindexPrev = chainActive.Tip();
 
             while(!pindexPrev){
-            	 LogPrintf("[%s:%d], chainActive.size():[%d] chainActive.Tip() is NULL!\n",__FUNCTION__,__LINE__,chainActive.vChain.size());
+            	 LogPrintf("[%s:%d], chainActive.size():[%d] chainActive.Tip() is NULL!\n",__FUNCTION__,__LINE__,chainActive.Height());
             	pindexPrev = chainActive.Tip();
 
             }
