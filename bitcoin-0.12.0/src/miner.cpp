@@ -673,7 +673,7 @@ void static BitcoinMiner(const CChainParams& chainparams)
 
                 continue;
             }
-
+//            sleep(5);
             //if (false==lockState)  continue;
 
             auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
