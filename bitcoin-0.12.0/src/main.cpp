@@ -4405,7 +4405,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     }
                     if (inv.type == MSG_BLOCK)
                     {
-                    	LogPrintf("=============type::BLOCK hash:%s \n", block.GetHash().GetHex());
+                    	LogPrintf("=============type::BLOCK send block hash:%s \n", block.GetHash().GetHex());
                         pfrom->PushMessage(NetMsgType::BLOCK, block);
                     }
                     else // MSG_FILTERED_BLOCK)
@@ -4805,7 +4805,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         for(iIter = pfrom->vRecvGetData.begin(); iIter != pfrom->vRecvGetData.end(); iIter++)
         {
         	 const CInv &inv = *iIter;
-        	 LogPrintf("=============type::GETDATA === from MAC:%s=== hash:%s \n", pfrom->m_strMacAddr, inv.hash.ToString());
+        	 LogPrintf("****************type::GETDATA recv === from MAC:%s=== hash:%s \n", pfrom->m_strMacAddr, inv.hash.ToString());
         }
         //End   Add by syl 2016-12-01=======================================================
         ProcessGetData(pfrom, chainparams.GetConsensus());
@@ -4969,7 +4969,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         BOOST_FOREACH(const CBlockHeader& header, headers) {
 			//Begin Add by syl 2016-11-28=====================================
 			string strMsg = "";
-			strMsg += "===RecvBlockHeaderHash : " + header.GetHash().ToString() + "==from : " + pfrom->m_strMacAddr + "\r\n";
+			strMsg += "***RecvBlockHeaderHash : " + header.GetHash().ToString() + "***from : " + pfrom->m_strMacAddr + "\r\n";
 			LogPrintf("%s", strMsg);
 			//End	Add by syl 2016-11-28=====================================
 
@@ -4987,7 +4987,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 }
 				//Begin Add by syl 2016-11-28=====================================
 				string strMsg = "";
-				strMsg += "===Error AcceptBlockHeader error : " + header.GetHash().ToString() + "\r\n";
+				strMsg += "******Error AcceptBlockHeader error : " + header.GetHash().ToString() + "\r\n";
 				LogPrintf("%s", strMsg);
 				//End	Add by syl 2016-11-28=====================================
             }
@@ -5056,7 +5056,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 	for(iIter = vGetData.begin(); iIter != vGetData.end(); iIter++)
                 	{
                 		string strMsg = "";
-                		strMsg += "===type::GETDATA : " + (*iIter).hash.ToString() + "\r\n";
+                		strMsg += "===type::GETDATA send hash: " + (*iIter).hash.ToString() + "\r\n";
                 		LogPrintf("%s", strMsg);
                 	}
 					//End Add by syl 2016-11-29========================================================
@@ -5084,6 +5084,13 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         // Such an unrequested block may still be processed, subject to the
         // conditions in AcceptBlock().
         bool forceProcessing = pfrom->fWhitelisted && !IsInitialBlockDownload();
+
+        //Begin Add by syl 2016-11-29========================================================
+		std::string strMsg;
+		strMsg = "***type::BLOCK recv block hash: " + block.GetHash().ToString() + "\r\n";
+		LogPrintf("%s", strMsg);
+		//End Add by syl 2016-11-29========================================================
+
         ProcessNewBlock(state, chainparams, pfrom, &block, forceProcessing, NULL);
         int nDoS;
         if (state.IsInvalid(nDoS)) {
