@@ -1096,90 +1096,31 @@ uint256 SignatureHash(const CScript& scriptCode, const CTransaction& txTo, unsig
 }
 
 /* add by sdk begin */
-namespace {
-class Cqkgj_SignatureSerializer {
-private:
-    const Cqkgj_basic_data &txTo;  //! reference to the spending transaction (the one being serialized)
-    const CScript &scriptCode; //! output script being consumed
-    const unsigned int nIn;    //! input index of txTo being signed
-    const bool fAnyoneCanPay;  //! whether the hashtype has the SIGHASH_ANYONECANPAY flag set
-    const bool fHashSingle;    //! whether the hashtype is SIGHASH_SINGLE
-    const bool fHashNone;      //! whether the hashtype is SIGHASH_NONE
-
-public:
-    Cqkgj_SignatureSerializer  (const Cqkgj_basic_data &txToIn, const CScript &scriptCodeIn, unsigned int nInIn, int nHashTypeIn) :
-        txTo(txToIn), scriptCode(scriptCodeIn), nIn(nInIn),
-        fAnyoneCanPay(!!(nHashTypeIn & SIGHASH_ANYONECANPAY)),
-        fHashSingle((nHashTypeIn & 0x1f) == SIGHASH_SINGLE),
-        fHashNone((nHashTypeIn & 0x1f) == SIGHASH_NONE) {}
-
-    /** Serialize an input of txTo */
-    template<typename S>
-    void SerializeInput(S &s, unsigned int nInput, int nType, int nVersion) const {
-        // In case of SIGHASH_ANYONECANPAY, only the input being signed is serialized
-        if (fAnyoneCanPay)
-            nInput = nIn;
-        // Serialize the prevout
-        ::Serialize(s, txTo.m_data, nType, nVersion);
+bool check_sign(Cqkgj_basic_data& vch_data )
+{
+     vector<unsigned char> vch_pub_key;
+    /* 把得到的数据以base58格式解码 */
+    bool bdecodeRet = DecodeBase58( vch_data.get_addr(),vch_pub_key );
+    if ( !bdecodeRet )
+    {
+        LogPrintf( "[%s:%d],public key:[%s] decode error!\n",__FUNCTION__, __LINE__, vch_data.get_addr() );
+        return false;
     }
 
-    /** Serialize txTo */
-    template<typename S>
-    void Serialize(S &s, int nType, int nVersion) const {
-         //Serialize nVersion
-        ::Serialize(s, txTo.m_version, nType, nVersion);
-
-        // Serialize vin
-        unsigned int nInput = 1;
-        SerializeInput(s, nInput, nType, nVersion);
+    /* 把得到的签名以base58格式解码 */
+    std::vector<unsigned char> vchSign;
+    bool bSign = DecodeBase58( vch_data.get_sign(), vchSign );
+    if ( false == bSign )
+    {
+        LogPrintf( "[%s:%d],signature:[%s] decode error!\n",__FUNCTION__, __LINE__, vch_data.get_sign() );
+        return false;
     }
-};
-} // anon namespace
 
-uint256 sign_hash(const CScript& scriptCode, const Cqkgj_basic_data& data, unsigned int nIn, int nHashType)
-{
-    static const uint256 one(uint256S("0000000000000000000000000000000000000000000000000000000000000001"));
+    uint256 hashMsg = Hash(vch_data.get_data().begin(), vch_data.get_data().end());
 
-    // Wrapper to serialize only the necessary parts of the transaction being signed
-    Cqkgj_SignatureSerializer txTmp(data, scriptCode, nIn, nHashType);
-
-    // Serialize and hash
-    CHashWriter ss(SER_GETHASH, 0);
-    ss << txTmp << nHashType;
-    return ss.GetHash();
-}
-
-bool check_sign(Cqkgj_basic_data& vch_data, vector<unsigned char>&vch_pub_key, CScript& script)
-{
-    std::cout<<"address:"<<vch_data.m_address<<std::endl;
-    CBitcoinAddress address;
-    address.SetString(vch_data.m_address);
-
-    CKeyID kid;
-    address.GetKeyID(kid);
-
-    vector<unsigned char> pub_key1;
-    pub_key1.resize(vch_data.m_address.length());
-    pub_key1.assign(vch_data.m_address.begin(),vch_data.m_address.end());
-
-    string str;
-    str.assign(pub_key1.begin(),pub_key1.end());
-    std::cout<<"str:"<<str<<std::endl;
-    //CPubKey pub_key( vch_pub_key );
-    CPubKey pub_key( vch_pub_key.begin(),vch_pub_key.end() );
-    std::cout<<"pub_key1.begin():"<<pub_key1[0]<<" pub_key1.end():"<<pub_key1[39]<<std::endl;
-    //CPubKey pub_key( pub_key1.begin(),pub_key1.end() );
-    if ( !pub_key.IsValid() )
-        return false;
-
-    std::vector<unsigned char> vchSig;// = (std::vector<unsigned char>)(char*)vch_data.m_data.c_str();
-    vchSig.push_back(*(unsigned char*)vch_data.m_data.c_str());
-
-    uint256 sig_hash = sign_hash(script,vch_data,1,1);
-    //if ( !pub_key.Verify(sig_hash, vchSig ))
-    if ( !pub_key.qkgj_verify(sig_hash, vch_data.m_sign))
-        return false;
-    return true;
+    CPubKey pub_key( vch_pub_key );
+    bool bVer = pub_key.Verify( hashMsg,vchSign );
+    return bVer;
 }
 /* add by sdk end */
 

@@ -140,13 +140,20 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
     CPubKey pub_key = secret.GetPubKey();
     assert( secret.VerifyPubKey( pub_key ) );
 
+	/* 把转换成base58编码格式 */
+    std::vector< unsigned char> tempVch;
+    tempVch.resize(pub_key.size());
+    tempVch.assign(pub_key.begin(),pub_key.end());
+    string strKey = EncodeBase58( tempVch );
+
 	/* 获得私钥*/
     string pri_key(CBitcoinSecret(secret).ToString());
 
+    LogPrintf("[%s:%d],prikey:[%s],pubkey:[%s]\n",__FUNCTION__,__LINE__,pri_key,strKey);
+
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("PriKey",pri_key));
-    //result.push_back(Pair("PubKey",pub_key.GetID().ToString()));
-    result.push_back(Pair("PubKey",pub_key.ToString()));
+    result.push_back(Pair("PubKey",strKey));
 
     return result;
 }
@@ -197,7 +204,6 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
     LogPrintf("[%s:%d],addr:%s,prikey:%s,data:%s\n",__FUNCTION__,__LINE__,pub_key,pri_key,get_data);
 
     std::vector<unsigned char> vch_sign;
-    CKeyID keyid;
     std::string addr,temp;
     Cqkgj_basic_data basic_data(addr,get_data,temp);
 
@@ -213,16 +219,22 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,"Private key outside allowed range");
     }
 
-    create_sign( key, vch_sign, keyid, basic_data );
+    bool bSign = create_sign( key, vch_sign, basic_data );
+    if ( false == bSign )
+    {
+        LogPrintf("[%s:%d],data signature failure!prikey:%s,data:%s\n",__FUNCTION__,__LINE__,pri_key,get_data);
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"Private signature data error!");
+    }
+
+	/* 把签名转换成base58编码格式 */
     string ret = EncodeBase58(vch_sign);
-    //ret.insert(ret.begin(),vch_sign.begin(),vch_sign.end());
     LogPrintf("[%s:%d],sign:%s,prikey:%s,data:%s\n",__FUNCTION__,__LINE__,ret,pri_key,get_data);
     return ret;
 }
 
 UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 {
-    if ( bHelp  || params.size() != 1)
+    if ( bHelp)//  || params.size() != 1)
     {
         throw runtime_error(
             "send_data_to_sys \"{\"address\":\"address info\",\"data\":\"data info\",\"sign\":\"sign value\"}\"\n"
@@ -276,21 +288,12 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 
     Cqkgj_basic_data data(str_addr,str_data,str_sign);
 
-    vector<unsigned char> vch_pub_key;
-    bool bdecodeRet = DecodeBase58( str_addr,vch_pub_key );
-    if ( !bdecodeRet )
+    if (!check_sign(data))
     {
-        LogPrintf("[%s:%d],public key:[%s] decode error!\n",__FUNCTION__,__LINE__,str_addr);
-        throw JSONRPCError( RPC_INVALID_PARAMETER, "decode public key error!");
+        return UniValue(UniValue::VNUM, "{\"result\":\"data verify failure!\"}");
     }
-    //vch_pub_key.resize(str_addr.length());
-    //vch_pub_key.assign(str_addr.begin(),str_addr.end());
-
-    //CScript script;
-    //if (!check_sign(data, vch_pub_key, script))
-    //{
-    //    return UniValue(UniValue::VNUM, "{\"result\":\"data verify failure!\"}");
-    //}
+    else
+        std::cout<<"success"<<std::endl;
 
     //写入内存池
     //Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
