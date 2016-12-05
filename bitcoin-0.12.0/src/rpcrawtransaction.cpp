@@ -288,12 +288,12 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 
     Cqkgj_basic_data data(str_addr,str_data,str_sign);
 
-    if (!check_sign(data))
-    {
-        return UniValue(UniValue::VNUM, "{\"result\":\"data verify failure!\"}");
-    }
-    else
-        std::cout<<"success"<<std::endl;
+    //if (!check_sign(data))
+    //{
+    //    return UniValue(UniValue::VNUM, "{\"result\":\"data verify failure!\"}");
+    //}
+    //else
+    //    std::cout<<"success"<<std::endl;
 
     //写入内存池
     //Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
