@@ -882,6 +882,7 @@ bool get_transaction( const uint256 &hash, Cqkgj_basic_data &data, uint256& hash
         return true;
     }
 
+    fTxIndex = true;
     if ( fTxIndex )
     {
         CDiskTxPos postx;

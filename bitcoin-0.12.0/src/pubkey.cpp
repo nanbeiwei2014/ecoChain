@@ -181,7 +181,7 @@ bool CPubKey::qkgj_verify( const uint256 &hash, const std::string &vchSig ) cons
     memcpy(sig.data,  vchSig.c_str(),vchSig.length());
     return secp256k1_ecdsa_verify( secp256k1_context_verify, &sig, hash.begin(), &pubkey );
 }
-
+#if 0
 bool CPubKey::DecodeBase58(const char* psz,std::vector<unsigned char> &outData)
 {
     // Skip leading spaces.
@@ -282,7 +282,7 @@ std::string CPubKey::ToString() //const
     //vchEncode.insert(vchEncode.end(), vch.begin(), vch.end());
     return EncodeBase58(vchEncode);
 }
-
+#endif
 //bool CPubKey::SetString(const std::string& str,std::vector<unsigned char>&outData)
 //{
 //    return SetString(str.c_str(), outData);

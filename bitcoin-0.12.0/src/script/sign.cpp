@@ -35,14 +35,12 @@ bool TransactionSignatureCreator::CreateSig(std::vector<unsigned char>& vchSig, 
 
 /* add by sdk begin */
 //bool create_sign(const CPrivKey &cKey, std::vector<unsigned char>&vchSign, const CKeyID& addr, const Cqkgj_basic_data& data)
-bool create_sign(const CKey &cKey, std::vector<unsigned char>&vchSign, const CKeyID& addr, const Cqkgj_basic_data& data)
+bool create_sign(const CKey &cKey, std::vector<unsigned char>&vchSign, const Cqkgj_basic_data& data)
 {
-    unsigned int nIn = 1;
-    CScript script;
-    int nHashType = 1;
-    uint256 hash = sign_hash(script,data,nIn,nHashType);
+    //uint256 hash = sign_hash(script,data,nIn,nHashType);
+    uint256 hashMsg = Hash( data.get_data().begin(), data.get_data().end() );
     //if (!cKey.Sign(hash,vchSign))
-    if (!cKey.qkgj_sign(hash,vchSign))
+    if (!cKey.Sign( hashMsg,vchSign) )
         return false;
     return true;
 }

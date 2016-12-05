@@ -60,7 +60,7 @@ bool SignSignature(const CKeyStore& keystore, const CScript& fromPubKey, CMutabl
 bool SignSignature(const CKeyStore& keystore, const CTransaction& txFrom, CMutableTransaction& txTo, unsigned int nIn, int nHashType=SIGHASH_ALL);
 
 /* add by sdk begin */
-bool create_sign(const CKey &cKey, std::vector<unsigned char> &vchSign, const CKeyID& addr, const Cqkgj_basic_data& data);
+bool create_sign(const CKey &cKey, std::vector<unsigned char> &vchSign, const Cqkgj_basic_data& data);
 /* add by sdk end */
 
 /** Combine two script signatures using a generic signature checker, intelligently, possibly with OP_0 placeholders. */
