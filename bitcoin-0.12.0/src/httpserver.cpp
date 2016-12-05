@@ -256,13 +256,13 @@ static void http_request_cb(struct evhttp_request* req, void* arg)
 
     LogPrint("http", "Received a %s request for %s from %s\n",
              RequestMethodString(hreq->GetRequestMethod()), hreq->GetURI(), hreq->GetPeer().ToString());
-
-    // Early address-based allow check
-    if (!ClientAllowed(hreq->GetPeer())) {
-        hreq->WriteReply(HTTP_FORBIDDEN);
-        return;
-    }
-
+//Begin Noted by syl 2016-12-05============================================
+//    // Early address-based allow check
+//    if (!ClientAllowed(hreq->GetPeer())) {
+//        hreq->WriteReply(HTTP_FORBIDDEN);
+//        return;
+//    }
+//End   Noted by syl 2016-12-05============================================
     // Early reject unknown HTTP methods
     if (hreq->GetRequestMethod() == HTTPRequest::UNKNOWN) {
         hreq->WriteReply(HTTP_BADMETHOD);
@@ -271,6 +271,7 @@ static void http_request_cb(struct evhttp_request* req, void* arg)
 
     // Find registered handler for prefix
     std::string strURI = hreq->GetURI();
+    strURI = strURI.substr(0, 1);
     std::string path;
     std::vector<HTTPPathHandler>::const_iterator i = pathHandlers.begin();
     std::vector<HTTPPathHandler>::const_iterator iend = pathHandlers.end();
@@ -324,7 +325,8 @@ static bool HTTPBindAddresses(struct evhttp* http)
 
     // Determine what addresses to bind to
     if (!mapArgs.count("-rpcallowip")) { // Default to loopback if not allowing external IPs
-        endpoints.push_back(std::make_pair("::1", defaultPort));
+        //endpoints.push_back(std::make_pair("::1", defaultPort));									//Noted by syl 2016-12-05================
+    	endpoints.push_back(std::make_pair(g_localMacInfo.GetLocalIP().c_str(), defaultPort));		//Noted by syl 2016-12-05================
         endpoints.push_back(std::make_pair("127.0.0.1", defaultPort));
         if (mapArgs.count("-rpcbind")) {
             LogPrintf("WARNING: option -rpcbind was ignored because -rpcallowip was not specified, refusing to allow everyone to connect\n");

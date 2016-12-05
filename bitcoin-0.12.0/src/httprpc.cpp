@@ -147,32 +147,52 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
         req->WriteReply(HTTP_BAD_METHOD, "JSONRPC server handles only POST requests");
         return false;
     }
-    // Check authorization
-    std::pair<bool, std::string> authHeader = req->GetHeader("authorization");
-    if (!authHeader.first) {
-        req->WriteHeader("WWW-Authenticate", WWW_AUTH_HEADER_DATA);
-        req->WriteReply(HTTP_UNAUTHORIZED);
-        return false;
-    }
-
-    if (!RPCAuthorized(authHeader.second)) {
-        LogPrintf("ThreadRPCServer incorrect password attempt from %s\n", req->GetPeer().ToString());
-
-        /* Deter brute-forcing
-           If this results in a DoS the user really
-           shouldn't have their RPC port exposed. */
-        MilliSleep(250);
-
-        req->WriteHeader("WWW-Authenticate", WWW_AUTH_HEADER_DATA);
-        req->WriteReply(HTTP_UNAUTHORIZED);
-        return false;
-    }
+//Begin Noted by syl 2016-12-05===========================================================================
+//    // Check authorization
+//    std::pair<bool, std::string> authHeader = req->GetHeader("authorization");
+//    if (!authHeader.first) {
+//        req->WriteHeader("WWW-Authenticate", WWW_AUTH_HEADER_DATA);
+//        req->WriteReply(HTTP_UNAUTHORIZED);
+//        return false;
+//    }
+//
+//    if (!RPCAuthorized(authHeader.second)) {
+//        LogPrintf("ThreadRPCServer incorrect password attempt from %s\n", req->GetPeer().ToString());
+//
+//        /* Deter brute-forcing
+//           If this results in a DoS the user really
+//           shouldn't have their RPC port exposed. */
+//        MilliSleep(250);
+//
+//        req->WriteHeader("WWW-Authenticate", WWW_AUTH_HEADER_DATA);
+//        req->WriteReply(HTTP_UNAUTHORIZED);
+//        return false;
+//    }
+//End   Noted by syl 2016-12-05===========================================================================
 
     JSONRequest jreq;
     try {
+    	std::string strbody;
+
+    	std::string strUrl = req->GetURI();
+    	if(strUrl.length() > 1)
+    	{
+    		std::string strTotal = "{\"method\":\"";
+
+    		std::string strData = req->ReadBody();
+    		std::string strMenthod = strUrl.substr(1, strUrl.length() - 1);
+
+    		strTotal += strMenthod + "\",\"params\":[" + strData + "],\"id\":1}\n";
+    		strbody = strTotal;
+    	}
+    	else
+    	{
+    		strbody = req->ReadBody();
+    	}
+
         // Parse request
         UniValue valRequest;
-        if (!valRequest.read(req->ReadBody()))
+        if (!valRequest.read(strbody))
             throw JSONRPCError(RPC_PARSE_ERROR, "Parse error");
 
         std::string strReply;

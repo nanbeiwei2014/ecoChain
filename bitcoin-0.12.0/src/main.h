@@ -33,11 +33,7 @@ class CBlockTreeDB;
 class CBloomFilter;
 class CChainParams;
 class CInv;
-//**************begin by mengqg pause 20161116*********************************************************************
-//class CScriptCheck;
 
-//class CTxMemPool;
-//**************end by mengqg pause 20161116*********************************************************************
 /* add by sdk begin */
 class Cqkgj_mempool;
 /* add by sdk end */
@@ -301,12 +297,6 @@ bool AddToMempool( Cqkgj_mempool& pool, CValidationState &state, const Cqkgj_bas
 bool get_transaction( const uint256 &hash, Cqkgj_basic_data &data, uint256& hashBlock );
 /* add by sdk end */
 
-/** (try to) add transaction to memory pool **/
-//**************begin by mengqg pause 20161116*********************************************************************
-//bool AcceptToMemoryPool(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
-//                        bool* pfMissingInputs, bool fOverrideMempoolLimit=false, bool fRejectAbsurdFee=false);
-//**************end by mengqg pause 20161116*********************************************************************
-/** Convert CValidationState to a human-readable message for logging */
 std::string FormatStateMessage(const CValidationState &state);
 
 struct CNodeStateStats {
@@ -349,81 +339,7 @@ struct CDiskTxPos : public CDiskBlockPos
  */
 unsigned int GetLegacySigOpCount(const CTransaction& tx);
 
-/**
- * Count ECDSA signature operations in pay-to-script-hash inputs.
- * 
- * @param[in] mapInputs Map of previous transactions that have outputs we're spending
- * @return maximum number of sigops required to validate this transaction's inputs
- * @see CTransaction::FetchInputs
- */
-//****************begin by mengqg 20161116***********************************************************************************
-/*************
-//unsigned int GetP2SHSigOpCount(const CTransaction& tx, const CCoinsViewCache& mapInputs);
 
-//**
- * Check whether all inputs of this transaction are valid (no double spends, scripts & sigs, amounts)
- * This does not modify the UTXO set. If pvChecks is not NULL, script checks are pushed onto it
- * instead of being performed inline.
- *
-bool CheckInputs(const CTransaction& tx, CValidationState &state, const CCoinsViewCache &view, bool fScriptChecks,
-                 unsigned int flags, bool cacheStore, std::vector<CScriptCheck> *pvChecks = NULL);
-
-//** Apply the effects of this transaction on the UTXO set represented by view *
-void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCache &inputs, int nHeight);
-
-//** Context-independent validity checks *
-bool CheckTransaction(const CTransaction& tx, CValidationState& state);
-
-/**
- * Check if transaction is final and can be included in a block with the
- * specified height and time. Consensus critical.
- *
-bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime);
-
-/**
- * Check if transaction will be final in the next block to be created.
- *
- * Calls IsFinalTx() with current block height and appropriate block time.
- *
- * See consensus/consensus.h for flag definitions.
- *
-bool CheckFinalTx(const CTransaction &tx, int flags = -1);
-
-/** 
- * Closure representing one script verification
- * Note that this stores references to the spending transaction 
- *
-class CScriptCheck
-{
-private:
-    CScript scriptPubKey;
-    const CTransaction *ptxTo;
-    unsigned int nIn;
-    unsigned int nFlags;
-    bool cacheStore;
-    ScriptError error;
-
-public:
-    CScriptCheck(): ptxTo(0), nIn(0), nFlags(0), cacheStore(false), error(SCRIPT_ERR_UNKNOWN_ERROR) {}
-    CScriptCheck(const CCoins& txFromIn, const CTransaction& txToIn, unsigned int nInIn, unsigned int nFlagsIn, bool cacheIn) :
-        scriptPubKey(txFromIn.vout[txToIn.vin[nInIn].prevout.n].scriptPubKey),
-        ptxTo(&txToIn), nIn(nInIn), nFlags(nFlagsIn), cacheStore(cacheIn), error(SCRIPT_ERR_UNKNOWN_ERROR) { }
-
-    bool operator()();
-
-    void swap(CScriptCheck &check) {
-        scriptPubKey.swap(check.scriptPubKey);
-        std::swap(ptxTo, check.ptxTo);
-        std::swap(nIn, check.nIn);
-        std::swap(nFlags, check.nFlags);
-        std::swap(cacheStore, check.cacheStore);
-        std::swap(error, check.error);
-    }
-
-    ScriptError GetScriptError() const { return error; }
-};
-*************/
-//****************end by mengqg 20161116***********************************************************************************
 
 
 /** Functions for disk access for blocks */
@@ -438,10 +354,8 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
  *  will be true if no problems were found. Otherwise, the return value will be false in case
  *  of problems. Note that in any case, coins may be modified. */
 //******************begin delete by mengqg 20161116*****************************************************************************************************************************
-//bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CCoinsViewCache& coins, bool* pfClean = NULL);
 bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockIndex* pindex, CBestBlock& coins, bool* pfClean = NULL);
 /** Apply the effects of this block (with given index) on the UTXO set represented by coins */
-//bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& coins, bool fJustCheck = false);
 bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CBestBlock& coins, bool fJustCheck = false);
 //******************end  delete by mengqg 20161116***************************************************************************************************
 /** Context-independent validity checks */
@@ -510,17 +424,6 @@ public:
      }
 };
 
-/** RAII wrapper for VerifyDB: Verify consistency of the block and coin databases */
-//****************begin by mengqg pause 20161116 *******************************************************************************************************
-/*****
-class CVerifyDB {
-public:
-    CVerifyDB();
-    ~CVerifyDB();
-    bool VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview, int nCheckLevel, int nCheckDepth);
-};
-*****/
-//****************begin by mengqg pause 20161116 *******************************************************************************************************
 
 /** Find the last common block between the parameter chain and a locator. */
 CBlockIndex* FindForkInGlobalIndex(const CChain& chain, const CBlockLocator& locator);
@@ -540,16 +443,6 @@ extern CChain chainActive;
 /** Global variable that points to the active block tree (protected by cs_main) */
 extern CBlockTreeDB *pblocktree;
 
-/**
- * Return the spend height, which is one more than the inputs.GetBestBlock().
- * While checking, GetBestBlock() refers to the parent block. (protected by cs_main)
- * This is also true for mempool checks.
- */
-//****************begin by mengqg pause 20161116 *******************************************************************************************************
-/*****
-int GetSpendHeight(const CCoinsViewCache& inputs);
-*****/
-//****************end by mengqg pause 20161116 *******************************************************************************************************
 
 /** Reject codes greater or equal to this can be returned by AcceptToMemPool
  * for transactions, to signal internal conditions. They cannot and should not

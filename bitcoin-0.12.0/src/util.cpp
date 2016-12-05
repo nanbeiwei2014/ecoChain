@@ -846,6 +846,9 @@ int GetNumCores()
 CLocalMacAddr::CLocalMacAddr()
 {
 	GetNetworkCardName();
+	GetLocalMac();
+	GetLocalIP();
+
 	//update_hash();
 }
 CLocalMacAddr::~CLocalMacAddr(){}
@@ -895,20 +898,28 @@ void CLocalMacAddr::GetNetworkCardName()
 		{
 			if (!(ifr.ifr_flags & IFF_LOOPBACK))
 			{
+				count++;
+
+				LocalInfo locInfo;
 				if (ioctl(sock, SIOCGIFHWADDR, &ifr) == 0)
 				{
-					count++;
+
 					unsigned char * ptr;
 					ptr = (unsigned char *) &ifr.ifr_ifru.ifru_hwaddr.sa_data[0];
 					snprintf(szMac, 64, "%02X:%02X:%02X:%02X:%02X:%02X", *ptr,
 							*(ptr + 1), *(ptr + 2), *(ptr + 3), *(ptr + 4),
 							*(ptr + 5));
 
-					string strName = ifr.ifr_name;
-					string strMac = szMac;
-					m_localNetCardMap.insert(std::make_pair(strName, strMac));
-					//printf("%d,Interface name : %s , Mac address : %s \n", count, ifr.ifr_name, szMac);
+					locInfo.m_strNetName = ifr.ifr_name;
+					locInfo.m_strMac = szMac;
 				}
+				if(ioctl(sock, SIOCGIFADDR, &ifr) == 0)
+				{
+					struct   sockaddr_in *sin = (struct sockaddr_in *)&ifr.ifr_addr;
+					locInfo.m_strIP = inet_ntoa(sin->sin_addr);
+				}
+
+				m_localNetCardMap.insert(std::make_pair(locInfo.m_strNetName, locInfo));
 			}
 		}
 		else
@@ -920,43 +931,21 @@ void CLocalMacAddr::GetNetworkCardName()
 
 	return ;
 }
-//std::string CLocalMacAddr::GetLocalIPFun()
-//{
-//	int sock_get_ip;
-//	char ipaddr[50];
-//
-//	    struct   sockaddr_in *sin;
-//	    struct   ifreq ifr_ip;
-//
-//	    if ((sock_get_ip=socket(AF_INET, SOCK_STREAM, 0)) == -1)
-//	    {
-//	         printf("socket create failse...GetLocalIp!/n");
-//	         return "";
-//	    }
-//
-//	    memset(&ifr_ip, 0, sizeof(ifr_ip));
-//	    strncpy(ifr_ip.ifr_name, "eth0", sizeof(ifr_ip.ifr_name) - 1);
-//
-//	    if( ioctl( sock_get_ip, SIOCGIFADDR, &ifr_ip) < 0 )
-//	    {
-//	         return "";
-//	    }
-//	    sin = (struct sockaddr_in *)&ifr_ip.ifr_addr;
-//	    strcpy(ipaddr,inet_ntoa(sin->sin_addr));
-//
-//	    printf("local ip:%s /n",ipaddr);
-//	    close( sock_get_ip );
-//
-//	    return ipaddr;
-//}
 
 std::string	CLocalMacAddr::GetLocalMac()
 {
 	if(m_localNetCardMap.size() > 0)
 	{
-		m_strMacAddr = m_localNetCardMap.begin()->second;
+		m_strMacAddr = m_localNetCardMap.begin()->second.m_strMac;
 	}
 	return m_strMacAddr;
+}
+std::string	CLocalMacAddr::GetLocalIP()
+{
+	if (m_localNetCardMap.size() > 0) {
+		m_strIP = m_localNetCardMap.begin()->second.m_strIP;
+	}
+	return m_strIP;
 }
 uint256 CLocalMacAddr::GetLocalMacHash()
 {
