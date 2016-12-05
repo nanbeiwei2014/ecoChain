@@ -624,55 +624,55 @@ void static BitcoinMiner(const CChainParams& chainparams)
 
             }
 
-//            unsigned int nConnectCount = 0;
-//
-//            for(vector<CNode*>::iterator iter=g_vAllNodes.begin();iter!=g_vAllNodes.end();iter++)
-//            {
-//            	if ((*iter)->m_bNetState) nConnectCount++;
-//            }
-//            std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
-// //           vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
-//            vector<CNode*>::iterator iter=g_vAllNodes.begin();
-//            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
-//            {
-//            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
-//            	iter++;
-//            }
-//
-//             std::string strIp=(*iter)->addr.ToStringIP();
-//            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
-//            {
-//        	   if ((GetTime()-pindexPrev->nTime)<(0.9*DEFAULT_GENERATE_PERIOD))
-//        		   continue;
-//
-//            }else{
-//            	continue;
-//            }
-//
-//            (*iter)->m_creBlockTime= GetTime();
-            int64_t iTime=GetTime();
-            int64_t period=DEFAULT_GENERATE_PERIOD;
+            unsigned int nConnectCount = 0;
 
-            //static bool lockState = true;
-            if (0.95 * DEFAULT_GENERATE_PERIOD > (iTime - pindexPrev->GetBlockTime()))
-                continue;
-            if ((0.05 * DEFAULT_GENERATE_PERIOD) < fabs(iTime % period)) {
-                continue;
-            }
-
-            int nIndex = -1;
-            if(mapArgs.count("-index"))
+            for(vector<CNode*>::iterator iter=g_vAllNodes.begin();iter!=g_vAllNodes.end();iter++)
             {
-                nIndex = GetArg("-index",0);
-                if(nIndex == -1)
-                {
-                    continue;
-                }
+            	if ((*iter)->m_bNetState) nConnectCount++;
             }
-            if (nIndex != ((iTime / period) % (vNodes.size() + 1))) {
+            std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+ //           vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+            vector<CNode*>::iterator iter=g_vAllNodes.begin();
+            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
+            {
+            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
+            	iter++;
+            }
 
-                continue;
+             std::string strIp=(*iter)->addr.ToStringIP();
+            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
+            {
+        	   if ((GetTime()-pindexPrev->nTime)<(0.95*DEFAULT_GENERATE_PERIOD))
+        		   continue;
+
+            }else{
+            	continue;
             }
+            (*iter)->m_creBlockTime= GetTime();
+
+//            int64_t iTime=GetTime();
+//            int64_t period=DEFAULT_GENERATE_PERIOD;
+//
+//            //static bool lockState = true;
+//            if (0.95 * DEFAULT_GENERATE_PERIOD > (iTime - pindexPrev->GetBlockTime()))
+//                continue;
+//            if ((0.05 * DEFAULT_GENERATE_PERIOD) < fabs(iTime % period)) {
+//                continue;
+//            }
+//
+//            int nIndex = -1;
+//            if(mapArgs.count("-index"))
+//            {
+//                nIndex = GetArg("-index",-1);
+//                if(nIndex == -1)
+//                {
+//                    continue;
+//                }
+//            }
+//            if (nIndex != ((iTime / period) % (vNodes.size() + 1))) {
+//
+//                continue;
+//            }
 //            sleep(5);
             //if (false==lockState)  continue;
 

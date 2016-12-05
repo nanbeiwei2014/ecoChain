@@ -250,13 +250,20 @@ template <typename Callable> void TraceThread(const char* name,  Callable func)
 }
 
 /*Begin add by syl 2016-11-23============================= */
+struct LocalInfo
+{
+	std::string 	m_strNetName;
+	std::string 	m_strMac;
+	std::string 	m_strIP;
+};
 class CLocalMacAddr
 {
 private:
     const uint256 m_hash;       /* data's hash */
     std::string m_strMacAddr;
     std::string m_strIP;
-    std::map<std::string, std::string>	m_localNetCardMap;
+
+    std::map<std::string, LocalInfo>	m_localNetCardMap;
     //void update_hash() const;
 
 public:
@@ -278,9 +285,9 @@ public:
 //    }
 
     void GetNetworkCardName();
-    //std::string GetLocalIPFun();
 
     std::string	GetLocalMac();
+    std::string	GetLocalIP();
     uint256 GetLocalMacHash();
 };
 

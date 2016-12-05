@@ -44,7 +44,6 @@ public:
     CFeeRate(const CFeeRate& other) { nSatoshisPerK = other.nSatoshisPerK; }
 
     CAmount GetFee(size_t size) const; // unit returned is satoshis
-    //CAmount GetFeePerK() const { return GetFee(1000); } // satoshis-per-1000-bytes    Noted by syl 2016-11-19========================
 
     friend bool operator<(const CFeeRate& a, const CFeeRate& b) { return a.nSatoshisPerK < b.nSatoshisPerK; }
     friend bool operator>(const CFeeRate& a, const CFeeRate& b) { return a.nSatoshisPerK > b.nSatoshisPerK; }

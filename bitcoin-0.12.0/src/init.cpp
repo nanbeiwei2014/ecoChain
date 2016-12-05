@@ -822,12 +822,7 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
 #ifndef WIN32
     if (GetBoolArg("-sysperms", false)) {
-/* Begin Noted by syl 2016-11-14============================================
-#ifdef ENABLE_WALLET
-        if (!GetBoolArg("-disablewallet", false))
-            return InitError("-sysperms is not allowed in combination with enabled wallet functionality");
-#endif
- Begin Noted by syl 2016-11-14============================================*/
+
     } else {
         umask(077);
     }
@@ -853,22 +848,6 @@ bool AppInit2(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // ********************************************************* Step 2: parameter interactions
     const CChainParams& chainparams = Params();
-
-    // also see: InitParameterInteraction()
-/* Begin Noted by syl 2016-11-19============================================
-    // if using block pruning, then disable txindex
-    if (GetArg("-prune", 0)) {
-        if (GetBoolArg("-txindex", DEFAULT_TXINDEX))
-            return InitError(_("Prune mode is incompatible with -txindex."));
- End Noted by syl 2016-11-19==============================================*/
-/* Begin Noted by syl 2016-11-14============================================
-#ifdef ENABLE_WALLET
-        if (GetBoolArg("-rescan", false)) {
-            return InitError(_("Rescans are not possible in pruned mode. You will need to use -reindex which will download the whole blockchain again."));
-        }
-#endif
-    }
-End Noted by syl 2016-11-14===============================================*/
 
     // Make sure enough file descriptors are available
     int nBind = std::max((int)mapArgs.count("-bind") + (int)mapArgs.count("-whitebind"), 1);
@@ -909,13 +888,6 @@ End Noted by syl 2016-11-14===============================================*/
     if (GetBoolArg("-whitelistalwaysrelay", false))
         InitWarning(_("Unsupported argument -whitelistalwaysrelay ignored, use -whitelistrelay and/or -whitelistforcerelay."));
 
-//**************begin by mengqg pause 20161116*********************************************************************
-//    // Checkmempool and checkblockindex default to true in regtest mode
-//    int ratio = std::min<int>(std::max<int>(GetArg("-checkmempool", chainparams.DefaultConsistencyChecks() ? 1 : 0), 0), 1000000);
-//    if (ratio != 0) {
-//        mempool.setSanityCheck(1.0 / ratio);
-//    }
-//**************begin by mengqg pause 20161116*********************************************************************
     fCheckBlockIndex = GetBoolArg("-checkblockindex", chainparams.DefaultConsistencyChecks());
     fCheckpointsEnabled = GetBoolArg("-checkpoints", DEFAULT_CHECKPOINTS_ENABLED);
 
@@ -949,90 +921,17 @@ End Noted by syl 2016-11-14===============================================*/
         LogPrintf("Prune configured to target %uMiB on disk for block and undo files.\n", nPruneTarget / 1024 / 1024);
         fPruneMode = true;
     }
-/* Begin Noted by syl 2016-11-14============================================
-#ifdef ENABLE_WALLET
-    bool fDisableWallet = GetBoolArg("-disablewallet", false);
-#endif
- Begin Noted by syl 2016-11-14============================================*/
+
     nConnectTimeout = GetArg("-timeout", DEFAULT_CONNECT_TIMEOUT);
     if (nConnectTimeout <= 0)
         nConnectTimeout = DEFAULT_CONNECT_TIMEOUT;
 
-    // Fee-per-kilobyte amount considered the same as "free"
-    // If you are mining, be careful setting this:
-    // if you set it to zero then
-    // a transaction spammer can cheaply fill blocks using
-    // 1-satoshi-fee transactions. It should be set above the real
-    // cost to you of processing a transaction.
-//Begin Noted by syl 2016-11-19=====================================
-//    if (mapArgs.count("-minrelaytxfee"))
-//    {
-//        CAmount n = 0;
-//        if (ParseMoney(mapArgs["-minrelaytxfee"], n) && n > 0)
-//            ::minRelayTxFee = CFeeRate(n);
-//        else
-//            return InitError(strprintf(_("Invalid amount for -minrelaytxfee=<amount>: '%s'"), mapArgs["-minrelaytxfee"]));
-//    }
-//End Noted by syl 2016-11-19=======================================
 
     fRequireStandard = !GetBoolArg("-acceptnonstdtxn", !Params().RequireStandard());
     if (Params().RequireStandard() && !fRequireStandard)
         return InitError(strprintf("acceptnonstdtxn is not currently supported for %s chain", chainparams.NetworkIDString()));
     nBytesPerSigOp = GetArg("-bytespersigop", nBytesPerSigOp);
-/* Begin Noted by syl 2016-11-14===============================================
-#ifdef ENABLE_WALLET
-    if (mapArgs.count("-mintxfee"))
-    {
-        CAmount n = 0;
-        if (ParseMoney(mapArgs["-mintxfee"], n) && n > 0)
-            CWallet::minTxFee = CFeeRate(n);
-        else
-            return InitError(strprintf(_("Invalid amount for -mintxfee=<amount>: '%s'"), mapArgs["-mintxfee"]));
-    }
-    if (mapArgs.count("-fallbackfee"))
-    {
-        CAmount nFeePerK = 0;
-        if (!ParseMoney(mapArgs["-fallbackfee"], nFeePerK))
-            return InitError(strprintf(_("Invalid amount for -fallbackfee=<amount>: '%s'"), mapArgs["-fallbackfee"]));
-        if (nFeePerK > nHighTransactionFeeWarning)
-            InitWarning(_("-fallbackfee is set very high! This is the transaction fee you may pay when fee estimates are not available."));
-        CWallet::fallbackFee = CFeeRate(nFeePerK);
-    }
-    if (mapArgs.count("-paytxfee"))
-    {
-        CAmount nFeePerK = 0;
-        if (!ParseMoney(mapArgs["-paytxfee"], nFeePerK))
-            return InitError(strprintf(_("Invalid amount for -paytxfee=<amount>: '%s'"), mapArgs["-paytxfee"]));
-        if (nFeePerK > nHighTransactionFeeWarning)
-            InitWarning(_("-paytxfee is set very high! This is the transaction fee you will pay if you send a transaction."));
-        payTxFee = CFeeRate(nFeePerK, 1000);
-        if (payTxFee < ::minRelayTxFee)
-        {
-            return InitError(strprintf(_("Invalid amount for -paytxfee=<amount>: '%s' (must be at least %s)"),
-                                       mapArgs["-paytxfee"], ::minRelayTxFee.ToString()));
-        }
-    }
-    if (mapArgs.count("-maxtxfee"))
-    {
-        CAmount nMaxFee = 0;
-        if (!ParseMoney(mapArgs["-maxtxfee"], nMaxFee))
-            return InitError(strprintf(_("Invalid amount for -maxtxfee=<amount>: '%s'"), mapArgs["-maxtxfee"]));
-        if (nMaxFee > nHighTransactionMaxFeeWarning)
-            InitWarning(_("-maxtxfee is set very high! Fees this large could be paid on a single transaction."));
-        maxTxFee = nMaxFee;
-        if (CFeeRate(maxTxFee, 1000) < ::minRelayTxFee)
-        {
-            return InitError(strprintf(_("Invalid amount for -maxtxfee=<amount>: '%s' (must be at least the minrelay fee of %s to prevent stuck transactions)"),
-                                       mapArgs["-maxtxfee"], ::minRelayTxFee.ToString()));
-        }
-    }
-    nTxConfirmTarget = GetArg("-txconfirmtarget", DEFAULT_TX_CONFIRM_TARGET);
-    bSpendZeroConfChange = GetBoolArg("-spendzeroconfchange", DEFAULT_SPEND_ZEROCONF_CHANGE);
-    fSendFreeTransactions = GetBoolArg("-sendfreetransactions", DEFAULT_SEND_FREE_TRANSACTIONS);
 
-    std::string strWalletFile = GetArg("-wallet", "wallet.dat");
-#endif // ENABLE_WALLET
- End Noted by syl 2016-11-14===============================================*/
     fIsBareMultisigStd = GetBoolArg("-permitbaremultisig", DEFAULT_PERMIT_BAREMULTISIG);
     fAcceptDatacarrier = GetBoolArg("-datacarrier", DEFAULT_ACCEPT_DATACARRIER);
     nMaxDatacarrierBytes = GetArg("-datacarriersize", nMaxDatacarrierBytes);
@@ -1065,13 +964,7 @@ End Noted by syl 2016-11-14===============================================*/
         return InitError(_("Initialization sanity check failed. Bitcoin Core is shutting down."));
 
     std::string strDataDir = GetDataDir().string();
-/* Begin Noted by syl 2016-11-14=========================================
-#ifdef ENABLE_WALLET
-    // Wallet file must be a plain filename without a directory
-    if (strWalletFile != boost::filesystem::basename(strWalletFile) + boost::filesystem::extension(strWalletFile))
-        return InitError(strprintf(_("Wallet %s resides outside data directory %s"), strWalletFile, strDataDir));
-#endif
- End Noted by syl 2016-11-14===========================================*/
+
     // Make sure only a single Bitcoin process is using the data directory.
     boost::filesystem::path pathLockFile = GetDataDir() / ".lock";
     FILE* file = fopen(pathLockFile.string().c_str(), "a"); // empty lock file; created if it doesn't exist.
@@ -1099,11 +992,7 @@ End Noted by syl 2016-11-14===============================================*/
 #else
     LogPrintf("Using OpenSSL version %s\n", OpenSSL_version(OPENSSL_VERSION));
 #endif
-/* Begin Noted by syl 2016-11-14=========================================
-#ifdef ENABLE_WALLET
-    LogPrintf("Using BerkeleyDB version %s\n", DbEnv::version(0, 0, 0));
-#endif
- Begin Noted by syl 2016-11-14=========================================*/
+
     if (!fLogTimestamps)
         LogPrintf("Startup time: %s\n", DateTimeStrFormat("%Y-%m-%d %H:%M:%S", GetTime()));
     LogPrintf("Default data directory %s\n", GetDefaultDataDir().string());
@@ -1136,27 +1025,7 @@ End Noted by syl 2016-11-14===============================================*/
 
     int64_t nStart;
 
-    // ********************************************************* Step 5: verify wallet database integrity
-/* Begin Noted by syl 2016-11-14=========================================
-#ifdef ENABLE_WALLET
-    if (!fDisableWallet) {
-        LogPrintf("Using wallet %s\n", strWalletFile);
-        uiInterface.InitMessage(_("Verifying wallet..."));
 
-        std::string warningString;
-        std::string errorString;
-
-        if (!CWallet::Verify(strWalletFile, warningString, errorString))
-            return false;
-
-        if (!warningString.empty())
-            InitWarning(warningString);
-        if (!errorString.empty())
-            return InitError(errorString);
-
-    } // (!fDisableWallet)
-#endif // ENABLE_WALLET
- End	 Noted by syl 2016-11-14=========================================*/
     // ********************************************************* Step 6: network initialization
 
     RegisterNodeSignals(GetNodeSignals());
@@ -1346,21 +1215,11 @@ End Noted by syl 2016-11-14===============================================*/
         do {
             try {
                 UnloadBlockIndex();
-//               delete pcoinsTip;
-//                delete pcoinsdbview;
-//                delete pcoinscatcher;
+
                 delete pblocktree;
                 delete pbestblock;
                 pbestblock =new CBestBlock();
                 pblocktree = new CBlockTreeDB(nBlockTreeDBCache, false, fReindex);
-
-//*******************begin by mengqg pause 20161116************************************************************************************
-/******
-//                pcoinsdbview = new CCoinsViewDB(nCoinDBCache, false, fReindex);
-//                pcoinscatcher = new CCoinsViewErrorCatcher(pcoinsdbview);
-//                pcoinsTip = new CCoinsViewCache(pcoinscatcher);
-******/
-//*******************end by mengqg pause 20161116************************************************************************************
 
                 if (fReindex) {
                     pblocktree->WriteReindexing(true);
@@ -1414,15 +1273,6 @@ End Noted by syl 2016-11-14===============================================*/
                         break;
                     }
                 }
-//*******************begin by mengqg pause 20161116************************************************************************************
- /******               if (!CVerifyDB().VerifyDB(chainparams, pcoinsdbview, GetArg("-checklevel", DEFAULT_CHECKLEVEL),
-                              GetArg("-checkblocks", DEFAULT_CHECKBLOCKS))) {
-                    strLoadError = _("Corrupted block database detected");
-                    break;
-
-                }
-*****/
-//*******************end by mengqg pause 20161116************************************************************************************
             } catch (const std::exception& e) {
                 if (fDebug) LogPrintf("%s\n", e.what());
                 strLoadError = _("Error opening block database");
@@ -1461,168 +1311,6 @@ End Noted by syl 2016-11-14===============================================*/
     }
     LogPrintf(" block index %15dms\n", GetTimeMillis() - nStart);
 
-//**************begin by mengqg pause 20161116*********************************************************************
-//    boost::filesystem::path est_path = GetDataDir() / FEE_ESTIMATES_FILENAME;
-//    CAutoFile est_filein(fopen(est_path.string().c_str(), "rb"), SER_DISK, CLIENT_VERSION);
-//    // Allowed to fail as this file IS missing on first startup.
-//    if (!est_filein.IsNull())
-//        mempool.ReadFeeEstimates(est_filein);
-//    fFeeEstimatesInitialized = true;
-//**************begin by mengqg pause 20161116*********************************************************************
-    // ********************************************************* Step 8: load wallet
-/* Begin Noted by syl 2016-11-14===============================================
-#ifdef ENABLE_WALLET
-    if (fDisableWallet) {
-        pwalletMain = NULL;
-        LogPrintf("Wallet disabled!\n");
-    } else {
-
-        // needed to restore wallet transaction meta data after -zapwallettxes
-        std::vector<CWalletTx> vWtx;
-
-        if (GetBoolArg("-zapwallettxes", false)) {
-            uiInterface.InitMessage(_("Zapping all transactions from wallet..."));
-
-            pwalletMain = new CWallet(strWalletFile);
-            DBErrors nZapWalletRet = pwalletMain->ZapWalletTx(vWtx);
-            if (nZapWalletRet != DB_LOAD_OK) {
-                uiInterface.InitMessage(_("Error loading wallet.dat: Wallet corrupted"));
-                return false;
-            }
-
-            delete pwalletMain;
-            pwalletMain = NULL;
-        }
-
-        uiInterface.InitMessage(_("Loading wallet..."));
-
-        nStart = GetTimeMillis();
-        bool fFirstRun = true;
-        pwalletMain = new CWallet(strWalletFile);
-        DBErrors nLoadWalletRet = pwalletMain->LoadWallet(fFirstRun);
-        if (nLoadWalletRet != DB_LOAD_OK)
-        {
-            if (nLoadWalletRet == DB_CORRUPT)
-                strErrors << _("Error loading wallet.dat: Wallet corrupted") << "\n";
-            else if (nLoadWalletRet == DB_NONCRITICAL_ERROR)
-            {
-                InitWarning(_("Error reading wallet.dat! All keys read correctly, but transaction data"
-                             " or address book entries might be missing or incorrect."));
-            }
-            else if (nLoadWalletRet == DB_TOO_NEW)
-                strErrors << _("Error loading wallet.dat: Wallet requires newer version of Bitcoin Core") << "\n";
-            else if (nLoadWalletRet == DB_NEED_REWRITE)
-            {
-                strErrors << _("Wallet needed to be rewritten: restart Bitcoin Core to complete") << "\n";
-                LogPrintf("%s", strErrors.str());
-                return InitError(strErrors.str());
-            }
-            else
-                strErrors << _("Error loading wallet.dat") << "\n";
-        }
-
-        if (GetBoolArg("-upgradewallet", fFirstRun))
-        {
-            int nMaxVersion = GetArg("-upgradewallet", 0);
-            if (nMaxVersion == 0) // the -upgradewallet without argument case
-            {
-                LogPrintf("Performing wallet upgrade to %i\n", FEATURE_LATEST);
-                nMaxVersion = CLIENT_VERSION;
-                pwalletMain->SetMinVersion(FEATURE_LATEST); // permanently upgrade the wallet immediately
-            }
-            else
-                LogPrintf("Allowing wallet upgrade up to %i\n", nMaxVersion);
-            if (nMaxVersion < pwalletMain->GetVersion())
-                strErrors << _("Cannot downgrade wallet") << "\n";
-            pwalletMain->SetMaxVersion(nMaxVersion);
-        }
-
-        if (fFirstRun)
-        {
-            // Create new keyUser and set as default key
-            RandAddSeedPerfmon();
-
-            CPubKey newDefaultKey;
-            if (pwalletMain->GetKeyFromPool(newDefaultKey)) {
-                pwalletMain->SetDefaultKey(newDefaultKey);
-                if (!pwalletMain->SetAddressBook(pwalletMain->vchDefaultKey.GetID(), "", "receive"))
-                    strErrors << _("Cannot write default address") << "\n";
-            }
-
-            pwalletMain->SetBestChain(chainActive.GetLocator());
-        }
-
-        LogPrintf("%s", strErrors.str());
-        LogPrintf(" wallet      %15dms\n", GetTimeMillis() - nStart);
-
-        RegisterValidationInterface(pwalletMain);
-
-        CBlockIndex *pindexRescan = chainActive.Tip();
-        if (GetBoolArg("-rescan", false))
-            pindexRescan = chainActive.Genesis();
-        else
-        {
-            CWalletDB walletdb(strWalletFile);
-            CBlockLocator locator;
-            if (walletdb.ReadBestBlock(locator))
-                pindexRescan = FindForkInGlobalIndex(chainActive, locator);
-            else
-                pindexRescan = chainActive.Genesis();
-        }
-        if (chainActive.Tip() && chainActive.Tip() != pindexRescan)
-        {
-            //We can't rescan beyond non-pruned blocks, stop and throw an error
-            //this might happen if a user uses a old wallet within a pruned node
-            // or if he ran -disablewallet for a longer time, then decided to re-enable
-            if (fPruneMode)
-            {
-                CBlockIndex *block = chainActive.Tip();
-                while (block && block->pprev && (block->pprev->nStatus & BLOCK_HAVE_DATA) && block->pprev->nTx > 0 && pindexRescan != block)
-                    block = block->pprev;
-
-                if (pindexRescan != block)
-                    return InitError(_("Prune: last wallet synchronisation goes beyond pruned data. You need to -reindex (download the whole blockchain again in case of pruned node)"));
-            }
-
-            uiInterface.InitMessage(_("Rescanning..."));
-            LogPrintf("Rescanning last %i blocks (from block %i)...\n", chainActive.Height() - pindexRescan->nHeight, pindexRescan->nHeight);
-            nStart = GetTimeMillis();
-            pwalletMain->ScanForWalletTransactions(pindexRescan, true);
-            LogPrintf(" rescan      %15dms\n", GetTimeMillis() - nStart);
-            pwalletMain->SetBestChain(chainActive.GetLocator());
-            nWalletDBUpdated++;
-
-            // Restore wallet transaction metadata after -zapwallettxes=1
-            if (GetBoolArg("-zapwallettxes", false) && GetArg("-zapwallettxes", "1") != "2")
-            {
-                CWalletDB walletdb(strWalletFile);
-
-                BOOST_FOREACH(const CWalletTx& wtxOld, vWtx)
-                {
-                    uint256 hash = wtxOld.GetHash();
-                    std::map<uint256, CWalletTx>::iterator mi = pwalletMain->mapWallet.find(hash);
-                    if (mi != pwalletMain->mapWallet.end())
-                    {
-                        const CWalletTx* copyFrom = &wtxOld;
-                        CWalletTx* copyTo = &mi->second;
-                        copyTo->mapValue = copyFrom->mapValue;
-                        copyTo->vOrderForm = copyFrom->vOrderForm;
-                        copyTo->nTimeReceived = copyFrom->nTimeReceived;
-                        copyTo->nTimeSmart = copyFrom->nTimeSmart;
-                        copyTo->fFromMe = copyFrom->fFromMe;
-                        copyTo->strFromAccount = copyFrom->strFromAccount;
-                        copyTo->nOrderPos = copyFrom->nOrderPos;
-                        copyTo->WriteToDisk(&walletdb);
-                    }
-                }
-            }
-        }
-        pwalletMain->SetBroadcastTransactions(GetBoolArg("-walletbroadcast", DEFAULT_WALLETBROADCAST));
-    } // (!fDisableWallet)
-#else // ENABLE_WALLET
-    LogPrintf("No wallet support compiled in!\n");
-#endif // !ENABLE_WALLET
- Begin Noted by syl 2016-11-14===============================================*/
     // ********************************************************* Step 9: data directory maintenance
 
     // if pruning, unset the service bit and perform the initial blockstore prune
@@ -1672,15 +1360,8 @@ End Noted by syl 2016-11-14===============================================*/
 
     //// debug print
     LogPrintf("mapBlockIndex.size() = %u\n",   mapBlockIndex.size());
-    LogPrintf("nBestHeight = %d\n",                   chainActive.Height());
+    LogPrintf("nBestHeight = %d\n",            chainActive.Height());
 
-/*Begin Noted by syl 2016-11-14=========================================
-#ifdef ENABLE_WALLET
-    LogPrintf("setKeyPool.size() = %u\n",      pwalletMain ? pwalletMain->setKeyPool.size() : 0);
-    LogPrintf("mapWallet.size() = %u\n",       pwalletMain ? pwalletMain->mapWallet.size() : 0);
-    LogPrintf("mapAddressBook.size() = %u\n",  pwalletMain ? pwalletMain->mapAddressBook.size() : 0);
-#endif
-Begin Noted by syl 2016-11-14=========================================*/
     if (GetBoolArg("-listenonion", DEFAULT_LISTEN_ONION))
         StartTorControl(threadGroup, scheduler);
 
@@ -1698,17 +1379,6 @@ Begin Noted by syl 2016-11-14=========================================*/
     // ********************************************************* Step 12: finished
 
     SetRPCWarmupFinished();
-/*Begin Noted by syl 2016-11-14=========================================
-    uiInterface.InitMessage(_("Done loading"));
-#ifdef ENABLE_WALLET
-    if (pwalletMain) {
-        // Add wallet transactions that aren't already in a block to mapTransactions
-        pwalletMain->ReacceptWalletTransactions();
 
-        // Run a thread to flush wallet periodically
-        threadGroup.create_thread(boost::bind(&ThreadFlushWalletDB, boost::ref(pwalletMain->strWalletFile)));
-    }
-#endif
-End Noted by syl 2016-11-14========================================*/
     return !fRequestShutdown;
 }

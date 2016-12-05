@@ -2115,6 +2115,8 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     std::cout<<"second str2's value:"<<str2<<std::endl;
     assert(hashPrevBlock == view.GetBestBlock());
+
+    LogPrintf("[%s:%d], blockHash:[%s] blockTime:[%ld] !\n",__FUNCTION__,__LINE__,pindex->GetBlockHash().ToString(),pindex->GetBlockTime());
 //
 //    // Special case for the genesis block, skipping connection of its transactions
 //    // (its coinbase is unspendable)
@@ -5342,7 +5344,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     				sprintf(newSec, "%ld", (*iIter)->m_creBlockTime);
     				strMsg += "=============NotedMAC : " + (*iIter)->m_strMacAddr + "==updateNBTime:" + newSec + "\r\n";
     				LogPrintf("%s", strMsg);
-    				break;
+    				//break;
     			}
     			else
     			{
@@ -5849,9 +5851,9 @@ bool SendMessages(CNode* pto)
     return true;
 }
 
- std::string CBlockFileInfo::ToString() const {
-     return strprintf("CBlockFileInfo(blocks=%u, size=%u, heights=%u...%u, time=%s...%s)", nBlocks, nSize, nHeightFirst, nHeightLast, DateTimeStrFormat("%Y-%m-%d", nTimeFirst), DateTimeStrFormat("%Y-%m-%d", nTimeLast));
- }
+std::string CBlockFileInfo::ToString() const {
+	return strprintf("CBlockFileInfo(blocks=%u, size=%u, heights=%u...%u, time=%s...%s)", nBlocks, nSize, nHeightFirst, nHeightLast, DateTimeStrFormat("%Y-%m-%d", nTimeFirst), DateTimeStrFormat("%Y-%m-%d", nTimeLast));
+}
 
 
 
