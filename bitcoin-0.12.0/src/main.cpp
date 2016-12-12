@@ -5317,6 +5317,16 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 			int nPos = strIP.find(":");
 			strIP = strIP.substr(0, nPos);
 
+			//get local ip
+			std::string strFromIP = pfrom->addrName;
+			nPos = strFromIP.find(":");
+			strFromIP = strFromIP.substr(0, nPos);
+
+			if (strFromIP.compare(strIP) == 0)
+			{
+				continue;
+			}
+
 			CAddress newAddr(CService(strIP.c_str(), 0), NODE_NETWORK);
 			vAddr.push_back(newAddr);
 		}
@@ -5349,6 +5359,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 		BOOST_FOREACH(CAddress& addr, vAddr)
 		{
 			std::string strIP = addr.ToStringIPPort();
+			int nPos = strIP.find(":");
+			strIP = strIP.substr(0, nPos);
 
 			vector<std::string>::iterator it;
 			it = find(localNodeAddr.begin(), localNodeAddr.end(), strIP);
@@ -5358,7 +5370,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 			}
 
 			//connect new node
-			//CSemaphoreGrant grant(*semOutbound);
 			CAddress tempAddr;
 			OpenNetworkConnection(tempAddr, NULL, strIP.c_str());
 		}
