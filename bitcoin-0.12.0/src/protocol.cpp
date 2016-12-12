@@ -30,12 +30,14 @@ const char *PING="ping";
 const char *PONG="pong";
 const char *ALERT="alert";
 const char *NOTFOUND="notfound";
-const char *FILTERLOAD="filterload";
-const char *FILTERADD="filteradd";
-const char *FILTERCLEAR="filterclear";
+//const char *FILTERLOAD="filterload";
+//const char *FILTERADD="filteradd";
+//const char *FILTERCLEAR="filterclear";
 const char *REJECT="reject";
 const char *SENDHEADERS="sendheaders";
 const char *SENDNBTIME="sendnbtime";
+const char *GETNODEADDR="getnodeaddr";
+const char *SENDNODEADDR="sendnodeaddr";
 };
 
 static const char* ppszTypeName[] =
@@ -67,12 +69,14 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::PONG,
     NetMsgType::ALERT,
     NetMsgType::NOTFOUND,
-    NetMsgType::FILTERLOAD,
-    NetMsgType::FILTERADD,
-    NetMsgType::FILTERCLEAR,
+    //NetMsgType::FILTERLOAD,
+    //NetMsgType::FILTERADD,
+    //NetMsgType::FILTERCLEAR,
     NetMsgType::REJECT,
     NetMsgType::SENDHEADERS,
-	NetMsgType::SENDNBTIME
+	NetMsgType::SENDNBTIME,
+	NetMsgType::GETNODEADDR,
+	NetMsgType::SENDNODEADDR
 };
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes+ARRAYLEN(allNetMessageTypes));
 

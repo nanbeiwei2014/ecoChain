@@ -4509,21 +4509,21 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         return true;
     }
 
-
-    if (!(nLocalServices & NODE_BLOOM) &&
-              (strCommand == NetMsgType::FILTERLOAD ||
-               strCommand == NetMsgType::FILTERADD ||
-               strCommand == NetMsgType::FILTERCLEAR))
-    {
-        if (pfrom->nVersion >= NO_BLOOM_VERSION) {
-            Misbehaving(pfrom->GetId(), 100);
-            return false;
-        } else if (GetBoolArg("-enforcenodebloom", false)) {
-            pfrom->fDisconnect = true;
-            return false;
-        }
-    }
-
+//Begin Noted by syl 2016-12-20====================================
+//    if (!(nLocalServices & NODE_BLOOM) &&
+//              (strCommand == NetMsgType::FILTERLOAD ||
+//               strCommand == NetMsgType::FILTERADD ||
+//               strCommand == NetMsgType::FILTERCLEAR))
+//    {
+//        if (pfrom->nVersion >= NO_BLOOM_VERSION) {
+//            Misbehaving(pfrom->GetId(), 100);
+//            return false;
+//        } else if (GetBoolArg("-enforcenodebloom", false)) {
+//            pfrom->fDisconnect = true;
+//            return false;
+//        }
+//    }
+//End 	Noted by syl 2016-12-20====================================
 
     if (strCommand == NetMsgType::VERSION)
     {
@@ -4614,6 +4614,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             if (pfrom->fOneShot || pfrom->nVersion >= CADDR_TIME_VERSION || addrman.size() < 1000)
             {
                 pfrom->PushMessage(NetMsgType::GETADDR);
+                pfrom->PushMessage(NetMsgType::GETNODEADDR);	//add by syl 2016-12-10=============================
                 pfrom->fGetAddr = true;
             }
             addrman.Good(pfrom->addr);
@@ -4933,13 +4934,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         		//写入内存池
         		Cqkgj_basic_data  newBasicData = *iIter;
         		AddToMempool(qmempool, state, newBasicData);
-//                Cqkgj_basic_data  newBasicData = *iIter;
-//                Cqkgj_process_data	newProData(*iIter, GetTime(), 10.0, 100,0);
-//
-//        		if(qmempool.map_hash_data.find(newProData.m_data.get_hash()) == qmempool.map_hash_data.end())
-//        		{
-//        			qmempool.add_to_mempool(newProData.m_data.get_hash(), newProData);
-//        		}
         	}
         }
     	//End	Add by syl 2016-11-08==========================================================
@@ -5258,55 +5252,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         }
     }
 
-    /*Noted by syl 2016-11-15=======================================================
-    else if (strCommand == NetMsgType::FILTERLOAD)
-    {
-        CBloomFilter filter;
-        vRecv >> filter;
-
-        if (!filter.IsWithinSizeConstraints())
-            // There is no excuse for sending a too-large filter
-            Misbehaving(pfrom->GetId(), 100);
-        else
-        {
-            LOCK(pfrom->cs_filter);
-            delete pfrom->pfilter;
-            pfrom->pfilter = new CBloomFilter(filter);
-            pfrom->pfilter->UpdateEmptyFull();
-        }
-        pfrom->fRelayTxes = true;
-    }
-
-
-    else if (strCommand == NetMsgType::FILTERADD)
-    {
-        vector<unsigned char> vData;
-        vRecv >> vData;
-
-        // Nodes must NEVER send a data item > 520 bytes (the max size for a script data object,
-        // and thus, the maximum size any matched object can have) in a filteradd message
-        if (vData.size() > MAX_SCRIPT_ELEMENT_SIZE)
-        {
-            Misbehaving(pfrom->GetId(), 100);
-        } else {
-            LOCK(pfrom->cs_filter);
-            if (pfrom->pfilter)
-                pfrom->pfilter->insert(vData);
-            else
-                Misbehaving(pfrom->GetId(), 100);
-        }
-    }
-
-
-    else if (strCommand == NetMsgType::FILTERCLEAR)
-    {
-        LOCK(pfrom->cs_filter);
-        delete pfrom->pfilter;
-        pfrom->pfilter = new CBloomFilter();
-        pfrom->fRelayTxes = true;
-    }
-	Noted by syl 2016-11-15=======================================================*/
-
     //Begin Add by syl 2016-11-23================================
     else if (strCommand == NetMsgType::SENDNBTIME)
     {
@@ -5356,13 +5301,69 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     			}
     		}
     	}
-    	//re
-//    	{
-//    		LOCK(g_csAllvNodes);
-//    		g_vAllNodes = cpNodes;
-//    	}
     }
     //End 	Add by syl 2016-11-23================================
+
+    //Begin Add by syl 2016-12-10================================
+    //Get local connected node addresses send to the new node
+    else if (strCommand == NetMsgType::GETNODEADDR)
+    {
+		vector<CAddress> vAddr;
+
+		//Get node ips form nodesInfos
+		BOOST_FOREACH(const CNode* pnode, vNodes)
+		{
+			std::string strIP = pnode->addrName;
+			int nPos = strIP.find(":");
+			strIP = strIP.substr(0, nPos);
+
+			CAddress newAddr(CService(strIP.c_str(), 0), NODE_NETWORK);
+			vAddr.push_back(newAddr);
+		}
+
+		//Send local node ips to new node
+		if (vAddr.size() > 0)
+		{
+			pfrom->PushMessage(NetMsgType::SENDNODEADDR, vAddr);
+			vAddr.clear();
+		}
+    }
+	//recv other node connected addresses
+	else if (strCommand == NetMsgType::SENDNODEADDR)
+	{
+		vector<CAddress> vAddr;
+		vRecv >> vAddr;
+
+		//local connected addresses
+		vector<std::string> localNodeAddr;
+		BOOST_FOREACH(const CNode* pnode, vNodes)
+		{
+			std::string strIP = pnode->addrName;
+			int nPos = strIP.find(":");
+			strIP = strIP.substr(0, nPos);
+
+			localNodeAddr.push_back(strIP);
+		}
+
+		//judge is the new address
+		BOOST_FOREACH(CAddress& addr, vAddr)
+		{
+			std::string strIP = addr.ToStringIPPort();
+
+			vector<std::string>::iterator it;
+			it = find(localNodeAddr.begin(), localNodeAddr.end(), strIP);
+			if (it != localNodeAddr.end())
+			{
+				continue;
+			}
+
+			//connect new node
+			//CSemaphoreGrant grant(*semOutbound);
+			CAddress tempAddr;
+			OpenNetworkConnection(tempAddr, NULL, strIP.c_str());
+		}
+	}
+    //End 	Add by syl 2016-12-10================================
 
     else if (strCommand == NetMsgType::REJECT)
     {

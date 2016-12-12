@@ -185,25 +185,25 @@ extern const char *NOTFOUND;
  *   70011 as described by BIP111.
  * @see https://bitcoin.org/en/developer-reference#filterload
  */
-extern const char *FILTERLOAD;
-/**
- * The filteradd message tells the receiving peer to add a single element to a
- * previously-set bloom filter, such as a new public key.
- * @since protocol version 70001 as described by BIP37.
- *   Only available with service bit NODE_BLOOM since protocol version
- *   70011 as described by BIP111.
- * @see https://bitcoin.org/en/developer-reference#filteradd
- */
-extern const char *FILTERADD;
-/**
- * The filterclear message tells the receiving peer to remove a previously-set
- * bloom filter.
- * @since protocol version 70001 as described by BIP37.
- *   Only available with service bit NODE_BLOOM since protocol version
- *   70011 as described by BIP111.
- * @see https://bitcoin.org/en/developer-reference#filterclear
- */
-extern const char *FILTERCLEAR;
+//extern const char *FILTERLOAD;
+///**
+// * The filteradd message tells the receiving peer to add a single element to a
+// * previously-set bloom filter, such as a new public key.
+// * @since protocol version 70001 as described by BIP37.
+// *   Only available with service bit NODE_BLOOM since protocol version
+// *   70011 as described by BIP111.
+// * @see https://bitcoin.org/en/developer-reference#filteradd
+// */
+//extern const char *FILTERADD;
+///**
+// * The filterclear message tells the receiving peer to remove a previously-set
+// * bloom filter.
+// * @since protocol version 70001 as described by BIP37.
+// *   Only available with service bit NODE_BLOOM since protocol version
+// *   70011 as described by BIP111.
+// * @see https://bitcoin.org/en/developer-reference#filterclear
+// */
+//extern const char *FILTERCLEAR;
 /**
  * The reject message informs the receiving node that one of its previous
  * messages has been rejected.
@@ -223,6 +223,11 @@ extern const char *SENDHEADERS;
 //Send new block time
 extern const char *SENDNBTIME;
 
+//Get Other Node conected net address(IP)
+extern const char *GETNODEADDR;
+
+//Send local conected nodes address(IP) to new node
+extern const char *SENDNODEADDR;
 };
 
 /* Get a vector of all valid message types (see above) */
