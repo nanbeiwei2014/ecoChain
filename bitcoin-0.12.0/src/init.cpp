@@ -35,11 +35,6 @@
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
 #include "validationinterface.h"
-#ifdef ENABLE_WALLET
-#include "wallet/db.h"
-#include "wallet/wallet.h"
-#include "wallet/walletdb.h"
-#endif
 #include <stdint.h>
 #include <stdio.h>
 
@@ -64,9 +59,7 @@
 
 using namespace std;
 
-#ifdef ENABLE_WALLET
-CWallet* pwalletMain = NULL;
-#endif
+
 bool fFeeEstimatesInitialized = false;
 static const bool DEFAULT_PROXYRANDOMIZE = true;
 static const bool DEFAULT_REST_ENABLE = false;
@@ -194,10 +187,7 @@ void Shutdown()
     StopREST();
     StopRPC();
     StopHTTPServer();
-#ifdef ENABLE_WALLET
-    if (pwalletMain)
-        pwalletMain->Flush(false);
-#endif
+
     GenerateBitcoins(false, 0, Params());
     StopNode();
     StopTorControl();
@@ -233,10 +223,7 @@ void Shutdown()
         pblocktree = NULL;
 
     }
-#ifdef ENABLE_WALLET
-    if (pwalletMain)
-        pwalletMain->Flush(true);
-#endif
+
 
 #if ENABLE_ZMQ
     if (pzmqNotificationInterface) {
@@ -254,10 +241,7 @@ void Shutdown()
     }
 #endif
     UnregisterAllValidationInterfaces();
-#ifdef ENABLE_WALLET
-    delete pwalletMain;
-    pwalletMain = NULL;
-#endif
+
     globalVerifyHandle.reset();
     ECC_Stop();
     LogPrintf("%s: done\n", __func__);
