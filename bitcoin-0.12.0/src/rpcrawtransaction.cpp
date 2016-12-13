@@ -26,9 +26,6 @@
 #include "utiltime.h"
 #include "utilstrencodings.h"
 #include "util.h"
-#ifdef ENABLE_WALLET
-#include "wallet/wallet.h"
-#endif
 
 #include <stdint.h>
 
