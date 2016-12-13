@@ -152,14 +152,6 @@ extern CFeeRate minRelayTxFee;
 extern bool fAlerts;
 extern bool fEnableReplacement;
 
-//Begin Add by syl 2016-11-21==================================
-extern CCriticalSection 				g_csNewBlockTime;
-extern std::vector<uint64_t>			g_sendNewBlockTimeVec;
-
-extern CCriticalSection 				g_csBroadcastNewBlock;
-extern std::map<uint256, CBlockHeader> 	g_unBroBlockHeaderVec;
-//End 	Add by syl 2016-11-21==================================
-
 /** Best header we've seen so far (used for getheaders queries' starting points). */
 extern CBlockIndex *pindexBestHeader;
 
