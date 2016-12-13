@@ -319,8 +319,6 @@ class CNode
 {
 public:
 	//Begin Add by syl 2016-11-03=======================================
-	uint64_t  	m_currTime;
-	uint64_t	m_creBlockTime;
 	bool		m_bNetState;
 	std::string	m_strMacAddr;
 	//End	Add by syl 2016-11-03=======================================

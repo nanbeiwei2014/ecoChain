@@ -1782,12 +1782,6 @@ void ThreadMessageHandler()
             }
             boost::this_thread::interruption_point();
         }
-        //Begin Add by syl 2016-11-28===============================================
-        {
-        	LOCK(g_csNewBlockTime);
-   			g_sendNewBlockTimeVec.clear();
-        }
-        //End   Add by syl 2016-11-28===============================================
 
         {
             LOCK(cs_vNodes);
@@ -2434,8 +2428,6 @@ CNode::CNode(SOCKET hSocketIn, const CAddress& addrIn, const std::string& addrNa
     GetNodeSignals().InitializeNode(GetId(), this);
 
     //Begin Add by syl 2016-11-04=============================
-    m_currTime = GetTime();
-    m_creBlockTime = GetTime();
     m_bNetState = true;
     m_strMacAddr = "";
     //End	Add by syl 2016-11-04=============================

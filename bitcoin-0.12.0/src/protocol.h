@@ -220,8 +220,6 @@ extern const char *REJECT;
 extern const char *SENDHEADERS;
 
 //Add by syl 2016-11-23=================================
-//Send new block time
-extern const char *SENDNBTIME;
 
 //Get Other Node conected net address(IP)
 extern const char *GETNODEADDR;

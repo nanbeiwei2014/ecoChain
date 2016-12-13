@@ -152,11 +152,6 @@ bool AppInit(int argc, char* argv[])
 #endif
         SoftSetBoolArg("-server", true);
 
-        if(mapArgs.count("-index") < 0)
-        {
-        	LogPrint("%s", "No -index params !");
-        }
-
         // Set this early so that parameter interactions go to console
         InitLogging();
         InitParameterInteraction();
