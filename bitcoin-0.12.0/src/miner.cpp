@@ -45,7 +45,7 @@ using namespace std;
 uint64_t nLastBlockTx = 0;
 uint64_t nLastBlockSize = 0;
 //*************begin modify by mengqg 20161104***********************************
-static const int DEFAULT_GENERATE_PERIOD = 0.15*60;  //unit s
+static const int DEFAULT_GENERATE_PERIOD = 0.25*60;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
 //*************end modify by mengqg 20161104*************************
 
@@ -581,7 +581,8 @@ bool SortVNodesBy( const CNode* v1, const CNode* v2)
      assert(NULL!=v2);
 //	 if ((fabs(v1->m_creBlockTime - v2->m_creBlockTime)<(0.05*DEFAULT_GENERATE_PERIOD))&&(v1->m_bNetState>=v2->m_bNetState)&&(true==v1->m_bNetState)&&(true==v2->m_bNetState))
 //		 return v1->addr.ToStringIP()<v2->addr.ToStringIP();
-     return (v1->m_creBlockTime <= v2->m_creBlockTime)&&(v1->m_bNetState>=v2->m_bNetState);//Asc
+     //return (v1->m_creBlockTime <= v2->m_creBlockTime)&&(v1->m_bNetState>=v2->m_bNetState);//Asc
+     return (v1->m_strMacAddr < v2->m_strMacAddr);//&&(v1->m_bNetState>=v2->m_bNetState);
 }
 
 
@@ -624,58 +625,89 @@ void static BitcoinMiner(const CChainParams& chainparams)
 
             }
 
-//            unsigned int nConnectCount = 0;
-//
-//            for(vector<CNode*>::iterator iter=g_vAllNodes.begin();iter!=g_vAllNodes.end();iter++)
-//            {
-//            	if ((*iter)->m_bNetState) nConnectCount++;
-//            }
-//            std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
-// //           vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
-//            vector<CNode*>::iterator iter=g_vAllNodes.begin();
-//            if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
-//            {
-//            	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
-//            	iter++;
-//            }
-//
-//             std::string strIp=(*iter)->addr.ToStringIP();
-//            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
-//            {
-//        	   if ((GetTime()-pindexPrev->nTime)<(0.95*DEFAULT_GENERATE_PERIOD))
-//        		   continue;
-//
-//            }else{
-//            	continue;
-//            }
-//            (*iter)->m_creBlockTime= GetTime();
+            unsigned int nConnectCount = 0;
 
-            int64_t iTime=GetTime();
-            int64_t period=DEFAULT_GENERATE_PERIOD;
-
-            //static bool lockState = true;
-            if (0.95 * DEFAULT_GENERATE_PERIOD > (iTime - pindexPrev->GetBlockTime()))
-                continue;
-            if ((0.05 * DEFAULT_GENERATE_PERIOD) < fabs(iTime % period)) {
-                continue;
-            }
-
-            int nIndex = -1;
-            if(mapArgs.count("-index"))
+            for(vector<CNode*>::iterator iter=g_vAllNodes.begin();iter!=g_vAllNodes.end();iter++)
             {
-                nIndex = GetArg("-index",-1);
-                if(nIndex == -1)
-                {
-                    continue;
-                }
+            	if ((*iter)->m_bNetState) nConnectCount++;
             }
-            if (nIndex != ((iTime / period) % (vNodes.size() + 1))) {
+            std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+ //           vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+            vector<CNode*>::iterator iter=g_vAllNodes.begin();
+            for(;iter!=g_vAllNodes.end();iter++)
+            {
+            	if ((*iter)->m_strMacAddr==pindexPrev->m_strMac){
+            		iter++;
+            		break;
+            	}
 
-                continue;
             }
+
+            std::string strIp=(*iter)->addr.ToStringIP();
+            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
+            {
+        	   if ((GetTime()-pindexPrev->nTime)<(0.95*DEFAULT_GENERATE_PERIOD))
+        	   {
+
+        		   continue;
+        	   }
+
+
+            }else{
+            	continue;
+            }
+
+ //##############second method############################################################################################3
+//            for(vector<CNode*>::iterator iter=g_vAllNodes.begin();iter!=g_vAllNodes.end();iter++)
+//                     {
+//                     	if ((*iter)->m_bNetState) nConnectCount++;
+//                     }
+//                     std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+//          //           vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+//                     vector<CNode*>::iterator iter=g_vAllNodes.begin();
+//                     if ((0.05*DEFAULT_GENERATE_PERIOD)>fabs(g_vAllNodes[0]->m_creBlockTime - g_vAllNodes[1]->m_creBlockTime ))
+//                     {
+//                     	if (g_vAllNodes[0]->addr.ToStringIP() > g_vAllNodes[1]->addr.ToStringIP() )
+//                     	iter++;
+//                     }
+//                      std::string strIp=(*iter)->addr.ToStringIP();
+//                     if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
+//                     {
+//                 	   if ((GetTime()-pindexPrev->nTime)<(0.95*DEFAULT_GENERATE_PERIOD))
+//                 		   continue;
+//                     }else{
+//                     	continue;
+//                     }
+//
+//##############third method############################################################################################3
+//            int64_t iTime=GetTime();
+//            int64_t period=DEFAULT_GENERATE_PERIOD;
+//
+//            //static bool lockState = true;
+//            if (0.95 * DEFAULT_GENERATE_PERIOD > (iTime - pindexPrev->GetBlockTime()))
+//                continue;
+//            if ((0.05 * DEFAULT_GENERATE_PERIOD) < fabs(iTime % period)) {
+//                continue;
+//            }
+//
+//            int nIndex = -1;
+//            if(mapArgs.count("-index"))
+//            {
+//                nIndex = GetArg("-index",-1);
+//                if(nIndex == -1)
+//                {
+//                    continue;
+//                }
+//            }
+//            if (nIndex != ((iTime / period) % (vNodes.size() + 1))) {
+//
+//                continue;
+//            }
 //            sleep(5);
             //if (false==lockState)  continue;
 
+
+            (*iter)->m_creBlockTime= GetTime();
             auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
             if (!pblocktemplate.get())
             {
