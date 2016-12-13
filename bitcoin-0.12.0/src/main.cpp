@@ -3436,7 +3436,10 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
 {
     // Preliminary checks
     bool checked = CheckBlock(*pblock, state);
-
+    if (NULL==dbp ||NULL==pfrom)
+    LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s\n",__FUNCTION__,__LINE__,"NULL",pblock->ToString(),"NULL");
+    else
+    LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s\n",__FUNCTION__,__LINE__,dbp->ToString(),pblock->ToString(),pfrom->addrName);
     {
         LOCK(cs_main);
         bool fRequested = MarkBlockAsReceived(pblock->GetHash());
