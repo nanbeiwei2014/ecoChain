@@ -53,8 +53,8 @@ public:
        READWRITE(nBits);
        READWRITE(nNonce);
        READWRITE(sPubKey);
-//       READWRITE(sSign);
-//       READWRITE(m_strMac);
+       READWRITE(sSign);
+       READWRITE(m_strMac);
     }
 
     void SetNull()
