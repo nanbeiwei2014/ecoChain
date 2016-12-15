@@ -144,7 +144,11 @@ public:
     unsigned int nTime;
     unsigned int nBits;
     unsigned int nNonce;
-    std::string 	m_strMac;
+
+    std::string sPubKey;
+	std::string sSign;
+
+	std::string m_strMac;
 
     //! (memory only) Sequential id assigned to distinguish order in which blocks are received.
     uint32_t nSequenceId;
@@ -169,6 +173,10 @@ public:
         nTime          = 0;
         nBits = 0x1d00ffff;//0x20ffffff;
         nNonce =0x01;
+
+        sPubKey="";
+        sSign="";
+
         m_strMac = "";
     }
 
@@ -186,6 +194,8 @@ public:
         nTime          = block.nTime;
         nBits          = block.nBits;
         nNonce         = block.nNonce;
+        sPubKey 	= block.sPubKey;
+        sSign		= block.sSign;
         m_strMac       = block.m_strMac;
     }
 
@@ -217,6 +227,8 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.sPubKey	=	sPubKey;
+        block.sSign		= 	sSign;
         block.m_strMac		 = m_strMac;
         return block;
     }
@@ -324,6 +336,10 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+
+        READWRITE(sPubKey);
+//        READWRITE(sSign);
+
     }
 
     uint256 GetBlockHash() const
@@ -335,6 +351,8 @@ public:
         block.nTime           = nTime;
         block.nBits           = nBits;
         block.nNonce          = nNonce;
+        block.sPubKey	=	sPubKey;
+//        block.sSign		= 	sSign;
         return block.GetHash();
     }
 

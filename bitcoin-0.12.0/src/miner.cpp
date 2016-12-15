@@ -29,6 +29,9 @@
 #include <boost/tuple/tuple.hpp>
 #include <queue>
 
+
+
+
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -45,7 +48,7 @@ using namespace std;
 uint64_t nLastBlockTx = 0;
 uint64_t nLastBlockSize = 0;
 //*************begin modify by mengqg 20161104***********************************
-static const int DEFAULT_GENERATE_PERIOD = 0.1*60;  //unit s
+static const int DEFAULT_GENERATE_PERIOD = 0.1*20;  //unit s
 static const int VALID_BLOCK_NODES = 0;//
 //*************end modify by mengqg 20161104*************************
 
@@ -350,37 +353,59 @@ bool SortVNodesBy( const CNode* v1, const CNode* v2)
      return (v1->m_strMacAddr < v2->m_strMacAddr);//&&(v1->m_bNetState>=v2->m_bNetState);
 }
 
+//static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion)
+//{
+//	Cqkgj_basic_data   qtxNew(std::string("I am qukuaiguoji_jinliankeji"),std::string("The Times 11/NOV/2016 create first blockChain for futureBusinessMall"),std::string("false signature"));
+//
+//        CBlock genesis;
+//        genesis.nTime    = nTime;
+//        genesis.nBits    = nBits;
+//        genesis.nNonce   = nNonce;
+//
+//        genesis.sPubKey =  g_signature.getPublicKey();
+//        genesis.sSign = std::string("");
+//
+//        genesis.nVersion = nVersion;
+//        genesis.qvtx.push_back(qtxNew);
+//        genesis.hashPrevBlock.SetNull();
+//        genesis.hashMerkleRoot = BlockMerkleRoot(genesis);
+//        return genesis;
+//}
 
-void static BitcoinMiner(const CChainParams& chainparams)
-{
-    LogPrintf("QKGJBlockChainMiner started\n");
-    SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("QKGJ-miner");
+void static BitcoinMiner(const CChainParams& chainparams) {
+	LogPrintf("QKGJBlockChainMiner started\n");
+	SetThreadPriority(THREAD_PRIORITY_LOWEST);
+	RenameThread("QKGJ-miner");
 
-    try {
-        // Throw an error if no script was provided.  This can happen
-        // due to some internal error but also if the keypool is empty.
-        // In the latter case, already the pointer is NULL.
+	try {
+		// Throw an error if no script was provided.  This can happen
+		// due to some internal error but also if the keypool is empty.
+		// In the latter case, already the pointer is NULL.
 
-        while (true) {
-            if (chainparams.MiningRequiresPeers()) {
-                // Busy-wait for the network to come online so we don't waste time mining
-                // on an obsolete chain. In regtest mode we expect to fly solo.
-                do {
-                    bool fvNodesEmpty;
-                    {
-                        LOCK(cs_vNodes);
-                        fvNodesEmpty = vNodes.empty();
-                    }
-                    if (!fvNodesEmpty )//&& !IsInitialBlockDownload())
-                        break;
-                    MilliSleep(1000);
-                } while (true);
-            }
+		while (true) {
+			if (chainparams.MiningRequiresPeers()) {
+				// Busy-wait for the network to come online so we don't waste time mining
+				// on an obsolete chain. In regtest mode we expect to fly solo.
+				do {
+					bool fvNodesEmpty;
+					{
+						LOCK(cs_vNodes);
+						fvNodesEmpty = vNodes.empty();
+					}
+					if (!fvNodesEmpty)           //&& !IsInitialBlockDownload())
+						break;
+					MilliSleep(1000);
+				} while (true);
+			}
 
-            //
-            // Create new block
-            //
+			//
+			// Create new block
+			//
+//#####################create block sign 20161214######################################################################################
+//			CBlock block=CreateGenesisBlock(1480477681, 0x1d00ffff,0x01, 1);
+//			std::cout<<"the pubkey's value:"<<g_signature.getPublicKey()<<std::endl;
+//			std::cout<<"the Sign's value:"<<g_signature.Sign(block.GetHash())<<std::endl;
+//##########################################################################################################
             unsigned int nTransactionsUpdatedLast = qmempool.get_data_updated();
             CBlockIndex* pindexPrev = chainActive.Tip();
 
@@ -399,18 +424,29 @@ void static BitcoinMiner(const CChainParams& chainparams)
             std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
  //           vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
             vector<CNode*>::iterator iter=g_vAllNodes.begin();
-            for(;iter!=g_vAllNodes.end();iter++)
-            {
-            	if ((*iter)->m_strMacAddr==pindexPrev->m_strMac){
+			for (; iter != g_vAllNodes.end(); iter++) {
+				if ((*iter)->m_strMacAddr == pindexPrev->m_strMac) {
 
-            		iter++;
-            		if(g_vAllNodes.end()==iter)iter=g_vAllNodes.begin();
-            		break;
-            	}
+					iter++;
+					if (g_vAllNodes.end() == iter) {
+						iter = g_vAllNodes.begin();
+					}
+					break;
+				}
 
-            }
+			}
+			std::string strIp, strTest="";
+			if (g_vAllNodes.size() <= (iter - g_vAllNodes.begin())) {
+				strIp = (*g_vAllNodes.begin())->addr.ToStringIP();
+				strTest = (*g_vAllNodes.begin())->m_strMacAddr;
 
-            std::string strIp=(*iter)->addr.ToStringIP();
+			} else {
+				strIp = (*iter)->addr.ToStringIP();
+				strTest = (*iter)->m_strMacAddr;
+			}
+
+			LogPrintf("[%s:%d], MAC:[%s],IP address:[%s],g_vAllNodes.size():[%d],loop i:[%d]!\n",__FUNCTION__,__LINE__,strTest, strIp,g_vAllNodes.size(),iter-g_vAllNodes.begin());
+//            LogPrintf("[%s:%d], IP address:[%s],g_vAllNodes.size():[%d],loop iter:[%d]!\n",__FUNCTION__,__LINE__, strIp,g_vAllNodes.size(),iter-g_vAllNodes.begin());
             if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
             {
         	   if ((GetTime()-pindexPrev->nTime)<(0.95*DEFAULT_GENERATE_PERIOD))
@@ -470,7 +506,22 @@ void static BitcoinMiner(const CChainParams& chainparams)
             CBlock *pblock = &pblocktemplate->block;
             pblock->m_strMac = g_localMacInfo.GetLocalMac();
             pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
+//####################publickey privatekey sign#######################################################################3
 
+			string strPublicKey = g_signature.getPublicKey();
+			LogPrintf("[%s:%d],the PublicKey:[%s]\n", __FUNCTION__, __LINE__,					strPublicKey);
+			/* 获得私钥*/
+			string strPrivateKey = g_signature.getPrivateKey();
+			LogPrintf("[%s:%d], the PrivateKey:[%s]!\n", __FUNCTION__, __LINE__,					strPrivateKey);
+std::string   strSign=g_signature.Sign(pblock->GetHash());
+bool fSign = g_signature.Verify(pblock->GetHash(),strSign,strPublicKey);
+			LogPrintf("[%s:%d], the g_signature:[%s],fSign [%d]!\n", __FUNCTION__, __LINE__,	strSign,fSign);
+
+			//################start add strpubkey##########################################
+			pblock->sPubKey = g_signature.getPublicKey();
+			pblock->sSign = g_signature.Sign(pblock->GetHash());
+
+//############## create NewBlock method############################################################################################3
 //******************************************************************
             //pblock->nHeight = pindexPrev->nHeight+1;
             //define height into blockheader for caculating blockhash

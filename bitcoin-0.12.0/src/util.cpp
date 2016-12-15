@@ -15,7 +15,9 @@
 #include "sync.h"
 #include "utilstrencodings.h"
 #include "utiltime.h"
+
 //#include "hash.h"
+#include <strstream> //add by mengqg
 
 #include <stdarg.h>
 #include <fstream>
@@ -848,8 +850,6 @@ CLocalMacAddr::CLocalMacAddr()
 	GetNetworkCardName();
 	GetLocalMac();
 	GetLocalIP();
-
-	//update_hash();
 }
 CLocalMacAddr::~CLocalMacAddr(){}
 
@@ -864,6 +864,22 @@ CLocalMacAddr& CLocalMacAddr::operator=( const CLocalMacAddr &data )
 //{
 //    *const_cast<uint256*>(&m_hash) = SerializeHash(*this);
 //}
+static inline void IntToString (std::string& out, const int value)
+{
+    std::strstream ss; // #include <strstream>
+    ss <<  value;
+    ss >> out;
+}
+std::string CLocalMacAddr::GetStr() const {
+
+	std::string str;// = (std::string) g_localMacInfo.nTime;
+	IntToString(str,GetTime());
+	//sprintf(str,"%d",nTime);
+	str += g_localMacInfo.m_strMacAddr;
+	str += g_localMacInfo.m_strIP;
+	return str;
+}
+
 void CLocalMacAddr::GetNetworkCardName()
 {
 	std::vector<std::string> netCardNameVec;
@@ -953,52 +969,25 @@ uint256 CLocalMacAddr::GetLocalMacHash()
 }
 
 CLocalMacAddr g_localMacInfo;
+signature g_signature;
 
-//打印日志
-void OutputLog(const std::string& szOutputFileName, const std::string&  szMessage)
-{
-	//判断是否打印日志
-//	if (!m_bIsPrintLog) {
-//		return;
-//	}
-
-//	if (szOutputFileName.length() <= 0) {
-//		return;
-//	}
-//
-//	//当前目录
-//	char bufDir[1024];
-//	memset(bufDir, 0, 1024);
-//	getcwd(bufDir, 1024);
-//
-//	std::string strAppPath = bufDir;
-//	strAppPath += ("/log/");
-//
-//	//判断当前目录是否存在，如果不存在则创建
-//	if(opendir(strAppPath.c_str()) == NULL)
-//	{
-//		mkdir(strAppPath.c_str(), 0774);
-//	}
-//
-//	//保存路径
-//	string strFilePath = strAppPath + szOutputFileName;
-//	ofstream fout(strFilePath.c_str(), ios::out | ios::app);
-//	if (fout.fail())
-//	{
-//		return;
-//	}
-//	time_t rawtime;
-//	struct tm * timeinfo;
-//	time(&rawtime);
-//	timeinfo = localtime(&rawtime);
-//
-//	//
-//	char buf[128] = { 0 };
-//	strftime(buf, 64, "%Y-%m-%d %H:%M:%S", timeinfo);
-//	string strTime(buf);
-//	string szTmp = strTime + " :: " + szMessage + "\n";
-//
-//	fout.write(szTmp.c_str(), szTmp.size());
-//	fout.close();
-}
 /*End add by syl 2016-11-23======================================== */
+signature::signature() {
+	strSeed = g_localMacInfo.GetStr();
+	b_compress = true;
+	int len = strSeed.length();
+	vch.clear();
+	vch.resize(len);
+	vch.assign(strSeed.begin(),	strSeed.begin() + (strSeed.size() > 32 ? 32 : strSeed.size()));
+
+	if (len >= 32) /* 传过来的种子参数必须是32位，则否返回错误*/
+		secret.Set(vch.begin(), vch.end(), b_compress);
+	else {
+		for (int i = 0; vch.size() <= 32; i++) {
+			vch.resize(vch.size() + 1);
+			vch[vch.size()] = 'o';
+		}
+		secret.Set(vch.begin(), vch.end(), b_compress);
+	}
+}
+
