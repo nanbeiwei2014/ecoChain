@@ -2611,7 +2611,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
     if (block.GetBlockTime() > GetAdjustedTime() + 2 * 60 * 60)
         return state.Invalid(error("CheckBlockHeader(): block timestamp too far in the future"),
                              REJECT_INVALID, "time-too-new");
-    if(block.GetHash() == uint256S("0xb301af770734c13012d9c398b73133d238308a89cc20cda31e71723528c43124"))
+    if(block.GetHash() == uint256S("0xef09d19fb6c9381c003514e9fc47d101ae96aec8fcb7b3b9a1b4f25b57b7e508"))
     {
     	return true;
     }
