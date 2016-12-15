@@ -54,7 +54,7 @@ public:
        READWRITE(nNonce);
        READWRITE(sPubKey);
 //       READWRITE(sSign);
-       READWRITE(m_strMac);
+//       READWRITE(m_strMac);
     }
 
     void SetNull()
