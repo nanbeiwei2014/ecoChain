@@ -7,7 +7,7 @@
 #define BITCOIN_MINER_H
 
 #include "primitives/block.h"
-
+#include "key.h"  //############add by mengqg 20161203############################
 #include <stdint.h>
 
 class CBlockIndex;

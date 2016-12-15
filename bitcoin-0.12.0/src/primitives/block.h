@@ -27,10 +27,12 @@ public:
     uint256 hashMerkleRoot;
     uint64_t nTime;
     //int  nHeight;
- //****************begin delete by mengqg 20161105******************************************
+ //****************begin edit by mengqg 20161105******************************************
     uint32_t nBits;
     uint32_t nNonce;
- //****************end delete by mengqg 20161105******************************************
+    std::string sPubKey;
+    std::string sSign;
+ //****************end edit by mengqg 20161105******************************************
     std::string m_strMac;	//Add by syl 2016-11-24=========================================
 
     CBlockHeader()
@@ -50,7 +52,9 @@ public:
        // READWRITE(nHeight);
        READWRITE(nBits);
        READWRITE(nNonce);
-       READWRITE(m_strMac);
+       READWRITE(sPubKey);
+//       READWRITE(sSign);
+//       READWRITE(m_strMac);
     }
 
     void SetNull()
@@ -62,6 +66,8 @@ public:
         //nHeight=0;
         nBits = 0x1d00ffff;//0x20ffffff;
         nNonce =0x01;
+        sPubKey="";
+        sSign="";
         m_strMac = "";
     }
 
@@ -128,6 +134,8 @@ public:
         //block.nHeight		 = nHeight;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.sPubKey		 = sPubKey;
+        block.sSign			 = sSign;
         block.m_strMac		 = m_strMac;
         return block;
     }

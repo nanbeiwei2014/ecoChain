@@ -13,7 +13,10 @@
 #if defined(HAVE_CONFIG_H)
 #include "config/bitcoin-config.h"
 #endif
-
+//############add by mengqg 20161213########################################
+#include "key.h"
+#include "base58.h" //###########add by mengqg  20161213###########################
+//##############################################################3
 #include "compat.h"
 #include "tinyformat.h"
 #include "utiltime.h"
@@ -289,12 +292,68 @@ public:
     std::string	GetLocalMac();
     std::string	GetLocalIP();
     uint256 GetLocalMacHash();
+
+    //  uint256 GetHash() const;
+    std::string GetStr()const;
 };
 
 extern CLocalMacAddr g_localMacInfo;
 
-//打印日志
-extern void	OutputLog(const std::string& szOutputFileName, const std::string&  szMessage);
+class signature {
+private:
+	CKey secret;
+	bool b_compress;
+	std::string strSeed;
+	std::vector<unsigned char>  vch;
+public:
+	signature() ;
+	~signature(){
+		vch.clear();
+	}
+	std::string getPublicKey(){
+		CPubKey pub_key = secret.GetPubKey();
+		assert(secret.VerifyPubKey(secret.GetPubKey()));
+
+		/* 把转换成base58编码格式 */
+		std::vector<unsigned char> tempVch;
+		tempVch.clear();
+		tempVch.resize(pub_key.size());
+		tempVch.assign(pub_key.begin(), pub_key.end());
+		std::string strPublicKey = EncodeBase58(tempVch);
+		return strPublicKey;
+	}
+	std::string getPrivateKey() {
+		std::string strPrivateKey(CBitcoinSecret(secret).ToString());
+		 return strPrivateKey;
+	}
+	std::string Sign(const uint256 &hash) {
+		std::vector<unsigned char> vchSig;
+		vchSig.clear();
+		secret.Sign(hash, vchSig);
+		return EncodeBase58(vchSig);
+
+	}
+	bool Verify(const uint256 &hash, const std::string &strSign,const std::string &strPublicKey) const {
+		std::vector<unsigned char> vchSig;
+		vchSig.clear();
+		bool bSign = DecodeBase58(strSign, vchSig);
+		if (!bSign)
+			return false;
+
+		std::vector<unsigned char> vch_pub_key;
+		vch_pub_key.clear();
+		/* 把得到的数据以base58格式解码 */
+		bool bdecodeRet = DecodeBase58(strPublicKey, vch_pub_key);
+		if (!bdecodeRet)
+			return false;
+
+		CPubKey pub_key(vch_pub_key);
+		return pub_key.Verify(hash, vchSig);
+	}
+
+
+};
+extern signature g_signature;
 /*End add by syl  2016-11-23============================= */
 
 #endif // BITCOIN_UTIL_H

@@ -69,18 +69,17 @@ public:
     }
 
     //! Initialize a public key using begin/end iterators to byte data.
-    template <typename T>
-    void Set(const T pbegin, const T pend)
-    {
-        int leng=GetLen(pend[0]);
-        std::cout<<"leng:"<<leng<<std::endl;
-        int len = pend == pbegin ? 0 : GetLen(pbegin[0]);
-        std::cout<<"len:"<<len<<std::endl;
-        if (len && len == (pend - pbegin))
-            memcpy(vch, (unsigned char*)&pbegin[0], len);
-        else
-            Invalidate();
-    }
+	template<typename T>
+	void Set(const T pbegin, const T pend) {
+//        int leng=GetLen(pend[0]);
+
+		int len = pend == pbegin ? 0 : GetLen(pbegin[0]);
+
+		if (len && len == (pend - pbegin))
+			memcpy(vch, (unsigned char*) &pbegin[0], len);
+		else
+			Invalidate();
+	}
 
     //! Construct a public key using begin/end iterators to byte data.
     template <typename T>
