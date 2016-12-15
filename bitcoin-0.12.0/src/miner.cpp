@@ -436,7 +436,7 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 
 			}
 			std::string strIp, strTest="";
-			if (g_vAllNodes.size() <= (iter - g_vAllNodes.begin())) {
+			if ((g_vAllNodes.size()) <= (iter - g_vAllNodes.begin())) {
 				strIp = (*g_vAllNodes.begin())->addr.ToStringIP();
 				strTest = (*g_vAllNodes.begin())->m_strMacAddr;
 
@@ -445,7 +445,7 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 				strTest = (*iter)->m_strMacAddr;
 			}
 
-			LogPrintf("[%s:%d], MAC:[%s],IP address:[%s],g_vAllNodes.size():[%d],loop i:[%d]!\n",__FUNCTION__,__LINE__,strTest, strIp,g_vAllNodes.size(),iter-g_vAllNodes.begin());
+//			LogPrintf("[%s:%d], MAC:[%s],IP address:[%s],g_vAllNodes.size():[%d],loop i:[%d]!\n",__FUNCTION__,__LINE__,strTest, strIp,g_vAllNodes.size(),iter-g_vAllNodes.begin());
 //            LogPrintf("[%s:%d], IP address:[%s],g_vAllNodes.size():[%d],loop iter:[%d]!\n",__FUNCTION__,__LINE__, strIp,g_vAllNodes.size(),iter-g_vAllNodes.begin());
             if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
             {
