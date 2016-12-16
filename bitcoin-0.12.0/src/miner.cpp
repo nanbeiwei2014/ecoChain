@@ -5,10 +5,10 @@
 
 #include "miner.h"
 #include <math.h>
-#include "amount.h"
+//#include "amount.h"  //#####delete by mengqg 20161216##
 #include "chain.h"
 #include "chainparams.h"
-#include "coins.h"
+//#include "coins.h"   //######delete by mengqg 20161216#########################
 #include "consensus/consensus.h"
 #include "consensus/merkle.h"
 #include "consensus/validation.h"
@@ -72,172 +72,153 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
 
 CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
 {
-    LogPrintf("[%s:%d],begin enter function step\n",__FUNCTION__,__LINE__);
-    // Create new block
-    auto_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
-    if(!pblocktemplate.get())
-        return NULL;
-    CBlock *pblock = &pblocktemplate->block; // pointer for convenience
+	  // Create new block
+	auto_ptr<CBlockTemplate> pblocktemplate(new CBlockTemplate());
+	if (!pblocktemplate.get())
+		return NULL;
+	CBlock *pblock = &pblocktemplate->block; // pointer for convenience
 
-    // -regtest only: allow overriding block.nVersion with
-    // -blockversion=N to test forking scenarios
-    if (chainparams.MineBlocksOnDemand())
-        pblock->nVersion = GetArg("-blockversion", pblock->nVersion);
+	// -regtest only: allow overriding block.nVersion with
+	// -blockversion=N to test forking scenarios
+	if (chainparams.MineBlocksOnDemand())
+		pblock->nVersion = GetArg("-blockversion", pblock->nVersion);
 
-    // Largest block you're willing to create:
-    unsigned int nBlockMaxSize = GetArg("-blockmaxsize", DEFAULT_BLOCK_MAX_SIZE);
-    // Limit to between 1K and MAX_BLOCK_SIZE-1K for sanity:
-    nBlockMaxSize = std::max((unsigned int)1000, std::min((unsigned int)(MAX_BLOCK_SIZE-1000), nBlockMaxSize));
+	// Largest block you're willing to create:
+	unsigned int nBlockMaxSize = GetArg("-blockmaxsize",DEFAULT_BLOCK_MAX_SIZE);
+	// Limit to between 1K and MAX_BLOCK_SIZE-1K for sanity:
+	nBlockMaxSize = std::max((unsigned int) 1000,
+			std::min((unsigned int) (MAX_BLOCK_SIZE - 1000), nBlockMaxSize));
 
+	// Minimum block size you want to create; block will be filled with free transactions
+	// until there are no more or the block reaches this size:
+	unsigned int nBlockMinSize = GetArg("-blockminsize", DEFAULT_BLOCK_MIN_SIZE);
+	nBlockMinSize = std::min(nBlockMaxSize, nBlockMinSize);
 
-    // Minimum block size you want to create; block will be filled with free transactions
-    // until there are no more or the block reaches this size:
-    unsigned int nBlockMinSize = GetArg("-blockminsize", DEFAULT_BLOCK_MIN_SIZE);
-    nBlockMinSize = std::min(nBlockMaxSize, nBlockMinSize);
+	// Collect memory pool transactions into the block
 
-    // Collect memory pool transactions into the block
+	Cqkgj_mempool::set_entries inBlock;
 
-    Cqkgj_mempool::set_entries inBlock;
+	// This vector will be sorted into a priority queue:
+	vector<DataAgePriority> vecPriority;
+	DataAgePriorityCompare pricomparer;
 
-    // This vector will be sorted into a priority queue:
-    vector<DataAgePriority> vecPriority;
-    DataAgePriorityCompare pricomparer;
+	double actualPriority = -1;
+	uint64_t nBlockSize = 1000;
+	uint64_t nBlockTx = 0;
+	unsigned int nBlockSigOps = 100;
+	int lastFewTxs = 0;
 
-    double actualPriority = -1;
+	{
+		LOCK2(cs_main, qmempool.cs);
 
+		CBlockIndex* pindexPrev = chainActive.Tip();
+		const int nHeight = pindexPrev->nHeight + 1;
+		pblock->nTime = GetAdjustedTime();
+		const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
 
+		int64_t nLockTimeCutoff =
+				(STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST) ?
+						nMedianTimePast : pblock->GetBlockTime();
 
-    uint64_t nBlockSize = 1000;
-    uint64_t nBlockTx = 0;
-    unsigned int nBlockSigOps = 100;
-    int lastFewTxs = 0;
+		bool fPriorityBlock = nBlockMaxSize > 0;
+		if (fPriorityBlock) {
+			vecPriority.reserve(qmempool.map_data.size());
+			for (Cqkgj_mempool::indexed_data_set::iterator mi =
+					qmempool.map_data.begin(); mi != qmempool.map_data.end();
+					++mi) {
+				double dPriority = mi->get_priority(nHeight);
+				vecPriority.push_back(DataAgePriority(dPriority, mi));
+			}
+			std::make_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
+		}
 
-    {
-        LogPrintf("[%s:%d],begin enter LOCK2() step\n",__FUNCTION__,__LINE__);
-        LOCK2(cs_main, qmempool.cs);
-        LogPrintf("[%s:%d],end enter LOCK2() step\n",__FUNCTION__,__LINE__);
+		//Cqkgj_mempool::it_hash mi  = qmempool.map_hash_data.begin();
+		Cqkgj_mempool::indexed_data_set::nth_index<1>::type::iterator mi =
+				qmempool.map_data.get<1>().begin();
+		Cqkgj_mempool::data_it iter;
 
-        CBlockIndex* pindexPrev = chainActive.Tip();
-        const int nHeight = pindexPrev->nHeight + 1;
-        pblock->nTime = GetAdjustedTime();
-        const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
+		int i = 0;
+		while (mi != qmempool.map_data.get<1>().end()) {
+			bool priorityTx = false;
+			if (fPriorityBlock && !vecPriority.empty()) { // add a tx from priority queue to fill the blockprioritysize
+				priorityTx = true;
+				iter = vecPriority.front().second;
+				actualPriority = vecPriority.front().first;
+				std::pop_heap(vecPriority.begin(), vecPriority.end(),
+						pricomparer);
+				vecPriority.pop_back();
+			} else {
+				iter = qmempool.map_data.project<0>(mi);
+				mi++;
+			}
 
-        int64_t nLockTimeCutoff = (STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST)
-                                ? nMedianTimePast
-                                : pblock->GetBlockTime();
+			if (inBlock.count(iter)) {
+				continue; // could have been added to the priorityBlock
+			}
+			const Cqkgj_basic_data& tx = iter->get_data();
 
-        LogPrintf("[%s:%d],begin enter for() step\n",__FUNCTION__,__LINE__);
-        bool fPriorityBlock = nBlockMaxSize > 0;
-        if (fPriorityBlock) {
-            vecPriority.reserve(qmempool.map_data.size());
-            for (Cqkgj_mempool::indexed_data_set::iterator mi = qmempool.map_data.begin();
-                           mi != qmempool.map_data.end(); ++mi)
-             {
-                double dPriority = mi->get_priority(nHeight);
-                vecPriority.push_back(DataAgePriority(dPriority, mi));
-             }
-          std::make_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
-        }
-
-        //Cqkgj_mempool::it_hash mi  = qmempool.map_hash_data.begin();
-        Cqkgj_mempool::indexed_data_set::nth_index<1>::type::iterator mi = qmempool.map_data.get<1>().begin();
-        Cqkgj_mempool::data_it iter;
-
-        int i = 0;
-        LogPrintf("[%s:%d],begin enter while() step\n",__FUNCTION__,__LINE__);
-        while (mi != qmempool.map_data.get<1>().end() )
-        {
-            bool priorityTx = false;
-            if (fPriorityBlock && !vecPriority.empty()) { // add a tx from priority queue to fill the blockprioritysize
-                LogPrintf("[%s:%d],if (fPriorityBlock && !vecPriority.empty()),%d times,\n",__FUNCTION__,__LINE__,i);
-                priorityTx = true;
-                iter = vecPriority.front().second;
-                actualPriority = vecPriority.front().first;
-                std::pop_heap(vecPriority.begin(), vecPriority.end(), pricomparer);
-                vecPriority.pop_back();
-            }else{
-            	iter = qmempool.map_data.project<0>(mi);
-            	mi++;
-            }
-
-
-            if (inBlock.count(iter))
-            {
-                LogPrintf("[%s:%d],while begin step,%d times\n",__FUNCTION__,__LINE__,i);
-                continue; // could have been added to the priorityBlock
-            }
-            const Cqkgj_basic_data& tx = iter->get_data();
-
-
-            unsigned int nTxSize = iter->get_data_size();
-            if (!priorityTx &&
-                (nBlockSize >= nBlockMinSize)) {
-                break;
-            }
-            if (nBlockSize + nTxSize >= nBlockMaxSize) {
-                if (nBlockSize >  nBlockMaxSize - 100 || lastFewTxs > 50) {
-                    break;
-                }
-                // Once we're within 1000 bytes of a full block, only look at 50 more txs
-                // to try to fill the remaining space.
-                if (nBlockSize > nBlockMaxSize - 1000) {
-                    lastFewTxs++;
-                }
-                LogPrintf("[%s:%d],after if(nBlockSize + nTxSize >= nBlockMaxSize) \n",__FUNCTION__,__LINE__);
-                continue;
-            }
-/****
-            if (!IsFinalTx(tx, nHeight, nLockTimeCutoff))
-                continue;
+			unsigned int nTxSize = iter->get_data_size();
+			if (!priorityTx && (nBlockSize >= nBlockMinSize)) {
+				break;
+			}
+			if (nBlockSize + nTxSize >= nBlockMaxSize) {
+				if (nBlockSize > nBlockMaxSize - 100 || lastFewTxs > 50) {
+					break;
+				}
+				// Once we're within 1000 bytes of a full block, only look at 50 more txs
+				// to try to fill the remaining space.
+				if (nBlockSize > nBlockMaxSize - 1000) {
+					lastFewTxs++;
+				}
+				LogPrintf("[%s:%d],after if(nBlockSize + nTxSize >= nBlockMaxSize) \n",	__FUNCTION__, __LINE__);
+				continue;
+			}
+			/****
+			 if (!IsFinalTx(tx, nHeight, nLockTimeCutoff))
+			 continue;
 
 
-           unsigned int nTxSigOps = iter->GetSigOpCount();
-            if (nBlockSigOps + nTxSigOps >= MAX_BLOCK_SIGOPS) {
-                if (nBlockSigOps > MAX_BLOCK_SIGOPS - 2) {
-                    break;
-                }
-                continue;
-            }
-*****/
+			 unsigned int nTxSigOps = iter->GetSigOpCount();
+			 if (nBlockSigOps + nTxSigOps >= MAX_BLOCK_SIGOPS) {
+			 if (nBlockSigOps > MAX_BLOCK_SIGOPS - 2) {
+			 break;
+			 }
+			 continue;
+			 }
+			 *****/
 
-            LogPrintf("[%s:%d],1  step\n",__FUNCTION__,__LINE__);
-            // Added
-            pblock->qvtx.push_back(tx);
-            LogPrintf("[%s:%d],2 step\n",__FUNCTION__,__LINE__);
-            //pblocktemplate->vTxSigOps.push_back(nTxSigOps);
-            nBlockSize += nTxSize;
-            LogPrintf("[%s:%d],3 step\n",__FUNCTION__,__LINE__);
-            ++nBlockTx;
-            //nBlockSigOps += nTxSigOps;
-            LogPrintf("[%s:%d],4 step\n",__FUNCTION__,__LINE__);
+			// Added
+			pblock->qvtx.push_back(tx);
+			//pblocktemplate->vTxSigOps.push_back(nTxSigOps);
+			nBlockSize += nTxSize;
+			++nBlockTx;
+			//nBlockSigOps += nTxSigOps;
 
-            inBlock.insert(iter);
-            LogPrintf("[%s:%d],5 step\n",__FUNCTION__,__LINE__);
+			inBlock.insert(iter);
+			// Add transactions that depend on this one to the priority queue
+			i++;
 
-            // Add transactions that depend on this one to the priority queue
-            i++;
+		}
+		LogPrintf("[%s:%d],out step\n", __FUNCTION__, __LINE__);
 
-        }
-        LogPrintf("[%s:%d],out step\n",__FUNCTION__,__LINE__);
+		nLastBlockTx = nBlockTx;
+		nLastBlockSize = nBlockSize;
+		LogPrintf("CreateNewBlock(): total size %u txs: %u  sigops %d\n",
+				nBlockSize, nBlockTx, nBlockSigOps);
 
-        nLastBlockTx = nBlockTx;
-        nLastBlockSize = nBlockSize;
-        LogPrintf("CreateNewBlock(): total size %u txs: %u  sigops %d\n", nBlockSize, nBlockTx,  nBlockSigOps);
+		// Fill in header
+		pblock->hashPrevBlock = pindexPrev->GetBlockHash();
+		UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
 
+		CValidationState state;
+		if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false,
+				false)) {
+			throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
+		}
+	}
 
-        // Fill in header
-        pblock->hashPrevBlock  = pindexPrev->GetBlockHash();
-        UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev);
-
-
-        CValidationState state;
-        if (!TestBlockValidity(state, chainparams, *pblock, pindexPrev, false, false)) {
-            throw std::runtime_error(strprintf("%s: TestBlockValidity failed: %s", __func__, FormatStateMessage(state)));
-        }
-    }
-
-    LogPrintf("[%s:%d],end enter function step\n",__FUNCTION__,__LINE__);
-    return pblocktemplate.release();
+	LogPrintf("[%s:%d],end enter function step\n", __FUNCTION__, __LINE__);
+	return pblocktemplate.release();
 }
 
 void IncrementExtraNonce(CBlock* pblock, const CBlockIndex* pindexPrev, unsigned int& nExtraNonce)
