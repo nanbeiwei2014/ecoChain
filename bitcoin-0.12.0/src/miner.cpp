@@ -347,30 +347,13 @@ bool SortVNodesBy( const CNode* v1, const CNode* v2)
 {
      assert(NULL!=v1);
      assert(NULL!=v2);
+//##################################################################################################################################
 //	 if ((fabs(v1->m_creBlockTime - v2->m_creBlockTime)<(0.05*DEFAULT_GENERATE_PERIOD))&&(v1->m_bNetState>=v2->m_bNetState)&&(true==v1->m_bNetState)&&(true==v2->m_bNetState))
 //		 return v1->addr.ToStringIP()<v2->addr.ToStringIP();
-     //return (v1->m_creBlockTime <= v2->m_creBlockTime)&&(v1->m_bNetState>=v2->m_bNetState);//Asc
+//     return (v1->m_creBlockTime <= v2->m_creBlockTime)&&(v1->m_bNetState>=v2->m_bNetState);//Asc
+//#################################################################################################################################
      return (v1->m_strMacAddr < v2->m_strMacAddr);//&&(v1->m_bNetState>=v2->m_bNetState);
 }
-
-//static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion)
-//{
-//	Cqkgj_basic_data   qtxNew(std::string("I am qukuaiguoji_jinliankeji"),std::string("The Times 11/NOV/2016 create first blockChain for futureBusinessMall"),std::string("false signature"));
-//
-//        CBlock genesis;
-//        genesis.nTime    = nTime;
-//        genesis.nBits    = nBits;
-//        genesis.nNonce   = nNonce;
-//
-//        genesis.sPubKey =  g_signature.getPublicKey();
-//        genesis.sSign = std::string("");
-//
-//        genesis.nVersion = nVersion;
-//        genesis.qvtx.push_back(qtxNew);
-//        genesis.hashPrevBlock.SetNull();
-//        genesis.hashMerkleRoot = BlockMerkleRoot(genesis);
-//        return genesis;
-//}
 
 void static BitcoinMiner(const CChainParams& chainparams) {
 	LogPrintf("QKGJBlockChainMiner started\n");
@@ -381,7 +364,6 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 		// Throw an error if no script was provided.  This can happen
 		// due to some internal error but also if the keypool is empty.
 		// In the latter case, already the pointer is NULL.
-
 		while (true) {
 			if (chainparams.MiningRequiresPeers()) {
 				// Busy-wait for the network to come online so we don't waste time mining
@@ -401,10 +383,6 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 			//
 			// Create new block
 			//
-//#####################create block sign 20161214######################################################################################
-//			CBlock block=CreateGenesisBlock(1480477681, 0x1d00ffff,0x01, 1);
-//			std::cout<<"the pubkey's value:"<<g_signature.getPublicKey()<<std::endl;
-//			std::cout<<"the Sign's value:"<<g_signature.Sign(block.GetHash())<<std::endl;
 //##########################################################################################################
             unsigned int nTransactionsUpdatedLast = qmempool.get_data_updated();
             CBlockIndex* pindexPrev = chainActive.Tip();
