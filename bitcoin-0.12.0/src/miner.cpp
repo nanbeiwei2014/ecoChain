@@ -353,6 +353,8 @@ bool SortVNodesBy( const CNode* v1, const CNode* v2)
 //     return (v1->m_creBlockTime <= v2->m_creBlockTime)&&(v1->m_bNetState>=v2->m_bNetState);//Asc
 //#################################################################################################################################
      return (v1->m_strMacAddr < v2->m_strMacAddr);//&&(v1->m_bNetState>=v2->m_bNetState);
+//#################################################################################################################################
+//     return (v1->m_strMacAddr < v2->m_strMacAddr);//&&(v1->m_bNetState>=v2->m_bNetState);
 }
 
 void static BitcoinMiner(const CChainParams& chainparams) {

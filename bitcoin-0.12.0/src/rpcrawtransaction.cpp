@@ -270,7 +270,7 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
         if( "data" == name )
         {
             str_data = get_data[name].get_str();
-            str_data +=	g_localMacInfo.m_strMacAddr;//#######add by mengqg 20161216 test code###############
+            str_data +=	g_localMacInfo.GetLocalMac();//#######add by mengqg 20161216 test code###############
         }
         else if ( "address" == name )
         {
