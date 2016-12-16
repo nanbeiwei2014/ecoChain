@@ -189,7 +189,6 @@ CBlockTemplate* CreateNewBlock(const CChainParams& chainparams)
 
 			// Added
 			pblock->qvtx.push_back(tx);
-			//pblocktemplate->vTxSigOps.push_back(nTxSigOps);
 			nBlockSize += nTxSize;
 			++nBlockTx;
 			//nBlockSigOps += nTxSigOps;

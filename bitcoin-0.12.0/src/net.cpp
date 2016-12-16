@@ -467,7 +467,10 @@ void CNode::PushVersion()
     int64_t nTime = (fInbound ? GetAdjustedTime() : GetTime());
     CAddress addrYou = (addr.IsRoutable() && !IsProxy(addr) ? addr : CAddress(CService("0.0.0.0",0)));
     CAddress addrMe = GetLocalAddress(&addr);
-    addrYou.m_strMacAddr = g_localMacInfo.GetLocalMac();		//Add by syl 2016-11-26============================
+//###########begin edit by  mengqg 20161216#########################
+//    addrYou.m_strMacAddr = g_localMacInfo.GetLocalMac();		//Add by syl 2016-11-26============================
+    addrYou.m_strMacAddr =g_signature.getPublicKey();
+//###########end  edit by  mengqg 20161216#########################################
     GetRandBytes((unsigned char*)&nLocalHostNonce, sizeof(nLocalHostNonce));
     if (fLogIPs)
         LogPrint("net", "send version message: version %d, blocks=%d, us=%s, them=%s, peer=%d\n", PROTOCOL_VERSION, nBestHeight, addrMe.ToString(), addrYou.ToString(), id);
