@@ -1986,8 +1986,8 @@ void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
         pnodeLocalHost = new CNode(INVALID_SOCKET, CAddress(CService("127.0.0.1", 0), nLocalServices));
 
         //Begin Add by syl 2016-11-04================================================
-        pnodeLocalHost->m_strMacAddr = g_localMacInfo.GetLocalMac();
-
+//        pnodeLocalHost->m_strMacAddr = g_localMacInfo.GetLocalMac();
+        pnodeLocalHost->m_strMacAddr = g_signature.getPublicKey();
         LOCK(g_csAllvNodes);
         g_vAllNodes.push_back(pnodeLocalHost);
         //End	Add by syl 2016-11-04================================================
