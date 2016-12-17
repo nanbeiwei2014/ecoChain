@@ -414,8 +414,6 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 
         		   continue;
         	   }
-
-
             }else{
             	continue;
             }
