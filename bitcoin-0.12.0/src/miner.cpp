@@ -385,7 +385,7 @@ void static BitcoinMiner(const CChainParams& chainparams) {
  //           vector<CNode*>::iterator iter = std::min_element(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
             vector<CNode*>::iterator iter=g_vAllNodes.begin();
 			for (; iter != g_vAllNodes.end(); iter++) {
-				if ((*iter)->m_strMacAddr == pindexPrev->m_strMac) {
+				if ((*iter)->m_strMacAddr == pindexPrev->sPubKey) {
 
 					iter++;
 					if (g_vAllNodes.end() == iter) {
