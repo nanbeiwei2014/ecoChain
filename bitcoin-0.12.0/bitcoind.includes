@@ -14,8 +14,6 @@ src/leveldb/util
 src/obj
 src/policy
 src/primitives
-src/qt
-src/qt/test
 src/script
 src/secp256k1/contrib
 src/secp256k1/include
@@ -26,7 +24,6 @@ src/secp256k1/src/modules/recovery
 src/secp256k1/src/modules/schnorr
 src/support
 src/support/allocators
-src/test
 src/univalue
 src/univalue/include
 src/univalue/lib
