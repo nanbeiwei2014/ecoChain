@@ -315,12 +315,16 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     //触发广播数据到其他节点的广播消息
     RelayQkgjMsg(data);
 
-    UniValue result;
-    //result.push_back(Pair("hash",data.get_hash().GetHash());
+    UniValue result(UniValue::VOBJ);
+    //result.push_back(Pair("rawdata",get_data));
     //return result;
     uint256 hash_data = data.get_hash();
-    return hash_data.GetHex();
-    //return UniValue(UniValue::VNUM, "{\"resutl\":\"success\"}");
+	result.push_back(Pair("dataHash",hash_data.GetHex()));
+	result.push_back(Pair("data",str_data));
+	result.push_back(Pair("sign",str_sign));
+	result.push_back(Pair("address",str_addr));
+    //return hash_data.GetHex();
+    return result;
 }
 /* add by sdk end */
 
