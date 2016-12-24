@@ -501,8 +501,6 @@ bool fSign = g_signature.Verify(pblock->GetHash(),strSign,strPublicKey);
             if (pindexPrev != chainActive.Tip())
                 continue;
 
-
-
             // Update nTime every few seconds
             if (UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev) < 0)
                 continue; // Recreate the block if the clock has run backwards,
