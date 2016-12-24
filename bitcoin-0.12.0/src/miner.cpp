@@ -372,7 +372,6 @@ void static BitcoinMiner(const CChainParams& chainparams) {
             while(!pindexPrev){
             	 LogPrintf("[%s:%d], chainActive.size():[%d] chainActive.Tip() is NULL!\n",__FUNCTION__,__LINE__,chainActive.Height());
             	pindexPrev = chainActive.Tip();
-
             }
 
             unsigned int nConnectCount = 0;
@@ -392,16 +391,12 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 					}
 					break;
 				}
-
 			}
 			std::string strIp, strTest="";
 			if ((g_vAllNodes.size()) <= (iter - g_vAllNodes.begin())) {
 				strIp = (*g_vAllNodes.begin())->addr.ToStringIP();
-				strTest = (*g_vAllNodes.begin())->m_strMacAddr;
-
 			} else {
 				strIp = (*iter)->addr.ToStringIP();
-				strTest = (*iter)->m_strMacAddr;
 			}
 
 //			LogPrintf("[%s:%d], MAC:[%s],IP address:[%s],g_vAllNodes.size():[%d],loop i:[%d]!\n",__FUNCTION__,__LINE__,strTest, strIp,g_vAllNodes.size(),iter-g_vAllNodes.begin());
@@ -463,18 +458,8 @@ void static BitcoinMiner(const CChainParams& chainparams) {
             CBlock *pblock = &pblocktemplate->block;
             pblock->m_strMac = g_localMacInfo.GetLocalMac();
             pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
-//####################publickey privatekey sign#######################################################################3
 
-			string strPublicKey = g_signature.getPublicKey();
-			LogPrintf("[%s:%d],the PublicKey:[%s]\n", __FUNCTION__, __LINE__,					strPublicKey);
-			/* 获得私钥*/
-			string strPrivateKey = g_signature.getPrivateKey();
-			LogPrintf("[%s:%d], the PrivateKey:[%s]!\n", __FUNCTION__, __LINE__,					strPrivateKey);
-std::string   strSign=g_signature.Sign(pblock->GetHash());
-bool fSign = g_signature.Verify(pblock->GetHash(),strSign,strPublicKey);
-			LogPrintf("[%s:%d], the g_signature:[%s],fSign [%d]!\n", __FUNCTION__, __LINE__,	strSign,fSign);
-
-			//################start add strpubkey##########################################
+//################start add strpubkey##########################################
 			pblock->sPubKey = g_signature.getPublicKey();
 			pblock->sSign = g_signature.Sign(pblock->GetHash());
 
