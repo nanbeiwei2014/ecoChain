@@ -243,6 +243,15 @@ extern UniValue send_data_for_sign(const UniValue& params, bool bHelp);
 extern UniValue send_data_to_sys(const UniValue& params, bool bHelp);
 extern UniValue get_data_from_sys(const UniValue& params, bool bHelp);
 extern UniValue get_new_key(const UniValue& params, bool bHelp);
+extern UniValue GetDataList( const UniValue& params, bool bHelp );
+extern UniValue GetBlockList( const UniValue& params, bool bHelp );
+extern UniValue GetDataLastNew( const UniValue& params, bool bHelp );
+extern UniValue GetBlockByDate( const UniValue& params, bool bHelp );
+extern UniValue GetNodeStatus( const UniValue& params, bool bHelp );
+extern UniValue GetBlockDetail( const UniValue& params, bool bHelp );
+extern UniValue GetBlockHashByTx( const UniValue& params, bool bHelp );
+extern UniValue GetBlockHeight( const UniValue& params, bool bHelp );
+extern UniValue GetBlockHashByHe( const UniValue& params, bool bHelp );
 /* add by sdk end */
 
 //Begin	Add by syl 2016-10-31========================================
