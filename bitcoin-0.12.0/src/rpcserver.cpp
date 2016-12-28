@@ -307,6 +307,16 @@ static const CRPCCommand vRPCCommands[] =
     { "rawtransactions",    "send_data_to_sys",       &send_data_to_sys,       true  },
     { "rawtransactions",    "get_data_from_sys",      &get_data_from_sys,      true  },
     { "rawtransactions",    "get_new_key",            &get_new_key,            true  },
+    { "rawtransactions",    "GetDataList",            &GetDataList,            true  },
+    { "rawtransactions",    "GetBlockList",           &GetBlockList,           true  },
+    { "rawtransactions",    "GetDataLastNew",         &GetDataLastNew,         true  },
+    { "rawtransactions",    "GetBlockByDate",         &GetBlockByDate,         true  },
+    { "rawtransactions",    "GetNodeStatus",          &GetNodeStatus,          true  },
+    { "rawtransactions",    "GetBlockDetail",         &GetBlockDetail,         true  },
+    { "rawtransactions",    "GetBlockHashByTx",       &GetBlockHashByTx,       true  },
+    { "rawtransactions",    "GetBlockHeight",         &GetBlockHeight,         true  },
+    { "rawtransactions",    "GetBlockHashByHe",       &GetBlockHashByHe,       true  },
+	
     /* add by sdk end */
 
 //    /* Raw transactions */

@@ -35,7 +35,9 @@
 
 using namespace std;
 
-string FILE_NAME="test.log";
+const int IntMaxRecordNum = 100;
+const int IntMaxBlockNum = 100;
+static const int DEFAULT_GENERATE_PERIOD = 0.1*20;  //unit s
 
 /* add by sdk begin */
 /*********************************************************************
@@ -53,23 +55,25 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
              "\nArguments:\n"
              "1. \"data_id\"        (string, required) A json objects about this data's hash\n"
              "\nResult:\n"
-             "\"address\":\"address\" (string) string of address\n"
-             "\"data\":\"data\"       (string) string of the data\n"
-             "\"sign\":\"signature\"  (string) string of the sign\n"
-             "\"blockhash\":\"hash\", (string) the block hash\n"
-
+             "{\n"
+                "\"address\":\"address\" (string) string of address\n"
+                "\"data\":\"data\"       (string) string of the data\n"
+                "\"sign\":\"signature\"  (string) string of the sign\n"
+                "\"blockhash\":\"hash\", (string) the block hash\n"
+             "}\n"
              "\nExamples\n"
              + HelpExampleCli("get_data_from_sys", "\"[{\\\"data_id\\\":\\\"myid\\\"}]\"")
              + HelpExampleRpc("get_data_from_sys", "\"[{\\\"data_id\\\":\\\"myid\\\"}]\"")
         );
     }
+
     LOCK( cs_main );
     uint256 hash = ParseHashV( params[0], "parameter 1");
     Cqkgj_basic_data data;
     uint256 hashBlock;
     if( !get_transaction( hash, data, hashBlock ) )
     {
-        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"No information avaliable about the data you want get it");
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "No information avaliable about the data you want get it");
     }
 
     LogPrintf("[%s:%d],data_id:%s\n",__FUNCTION__,__LINE__,hash.GetHex());
@@ -81,6 +85,510 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     result.push_back(Pair("blockhash",hashBlock.GetHex()));
 
     return result;
+}
+
+/* get data list */
+UniValue GetDataList( const UniValue &params, bool bHelp )
+{
+    LogPrintf("[%s:%d],Enter function!\n",__FUNCTION__,__LINE__ );
+
+    if ( bHelp || params.size() != 1 )
+    {
+        throw runtime_error(
+             "GetDataList  \"intRecordNum\" \n"
+             "\nGet the new record data.\n"
+             "If  the parameter's value less than 1 or begger than MAX_RECORD_NUM, you will be get nothing!\n"
+             "\nArguments:\n"
+             "1. \"IntRecordNum\"      (int, Mandatory) How many records you wants to get.\n"
+             "\nResult:\n"
+             "[\n"
+                "{\n"
+                   "\"hash\":\"data's hash\"   (string) hex string of the data's hash\n"
+                   "\"description\":\"record's description\" (string) hex string of the public value\n"
+                   "\"confirm_cnt\":\"confirm count\" (string) hex string of the public value\n"
+                "},\n"
+             "]\n"
+             "\nExamples\n"
+             + HelpExampleCli("GetDataList", "\"IntRecordNum\"")
+             + HelpExampleRpc("GetDataList", "\"IntRecordNum\"")
+             );
+    }
+
+    LOCK( cs_main );
+
+    int recordNum = params[0].get_int();
+    if ( recordNum < 1 || recordNum > IntMaxRecordNum )
+    {
+        throw JSONRPCError( RPC_INVALID_PARAMETER, "The Num is out of range");
+    }
+
+    LogPrintf( "[%s:%d],IntRecordNum:%d\n",__FUNCTION__,__LINE__,recordNum );
+
+    UniValue res( UniValue::VARR );
+    CBlockIndex *pblock = chainActive.Tip();
+    int uiChainHeight = pblock->nHeight;
+    LogPrintf( "[%s:%d],chainHeight:%d\n", __FUNCTION__, __LINE__, uiChainHeight );
+
+    int i = 0;
+    int temp = 0;
+    while ( i < recordNum )
+    {
+        int uiConfirmCnt = uiChainHeight - pblock->nHeight;
+        CBlock block;
+        if ( !ReadBlockFromDisk( block, pblock, Params().GetConsensus() ) )
+        {
+            throw JSONRPCError( RPC_INTERNAL_ERROR, "Can't read block from disk");
+        }
+
+        int size = block.qvtx.size();
+		LogPrintf( "[%s:%d],block data size:%d\n", __FUNCTION__, __LINE__, size );
+
+        if ( i + size > recordNum )
+            temp = recordNum - i;
+        else
+            temp = size;
+
+        for ( int j = 0; j < temp; j++ )
+        {
+            UniValue obj( UniValue::VOBJ );
+            obj.push_back( Pair("hash",block.qvtx[j].get_hash().GetHex() ) );
+            obj.push_back( Pair("data",block.qvtx[j].m_data));
+            obj.push_back( Pair("confirm", uiConfirmCnt ));
+            res.push_back( obj );
+        } // end of for() loop
+
+        i += size;
+
+        pblock = pblock->pprev;
+        if ( NULL == pblock )
+            break;
+    } // end of while() loop
+
+    LogPrintf("[%s:%d],Leave function!\n",__FUNCTION__,__LINE__ );
+    return res;
+}
+
+/* get new block records */
+UniValue GetBlockList( const UniValue &params, bool bHelp )
+{
+    LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    if ( bHelp || params.size() != 1 )
+    {
+        throw runtime_error(
+             "GetBlockList  \"IntBlockNum\" \n"
+             "\nGet the new block record.\n"
+             "If  the parameter's value less than 1 or begger than MAX_RECORD_NUM, you will be get nothing but error!\n"
+             "\nArguments:\n"
+             "1. \"IntBlockNum\"      (int, Mandatory) How many Block records you wants to get.\n"
+             "\nResult:\n"
+             "[\n"
+                "{\n"
+                    "\"BlockHeight\":\"block's height\"   (int) the block's height!\n"
+                    "\"GenerateTime\":\"block generate time\" (string) hex string of the public value\n"
+                    "\"records\":\"how many records\" (string) hex string of the public value\n"
+                    "\"node\":\"which node generate this block\" (string) hex string of the public value\n"
+                    "\"hash\":\"the block's hash value\" (string) hex string of the public value\n"
+                    "\"size\":\"the block's size\" (string) hex string of the public value\n"
+                "},\n"
+             "]\n"
+             "\nExamples\n"
+             + HelpExampleCli("GetBlocckList", "\"IntBlockNum\"")
+             + HelpExampleRpc("GetBlocckList", "\"IntBlockNum\"")
+             );
+    }
+    LOCK( cs_main );
+    //RPCTypeCheck(params, boost::assign::list_of(UniValue::VNUM), true);
+    int recordNum = params[0].get_int();
+    if ( recordNum < 1 || recordNum > IntMaxBlockNum )
+    {
+        throw JSONRPCError( RPC_INVALID_PARAMETER, "The Num is out of range");
+    }
+
+	LogPrintf( "[%s:%d],recordNum:%d\n", __FUNCTION__, __LINE__, recordNum );
+
+    CBlockIndex *pblockindex = chainActive.Tip();
+    if ( NULL == pblockindex )
+    {
+        throw JSONRPCError( RPC_INVALID_PARAMETER, "There are no block in chain now!" );
+    }
+
+    int blockCount = pblockindex->nHeight;
+    LogPrintf( "[%s:%d],blockCount:%d\n", __FUNCTION__, __LINE__, blockCount );
+
+    int tempVar = ( blockCount < recordNum ? blockCount : recordNum );
+    LogPrintf( "[%s:%d],can get data at most:%d rows\n", __FUNCTION__, __LINE__, tempVar );
+
+    UniValue res(UniValue::VARR);
+
+    for ( int i = 0; i <= tempVar; i++ )
+    {
+        UniValue obj(UniValue::VOBJ);
+        CBlockIndex *pBlkIdx = chainActive[ tempVar - i ];
+        if ( NULL == pBlkIdx )
+        {
+            LogPrintf( "[%s:%d]chain index is null!",__FUNCTION__,__LINE__);
+            break;
+        }
+
+        obj.push_back( Pair( "height",  pBlkIdx->nHeight) );
+        obj.push_back( Pair( "time",    pBlkIdx->GetBlockTime()) );
+        obj.push_back( Pair( "records", (int)pBlkIdx->nTx) );
+        obj.push_back( Pair( "hash",    pBlkIdx->GetBlockHash().GetHex()) );
+        res.push_back(obj);
+    }
+
+    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    return res;
+}
+
+/* get data last new */
+UniValue GetDataLastNew( const UniValue &params, bool bHelp )
+{
+    LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+
+    if ( bHelp || params.size() != 0 )
+    {
+        throw runtime_error(
+             "GetDataLastNew \n"
+             "\nGet the Latest data record.\n"
+             "This functions has no parameter!\n"
+             "\nArguments:\n"
+             "\nResult:\n"
+             "{\n"
+                "\"blockNo\":\"The latest block number\"   (string) the block's number!\n"
+                "\"generateTime\":\"generate time\" (string) hex string of the public value\n"
+             "}\n"
+             "\nExamples\n"
+             + HelpExampleCli("GetDataList", "")
+             + HelpExampleRpc("GetDataList", "")
+             );
+    }
+
+	LOCK( cs_main );
+
+    UniValue res(UniValue::VOBJ);
+    CBlockIndex *pBlkIdx = chainActive.Tip();
+    if ( NULL != pBlkIdx )
+    {
+        res.push_back( Pair("blockNo", pBlkIdx->nHeight) );
+        res.push_back( Pair("generateTime",DEFAULT_GENERATE_PERIOD) );
+    }
+
+    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+
+    return res;
+}
+
+UniValue GetBlockByDate( const UniValue &params, bool bHelp )
+{
+    LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+
+    if ( bHelp || params.size() != 1 )
+    {
+        throw runtime_error(
+             "GetBlockByDate \"InputDate\" \n"
+             "\nAccording to the date to look for blocks info the Latest data record.\n"
+             "\nArguments:\n"
+             "\"InputDate\"  (int) The date when you look for"
+             "\nResult:\n"
+             "[\n"
+                "{\n"
+                    "\"height\":\"The latest block number\"   (string) the block's number!\n"
+                    "\"time\":\"generate time\" (string) hex string of the public value\n"
+                    "\"records\":\"how many records\" (string) hex string of the public value\n"
+                    "\"hash\":\"the block's hash value\" (string) hex string of the public value\n"
+                "}, \n"
+             "]\n"
+             "\nExamples\n"
+             + HelpExampleCli("GetBlockByDate", "\"InputDate\"")
+             + HelpExampleRpc("GetBlockByDate", "\"InputDate\"")
+             );
+    }
+
+    LOCK( cs_main );
+    //RPCTypeCheck( params, boost::assign::list_of( UniValue::VNUM ), true );
+    int64_t ulInputDate = params[0].get_int64();
+	LogPrintf( "[%s:%d],inPutDate:%ld\n", __FUNCTION__, __LINE__, ulInputDate );
+
+    int blockHeight = chainActive.Height();
+	LogPrintf( "[%s:%d],blockHeight:%d\n", __FUNCTION__, __LINE__, blockHeight );
+
+    UniValue res( UniValue::VARR );
+    int i = 0;
+    CBlockIndex *pBlkIdx = chainActive[ blockHeight -i ];
+
+    while ( NULL != pBlkIdx && i <= blockHeight )
+    {
+        UniValue obj(UniValue::VOBJ);
+
+        if ( ulInputDate > pBlkIdx->GetBlockTime() )
+            break;
+
+        obj.push_back( Pair("height", pBlkIdx->nHeight) );
+        obj.push_back( Pair("time",   DEFAULT_GENERATE_PERIOD) );
+        obj.push_back( Pair("records", (int32_t)pBlkIdx->nTx ) );
+        obj.push_back( Pair("hash",    pBlkIdx->GetBlockHash().GetHex() ) );
+        res.push_back( obj );
+
+        i++;
+        pBlkIdx = chainActive[ blockHeight-i ];
+    }
+
+    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+
+    return res;
+}
+
+UniValue GetNodeStatus( const UniValue &params, bool bHelp )
+{
+	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    if (params.size() != 1 || bHelp )
+    {
+        throw runtime_error(
+            "GetNodeStatus \"NodeCode\"\n"
+            "\nGet the private key and public key.\n"
+            "If  the parameters is null,the system can generate a private/public key pair.\n"
+            "But if the parameters is set ,you must make sure the length of the string equale 32.\n"
+
+            "\nArguments:\n"
+            "1. \"string\"        (string, option) the private seed.\n"
+            "\nResult:\n"
+            "{\n"
+                "\"nodeVersion\":1    (int) The node's version\n"
+                "\"protocolVersion\":1 (int) The protocol's version\n"
+                "\"linkNode\":2 (int) link node's number\n"
+                "\"netState\":true (boolean) network's state\n"
+                "\"height\":3 (int) node's height\n"
+                "\"generateTime\":3  (int) generate block's time\n"
+            "}\n"
+            "\nExamples\n"
+            + HelpExampleCli("GetNodeStatus", "\"node code\"")
+            + HelpExampleRpc("GetNodeStatus", "\"node code\"")
+            );
+    }
+
+    LOCK( cs_main );
+    int nodeCode = params[0].get_int();
+    if ( nodeCode > (int)g_vAllNodes.size() || nodeCode < 0 )
+    {
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "Nodes can not found" );
+    }
+
+	LogPrintf( "[%s:%d],nodeCode:%d\n", __FUNCTION__, __LINE__, nodeCode );
+
+    UniValue res( UniValue::VOBJ );
+    bool bFind = false;
+    BOOST_FOREACH( CNode *node, g_vAllNodes )
+    {
+        if ( nodeCode == node->GetId() )
+        {
+            bFind = true;
+            res.push_back( Pair( "nodeVersion", node->nVersion ));
+            res.push_back( Pair( "protVersion", node->nVersion ));
+            res.push_back( Pair( "linkNode", g_vAllNodes.size()-1 ));
+            res.push_back( Pair( "netState", node->m_bNetState ));
+        }
+    }
+    if ( true == bFind )
+    {
+        int height = chainActive.Height();
+        res.push_back( Pair( "height", height ));
+        res.push_back( Pair( "generateTime",DEFAULT_GENERATE_PERIOD) );
+    }
+    else
+    {
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "node not found" );
+    }
+
+    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+
+    return res;
+}
+
+UniValue GetBlockDetail( const UniValue &params, bool bHelp )
+{
+	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+
+    if( bHelp || params.size() != 1 )
+    {
+        throw runtime_error(
+             "get_new_key  \"blockHash\" \n"
+             "\nGet the block's detail info private key and public key.\n"
+             "If  the parameters is null,the system can generate a private/public key pair.\n"
+             "But if the parameters is set ,you must make sure the length of the string equale 32.\n"
+
+             "\nArguments:\n"
+             "1. \"string\"        (string, option) the block's hash.\n"
+             "\nResult:\n"
+             "{\n"
+                "\"height\":\"xxxxx\",    (string) block's height.\n"
+                "\"confirm\":1            (numeric) confirm's times.\n"
+                "\"size\":   2  (numeric) block's size.\n"
+                "\"records\":3  (numeric) block contains the number of data.\n"
+                "\"generateTime\":4 (numeric) generate block time. \n"
+                "\"version\":4  (numeric)  version.\n"
+                "\"generateNode\":3 (numeric)  which node generate block\n"
+                "\"hash\":\"xxxxx\" (string) block's hash\n"
+                "\"prevHash\":\"xxxxx\" (string) previous block's hash.\n"
+                "\"nextHash\":\"xxxxx\" (string) next block's hash.\n"
+                "\"merkleRoot\":\"xxxxx\" (string) current block's merkel root.\n"
+             "}\n"
+             "\nExamples\n"
+             + HelpExampleCli("GetBlockDetail", "\"blockHash\"")
+             + HelpExampleRpc("GetBlockDetail", "\"blockHash\"")
+        );
+    } // end of if
+
+    LOCK( cs_main );
+    string strHash = params[0].get_str();
+	LogPrintf( "[%s:%d],inputHash:%s\n", __FUNCTION__, __LINE__, strHash );
+
+    uint256 hash( uint256S( strHash ));
+    //uint256 hash = ParseHashV( params[0], "parameter 1");
+
+    if ( 0 == mapBlockIndex.count( hash ))
+    {
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "Block not found" );
+    }
+
+    UniValue res( UniValue::VOBJ );
+    CBlockIndex *pBlkIdx = mapBlockIndex[hash];
+    if ( NULL != pBlkIdx )
+    {
+        res.push_back( Pair( "height",       pBlkIdx->nHeight ));
+        res.push_back( Pair( "confirm",      chainActive.Height() - pBlkIdx->nHeight ));
+        res.push_back( Pair( "records",      (int32_t)pBlkIdx->nTx ));
+        res.push_back( Pair( "generateTime", DEFAULT_GENERATE_PERIOD));
+        res.push_back( Pair( "hash",         pBlkIdx->GetBlockHash().GetHex() ));
+        res.push_back( Pair( "prevHash",     pBlkIdx->pprev->GetBlockHash().GetHex() ));
+        res.push_back( Pair( "nextHash",     chainActive[pBlkIdx->nHeight+1]->GetBlockHash().GetHex() ));
+        res.push_back( Pair( "merkleRoot",   pBlkIdx->hashMerkleRoot.GetHex() ));
+    }
+
+    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    return res;
+}
+
+UniValue GetBlockHashByTx( const UniValue &params, bool bHelp )
+{
+	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+
+    if( bHelp || params.size() != 1 )
+    {
+        throw runtime_error(
+             "get_new_key  \"recordHash\" \n"
+             "\nGet the block's detail info private key and public key.\n"
+             "If  the parameters is null,the system can generate a private/public key pair.\n"
+             "But if the parameters is set ,you must make sure the length of the string equale 32.\n"
+
+             "\nArguments:\n"
+             "1. \"dataHash\"        (string) the record's hash.\n"
+             "\nResult:\n"
+             "\"hash\":\"xxxxx\" (string) block's hash\n"
+             "\nExamples\n"
+             + HelpExampleCli("GetBlockDetail", "\"recordHash\"")
+             + HelpExampleRpc("GetBlockDetail", "\"recordHash\"")
+        );
+    } // end of if
+
+    LOCK( cs_main );
+    uint256 hash = ParseHashV( params[0], "parameter 1");
+    //LogPrintf( "[%s:%d],dataHash:%s\n", __FUNCTION__, __LINE__, hash );
+
+    Cqkgj_basic_data data;
+    uint256 hashBlock;
+    if( !get_transaction( hash, data, hashBlock ) )
+    {
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"No information avaliable about the data you want get it");
+    }
+
+    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+
+    return hashBlock.GetHex();
+}
+
+UniValue GetBlockHeight( const UniValue &params, bool bHelp )
+{
+	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+
+    if( bHelp || params.size() != 1 )
+    {
+        throw runtime_error(
+             "GetBlockHeight  \"blockHash\" \n"
+             "\nGet the block's detail info private key and public key.\n"
+             "If  the parameters is null,the system can generate a private/public key pair.\n"
+             "But if the parameters is set ,you must make sure the length of the string equale 32.\n"
+
+             "\nArguments:\n"
+             "1. \"blockHash\"        (string) the record's hash.\n"
+             "\nResult:\n"
+             "{\n"
+                "\"blockHeight\":1 (uint) block's height\n"
+             "}\n"
+             "\nExamples\n"
+             + HelpExampleCli("GetBlockHeight", "\"blockHash\"")
+             + HelpExampleRpc("GetBlockHeight", "\"blockHash\"")
+        );
+    } // end of if
+
+    LOCK( cs_main );
+    string strHash = params[0].get_str();
+	LogPrintf( "[%s:%d],blockHash:%s\n", __FUNCTION__, __LINE__, strHash );
+
+    //uint256 hash( uint256S( strHash ));
+    uint256 hash = ParseHashV( params[0], "parameter 1");
+
+    if ( 0 == mapBlockIndex.count( hash ))
+    {
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "Block not found" );
+    }
+
+    UniValue res( UniValue::VOBJ );
+    CBlockIndex *pBlkIdx = mapBlockIndex[hash];
+    if ( NULL != pBlkIdx )
+    {
+        res.push_back( Pair("blockHeight", pBlkIdx->nHeight));
+    }
+
+    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    return res;
+}
+
+UniValue GetBlockHashByHe( const UniValue &params, bool bHelp )
+{
+	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+
+    if( bHelp || params.size() != 1 )
+    {
+        throw runtime_error(
+             "GetBlockHashByHe  \"blockHash\" \n"
+             "\nGet the block's detail info private key and public key.\n"
+             "If  the parameters is null,the system can generate a private/public key pair.\n"
+             "But if the parameters is set ,you must make sure the length of the string equale 32.\n"
+
+             "\nArguments:\n"
+             "1. \"blockHeight\"        (int) the record's height.\n"
+             "\nResult:\n"
+             "\"blockHeight\":\"xxxxx\" (string) block's hash\n"
+             "\nExamples\n"
+             + HelpExampleCli("GetBlockHashByHe", "\"blockHeight\"")
+             + HelpExampleRpc("GetBlockHashByHe", "\"blockHeight\"")
+        );
+    } // end of if
+
+    LOCK( cs_main );
+    int uiHeight = params[0].get_int();
+	LogPrintf( "[%s:%d],uiHeight:%d\n", __FUNCTION__, __LINE__, uiHeight );
+
+    int blockHeight = chainActive.Height();
+	LogPrintf( "[%s:%d],blockHeight:%d\n", __FUNCTION__, __LINE__, blockHeight );
+
+
+    if( uiHeight < 0 || uiHeight > blockHeight )
+        throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "Block not found" );
+
+    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    return chainActive[uiHeight]->GetBlockHash().GetHex();
 }
 
 /* get private key and public key */
@@ -108,7 +616,7 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
         );
     }
     LOCK( cs_main );
-    RPCTypeCheck(params, boost::assign::list_of(UniValue::VSTR)(UniValue::VARR)(UniValue::VARR)(UniValue::VSTR), true);
+    RPCTypeCheck(params, boost::assign::list_of(UniValue::VSTR), true);
 
     bool b_compress = true; //CanSupportFeature(FEATURE_COMPRPUBKEY );
     CKey secret;
@@ -157,6 +665,7 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
 
 UniValue send_data_for_sign( const UniValue& params, bool bHelp )
 {
+    LogPrintf( "[%s:%d],Enter process.... \n", __FUNCTION__, __LINE__ );
     if( bHelp || params.size() < 1 )
     {
         throw runtime_error(
@@ -171,9 +680,11 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
          );
     }
     LOCK( cs_main );
-    RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR),true);
+    LogPrintf( "[%s:%d],Check RpcType! \n", __FUNCTION__, __LINE__ );
+    RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ), true );
     if ( params[0].isNull() )
     {
+        LogPrintf( "[%s:%d],parameter 1 is null! \n", __FUNCTION__, __LINE__ );
         throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
     }
 
@@ -226,12 +737,13 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
 	/* 把签名转换成base58编码格式 */
     string ret = EncodeBase58(vch_sign);
     LogPrintf("[%s:%d],sign:%s,prikey:%s,data:%s\n",__FUNCTION__,__LINE__,ret,pri_key,get_data);
+    LogPrintf( "[%s:%d],Leave process.... \n", __FUNCTION__, __LINE__ );
     return ret;
 }
 
 UniValue send_data_to_sys(const UniValue& params, bool bHelp)
 {
-    if ( bHelp)//  || params.size() != 1)
+    if ( bHelp  || params.size() != 1)
     {
         throw runtime_error(
             "send_data_to_sys \"{\"address\":\"address info\",\"data\":\"data info\",\"sign\":\"sign value\"}\"\n"
@@ -252,7 +764,7 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     }
 
     LOCK( cs_main );
-    RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ)(UniValue::VSTR), true );
+    RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ), true );
     if ( params[0].isNull() )
     {
         throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
@@ -270,7 +782,6 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
         if( "data" == name )
         {
             str_data = get_data[name].get_str();
-            str_data +=	g_localMacInfo.GetLocalMac();//#######add by mengqg 20161216 test code###############
         }
         else if ( "address" == name )
         {
@@ -309,22 +820,20 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     }
     else
     {
+        CValidationState state;
         LogPrintf("[%s:%d],data has exists in mempool already!\n",__FUNCTION__,__LINE__);
+        return state.Invalid(false,REJECT_ALREADY_KNOWN,"already in mempool");
     }
 
     //触发广播数据到其他节点的广播消息
     RelayQkgjMsg(data);
 
-    UniValue result(UniValue::VOBJ);
-    //result.push_back(Pair("rawdata",get_data));
+    UniValue result;
+    //result.push_back(Pair("hash",data.get_hash().GetHash());
     //return result;
     uint256 hash_data = data.get_hash();
-	result.push_back(Pair("dataHash",hash_data.GetHex()));
-	result.push_back(Pair("data",str_data));
-	result.push_back(Pair("sign",str_sign));
-	result.push_back(Pair("address",str_addr));
-    //return hash_data.GetHex();
-    return result;
+    return hash_data.GetHex();
+    //return UniValue(UniValue::VNUM, "{\"resutl\":\"success\"}");
 }
 /* add by sdk end */
 
