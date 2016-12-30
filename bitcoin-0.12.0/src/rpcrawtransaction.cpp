@@ -26,6 +26,7 @@
 #include "utiltime.h"
 #include "utilstrencodings.h"
 #include "util.h"
+#include "clientversion.h"
 
 #include <stdint.h>
 
@@ -37,7 +38,6 @@ using namespace std;
 
 const int IntMaxRecordNum = 100;
 const int IntMaxBlockNum = 100;
-static const int DEFAULT_GENERATE_PERIOD = 0.1*20;  //unit s
 
 /* add by sdk begin */
 /*********************************************************************
@@ -76,7 +76,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
         throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "No information avaliable about the data you want get it");
     }
 
-    LogPrintf("[%s:%d],data_id:%s\n",__FUNCTION__,__LINE__,hash.GetHex());
+    LogPrintf("[%s:%s:%d],data_id:%s\n", __FILE__, __FUNCTION__,__LINE__,hash.GetHex());
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("address",data.m_address));
@@ -90,7 +90,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
 /* get data list */
 UniValue GetDataList( const UniValue &params, bool bHelp )
 {
-    LogPrintf("[%s:%d],Enter function!\n",__FUNCTION__,__LINE__ );
+    LogPrintf("[%s:%s:%d],Enter function!\n", __FILE__, __FUNCTION__,__LINE__ );
 
     if ( bHelp || params.size() != 1 )
     {
@@ -122,12 +122,12 @@ UniValue GetDataList( const UniValue &params, bool bHelp )
         throw JSONRPCError( RPC_INVALID_PARAMETER, "The Num is out of range");
     }
 
-    LogPrintf( "[%s:%d],IntRecordNum:%d\n",__FUNCTION__,__LINE__,recordNum );
+    LogPrintf( "[%s:%s:%d],IntRecordNum:%d\n", __FILE__, __FUNCTION__,__LINE__,recordNum );
 
     UniValue res( UniValue::VARR );
     CBlockIndex *pblock = chainActive.Tip();
     int uiChainHeight = pblock->nHeight;
-    LogPrintf( "[%s:%d],chainHeight:%d\n", __FUNCTION__, __LINE__, uiChainHeight );
+    LogPrintf( "[%s:%s:%d],chainHeight:%d\n", __FILE__, __FUNCTION__, __LINE__, uiChainHeight );
 
     int i = 0;
     int temp = 0;
@@ -141,7 +141,7 @@ UniValue GetDataList( const UniValue &params, bool bHelp )
         }
 
         int size = block.qvtx.size();
-		LogPrintf( "[%s:%d],block data size:%d\n", __FUNCTION__, __LINE__, size );
+        LogPrintf( "[%s:%s:%d],block data size:%d\n", __FILE__, __FUNCTION__, __LINE__, size );
 
         if ( i + size > recordNum )
             temp = recordNum - i;
@@ -151,9 +151,9 @@ UniValue GetDataList( const UniValue &params, bool bHelp )
         for ( int j = 0; j < temp; j++ )
         {
             UniValue obj( UniValue::VOBJ );
-            obj.push_back( Pair("hash",block.qvtx[j].get_hash().GetHex() ) );
-            obj.push_back( Pair("data",block.qvtx[j].m_data));
-            obj.push_back( Pair("confirm", uiConfirmCnt ));
+            obj.push_back( Pair( "hash",block.qvtx[j].get_hash().GetHex() ) );
+            obj.push_back( Pair( "data",block.qvtx[j].m_data));
+            obj.push_back( Pair( "confirm", uiConfirmCnt ));
             res.push_back( obj );
         } // end of for() loop
 
@@ -164,14 +164,14 @@ UniValue GetDataList( const UniValue &params, bool bHelp )
             break;
     } // end of while() loop
 
-    LogPrintf("[%s:%d],Leave function!\n",__FUNCTION__,__LINE__ );
+    LogPrintf("[%s:%s:%d],Leave function!\n", __FILE__, __FUNCTION__,__LINE__ );
     return res;
 }
 
 /* get new block records */
 UniValue GetBlockList( const UniValue &params, bool bHelp )
 {
-    LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Enter the process!\n", __FILE__, __FUNCTION__, __LINE__ );
     if ( bHelp || params.size() != 1 )
     {
         throw runtime_error(
@@ -204,7 +204,7 @@ UniValue GetBlockList( const UniValue &params, bool bHelp )
         throw JSONRPCError( RPC_INVALID_PARAMETER, "The Num is out of range");
     }
 
-	LogPrintf( "[%s:%d],recordNum:%d\n", __FUNCTION__, __LINE__, recordNum );
+    LogPrintf( "[%s:%s:%d],recordNum:%d\n", __FILE__, __FUNCTION__, __LINE__, recordNum );
 
     CBlockIndex *pblockindex = chainActive.Tip();
     if ( NULL == pblockindex )
@@ -213,10 +213,10 @@ UniValue GetBlockList( const UniValue &params, bool bHelp )
     }
 
     int blockCount = pblockindex->nHeight;
-    LogPrintf( "[%s:%d],blockCount:%d\n", __FUNCTION__, __LINE__, blockCount );
+    LogPrintf( "[%s:%s:%d],blockCount:%d\n", __FILE__, __FUNCTION__, __LINE__, blockCount );
 
     int tempVar = ( blockCount < recordNum ? blockCount : recordNum );
-    LogPrintf( "[%s:%d],can get data at most:%d rows\n", __FUNCTION__, __LINE__, tempVar );
+    LogPrintf( "[%s:%s:%d],can get data at most:%d rows\n", __FILE__, __FUNCTION__, __LINE__, tempVar );
 
     UniValue res(UniValue::VARR);
 
@@ -226,25 +226,31 @@ UniValue GetBlockList( const UniValue &params, bool bHelp )
         CBlockIndex *pBlkIdx = chainActive[ tempVar - i ];
         if ( NULL == pBlkIdx )
         {
-            LogPrintf( "[%s:%d]chain index is null!",__FUNCTION__,__LINE__);
+            LogPrintf( "[%s:%s:%d]chain index is null!", __FILE__, __FUNCTION__,__LINE__);
             break;
         }
 
-        obj.push_back( Pair( "height",  pBlkIdx->nHeight) );
-        obj.push_back( Pair( "time",    pBlkIdx->GetBlockTime()) );
-        obj.push_back( Pair( "records", (int)pBlkIdx->nTx) );
-        obj.push_back( Pair( "hash",    pBlkIdx->GetBlockHash().GetHex()) );
+        obj.push_back( Pair( "height",       pBlkIdx->nHeight) );
+        obj.push_back( Pair( "generateTime", pBlkIdx->GetBlockTime()) );
+        obj.push_back( Pair( "records",      (int)pBlkIdx->nTx) );
+        obj.push_back( Pair( "blockHash",    pBlkIdx->GetBlockHash().GetHex()) );
+        obj.push_back( Pair( "generateNode", pBlkIdx->sPubKey ) );
+
+        CBlockHeader blockHeader = pBlkIdx->GetBlockHeader();
+        CBlock block( blockHeader );
+        obj.push_back( Pair( "blockSize",    (int)::GetSerializeSize( block,SER_DISK, CLIENT_VERSION )));
+
         res.push_back(obj);
     }
 
-    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
     return res;
 }
 
 /* get data last new */
 UniValue GetDataLastNew( const UniValue &params, bool bHelp )
 {
-    LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Enter the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     if ( bHelp || params.size() != 0 )
     {
@@ -271,17 +277,17 @@ UniValue GetDataLastNew( const UniValue &params, bool bHelp )
     if ( NULL != pBlkIdx )
     {
         res.push_back( Pair("blockNo", pBlkIdx->nHeight) );
-        res.push_back( Pair("generateTime",DEFAULT_GENERATE_PERIOD) );
+        res.push_back( Pair("generateTime", (int)(pBlkIdx->nHeight == 0 ? 0 : pBlkIdx->nTime - pBlkIdx->pprev->nTime) ) );
     }
 
-    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     return res;
 }
 
 UniValue GetBlockByDate( const UniValue &params, bool bHelp )
 {
-    LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Enter the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     if ( bHelp || params.size() != 1 )
     {
@@ -308,10 +314,10 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
     LOCK( cs_main );
     //RPCTypeCheck( params, boost::assign::list_of( UniValue::VNUM ), true );
     int64_t ulInputDate = params[0].get_int64();
-	LogPrintf( "[%s:%d],inPutDate:%ld\n", __FUNCTION__, __LINE__, ulInputDate );
+    LogPrintf( "[%s:%s:%d],inPutDate:%ld\n", __FILE__, __FUNCTION__, __LINE__, ulInputDate );
 
     int blockHeight = chainActive.Height();
-	LogPrintf( "[%s:%d],blockHeight:%d\n", __FUNCTION__, __LINE__, blockHeight );
+    LogPrintf( "[%s:%s:%d],blockHeight:%d\n", __FILE__, __FUNCTION__, __LINE__, blockHeight );
 
     UniValue res( UniValue::VARR );
     int i = 0;
@@ -325,8 +331,14 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
             break;
 
         obj.push_back( Pair("height", pBlkIdx->nHeight) );
-        obj.push_back( Pair("time",   DEFAULT_GENERATE_PERIOD) );
+        obj.push_back( Pair("generateTime", (int)(pBlkIdx->nHeight == 0 ? 0 : pBlkIdx->nTime - pBlkIdx->pprev->nTime )) );
         obj.push_back( Pair("records", (int32_t)pBlkIdx->nTx ) );
+        obj.push_back( Pair("generateNode", pBlkIdx->sPubKey ) );
+
+        CBlockHeader blockHeader = pBlkIdx->GetBlockHeader();
+        CBlock block( blockHeader );
+        obj.push_back( Pair("blockSize", (int)::GetSerializeSize( block,SER_DISK, CLIENT_VERSION )));
+
         obj.push_back( Pair("hash",    pBlkIdx->GetBlockHash().GetHex() ) );
         res.push_back( obj );
 
@@ -334,14 +346,14 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
         pBlkIdx = chainActive[ blockHeight-i ];
     }
 
-    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     return res;
 }
 
 UniValue GetNodeStatus( const UniValue &params, bool bHelp )
 {
-	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Enter the process!\n", __FILE__, __FUNCTION__, __LINE__ );
     if (params.size() != 1 || bHelp )
     {
         throw runtime_error(
@@ -374,7 +386,7 @@ UniValue GetNodeStatus( const UniValue &params, bool bHelp )
         throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "Nodes can not found" );
     }
 
-	LogPrintf( "[%s:%d],nodeCode:%d\n", __FUNCTION__, __LINE__, nodeCode );
+    LogPrintf( "[%s:%s:%d],nodeCode:%d\n", __FILE__, __FUNCTION__, __LINE__, nodeCode );
 
     UniValue res( UniValue::VOBJ );
     bool bFind = false;
@@ -387,27 +399,30 @@ UniValue GetNodeStatus( const UniValue &params, bool bHelp )
             res.push_back( Pair( "protVersion", node->nVersion ));
             res.push_back( Pair( "linkNode", g_vAllNodes.size()-1 ));
             res.push_back( Pair( "netState", node->m_bNetState ));
+            break;
         }
     }
     if ( true == bFind )
     {
         int height = chainActive.Height();
-        res.push_back( Pair( "height", height ));
-        res.push_back( Pair( "generateTime",DEFAULT_GENERATE_PERIOD) );
+        CBlockIndex *pBlkIdx = chainActive.Tip();
+
+        res.push_back( Pair( "blockHeight", height ));
+        res.push_back( Pair("generateTime", (int)(height == 0 ? 0 : pBlkIdx->nTime - pBlkIdx->pprev->nTime )) );
     }
     else
     {
         throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "node not found" );
     }
 
-    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     return res;
 }
 
 UniValue GetBlockDetail( const UniValue &params, bool bHelp )
 {
-	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Enter the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     if( bHelp || params.size() != 1 )
     {
@@ -441,7 +456,7 @@ UniValue GetBlockDetail( const UniValue &params, bool bHelp )
 
     LOCK( cs_main );
     string strHash = params[0].get_str();
-	LogPrintf( "[%s:%d],inputHash:%s\n", __FUNCTION__, __LINE__, strHash );
+    LogPrintf( "[%s:%s:%d],inputHash:%s\n", __FILE__, __FUNCTION__, __LINE__, strHash );
 
     uint256 hash( uint256S( strHash ));
     //uint256 hash = ParseHashV( params[0], "parameter 1");
@@ -455,23 +470,31 @@ UniValue GetBlockDetail( const UniValue &params, bool bHelp )
     CBlockIndex *pBlkIdx = mapBlockIndex[hash];
     if ( NULL != pBlkIdx )
     {
-        res.push_back( Pair( "height",       pBlkIdx->nHeight ));
+        res.push_back( Pair( "blockHeight",       pBlkIdx->nHeight ));
         res.push_back( Pair( "confirm",      chainActive.Height() - pBlkIdx->nHeight ));
+
+        CBlockHeader blockHeader = pBlkIdx->GetBlockHeader();
+        CBlock block( blockHeader );
+        res.push_back( Pair( "blockSize",     (int)::GetSerializeSize( block,SER_DISK, CLIENT_VERSION )));
+
         res.push_back( Pair( "records",      (int32_t)pBlkIdx->nTx ));
-        res.push_back( Pair( "generateTime", DEFAULT_GENERATE_PERIOD));
-        res.push_back( Pair( "hash",         pBlkIdx->GetBlockHash().GetHex() ));
+        res.push_back( Pair("generateTime", (int)(pBlkIdx->nHeight == 0 ? 0 : pBlkIdx->nTime - pBlkIdx->pprev->nTime )) );
+        res.push_back( Pair( "version", pBlkIdx->nVersion ));
+        res.push_back( Pair( "generateNode", pBlkIdx->sPubKey ) );
+
+        res.push_back( Pair( "blockHash",         pBlkIdx->GetBlockHash().GetHex() ));
         res.push_back( Pair( "prevHash",     pBlkIdx->pprev->GetBlockHash().GetHex() ));
         res.push_back( Pair( "nextHash",     chainActive[pBlkIdx->nHeight+1]->GetBlockHash().GetHex() ));
         res.push_back( Pair( "merkleRoot",   pBlkIdx->hashMerkleRoot.GetHex() ));
     }
 
-    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
     return res;
 }
 
 UniValue GetBlockHashByTx( const UniValue &params, bool bHelp )
 {
-	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Enter the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     if( bHelp || params.size() != 1 )
     {
@@ -493,7 +516,7 @@ UniValue GetBlockHashByTx( const UniValue &params, bool bHelp )
 
     LOCK( cs_main );
     uint256 hash = ParseHashV( params[0], "parameter 1");
-    //LogPrintf( "[%s:%d],dataHash:%s\n", __FUNCTION__, __LINE__, hash );
+    //LogPrintf( "[%s:%s:%d],dataHash:%s\n", __FILE__, __FUNCTION__, __LINE__, hash );
 
     Cqkgj_basic_data data;
     uint256 hashBlock;
@@ -502,14 +525,14 @@ UniValue GetBlockHashByTx( const UniValue &params, bool bHelp )
         throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"No information avaliable about the data you want get it");
     }
 
-    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     return hashBlock.GetHex();
 }
 
 UniValue GetBlockHeight( const UniValue &params, bool bHelp )
 {
-	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Enter the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     if( bHelp || params.size() != 1 )
     {
@@ -533,7 +556,7 @@ UniValue GetBlockHeight( const UniValue &params, bool bHelp )
 
     LOCK( cs_main );
     string strHash = params[0].get_str();
-	LogPrintf( "[%s:%d],blockHash:%s\n", __FUNCTION__, __LINE__, strHash );
+    LogPrintf( "[%s:%s:%d],blockHash:%s\n", __FILE__, __FUNCTION__, __LINE__, strHash );
 
     //uint256 hash( uint256S( strHash ));
     uint256 hash = ParseHashV( params[0], "parameter 1");
@@ -550,13 +573,13 @@ UniValue GetBlockHeight( const UniValue &params, bool bHelp )
         res.push_back( Pair("blockHeight", pBlkIdx->nHeight));
     }
 
-    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
     return res;
 }
 
 UniValue GetBlockHashByHe( const UniValue &params, bool bHelp )
 {
-	LogPrintf( "[%s:%d],Enter the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Enter the process!\n", __FILE__, __FUNCTION__, __LINE__ );
 
     if( bHelp || params.size() != 1 )
     {
@@ -578,16 +601,16 @@ UniValue GetBlockHashByHe( const UniValue &params, bool bHelp )
 
     LOCK( cs_main );
     int uiHeight = params[0].get_int();
-	LogPrintf( "[%s:%d],uiHeight:%d\n", __FUNCTION__, __LINE__, uiHeight );
+    LogPrintf( "[%s:%s:%d],uiHeight:%d\n", __FILE__, __FUNCTION__, __LINE__, uiHeight );
 
     int blockHeight = chainActive.Height();
-	LogPrintf( "[%s:%d],blockHeight:%d\n", __FUNCTION__, __LINE__, blockHeight );
+    LogPrintf( "[%s:%s:%d],blockHeight:%d\n", __FILE__, __FUNCTION__, __LINE__, blockHeight );
 
 
     if( uiHeight < 0 || uiHeight > blockHeight )
         throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "Block not found" );
 
-    LogPrintf( "[%s:%d],Leave the process!\n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
     return chainActive[uiHeight]->GetBlockHash().GetHex();
 }
 
@@ -631,7 +654,7 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
         std::string str(params[0].get_str());
         vector<unsigned char> vch;
         int len = str.length();
-        LogPrintf("[%s:%d],paramas:%s,length:%d\n",__FUNCTION__,__LINE__,str,len);
+        LogPrintf("[%s:%s:%d],paramas:%s,length:%d\n", __FILE__, __FUNCTION__,__LINE__,str,len);
         vch.resize(len);
         vch.assign(str.begin(),str.end());
         if( len != 32 ) /* 传过来的种子参数必须是32位，则否返回错误*/
@@ -654,7 +677,7 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
 	/* 获得私钥*/
     string pri_key(CBitcoinSecret(secret).ToString());
 
-    LogPrintf("[%s:%d],prikey:[%s],pubkey:[%s]\n",__FUNCTION__,__LINE__,pri_key,strKey);
+    LogPrintf("[%s:%s:%d],prikey:[%s],pubkey:[%s]\n", __FILE__, __FUNCTION__,__LINE__,pri_key,strKey);
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("PriKey",pri_key));
@@ -665,7 +688,7 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
 
 UniValue send_data_for_sign( const UniValue& params, bool bHelp )
 {
-    LogPrintf( "[%s:%d],Enter process.... \n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Enter process.... \n", __FILE__, __FUNCTION__, __LINE__ );
     if( bHelp || params.size() < 1 )
     {
         throw runtime_error(
@@ -680,11 +703,11 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
          );
     }
     LOCK( cs_main );
-    LogPrintf( "[%s:%d],Check RpcType! \n", __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Check RpcType! \n", __FILE__, __FUNCTION__, __LINE__ );
     RPCTypeCheck( params, boost::assign::list_of(UniValue::VOBJ), true );
     if ( params[0].isNull() )
     {
-        LogPrintf( "[%s:%d],parameter 1 is null! \n", __FUNCTION__, __LINE__ );
+        LogPrintf( "[%s:%s:%d],parameter 1 is null! \n", __FILE__, __FUNCTION__, __LINE__ );
         throw JSONRPCError( RPC_INVALID_PARAMETER, "Invalid parameter,arguments 1 must be non-null");
     }
 
@@ -709,7 +732,7 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
         }
     }
 
-    LogPrintf("[%s:%d],addr:%s,prikey:%s,data:%s\n",__FUNCTION__,__LINE__,pub_key,pri_key,get_data);
+    LogPrintf("[%s:%s:%d],addr:%s,prikey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,pub_key,pri_key,get_data);
 
     std::vector<unsigned char> vch_sign;
     std::string addr,temp;
@@ -730,14 +753,14 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
     bool bSign = create_sign( key, vch_sign, basic_data );
     if ( false == bSign )
     {
-        LogPrintf("[%s:%d],data signature failure!prikey:%s,data:%s\n",__FUNCTION__,__LINE__,pri_key,get_data);
+        LogPrintf("[%s:%s:%d],data signature failure!prikey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,pri_key,get_data);
         throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"Private signature data error!");
     }
 
 	/* 把签名转换成base58编码格式 */
     string ret = EncodeBase58(vch_sign);
-    LogPrintf("[%s:%d],sign:%s,prikey:%s,data:%s\n",__FUNCTION__,__LINE__,ret,pri_key,get_data);
-    LogPrintf( "[%s:%d],Leave process.... \n", __FUNCTION__, __LINE__ );
+    LogPrintf("[%s:%s:%d],sign:%s,prikey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,ret,pri_key,get_data);
+    LogPrintf( "[%s:%s:%d],Leave process.... \n", __FILE__, __FUNCTION__, __LINE__ );
     return ret;
 }
 
@@ -793,16 +816,19 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
         }
     }
 
-    LogPrintf("[%s:%d],addr:%s,data:%s,sign:%s\n",__FUNCTION__,__LINE__,str_addr,str_data,str_sign);
+    LogPrintf("[%s:%s:%d],addr:%s,data:%s,sign:%s\n", __FILE__, __FUNCTION__,__LINE__,str_addr,str_data,str_sign);
 
     Cqkgj_basic_data data(str_addr,str_data,str_sign);
 
-    //if (!check_sign(data))
-    //{
-    //    return UniValue(UniValue::VNUM, "{\"result\":\"data verify failure!\"}");
-    //}
-    //else
-    //    std::cout<<"success"<<std::endl;
+    if (!check_sign(data))
+    {
+        return UniValue(UniValue::VNUM, "{\"result\":\"data verify failure!\"}");
+    }
+    else
+    {
+        LogPrintf("[%s:%s:%d],verify signature success\n", __FILE__, __FUNCTION__,__LINE__ );
+        std::cout<<"success"<<std::endl;
+    }
 
     //写入内存池
     //Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
@@ -814,14 +840,14 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
         bool bRet = AddToMempool( qmempool, state, data );
         if ( false == bRet )
         {
-            LogPrintf("[%s:%d],add to mempool return false\n",__FUNCTION__,__LINE__);
+            LogPrintf("[%s:%s:%d],add to mempool return false\n", __FILE__, __FUNCTION__,__LINE__);
             throw JSONRPCError(RPC_TRANSACTION_REJECTED,strprintf("%i:%s",state.GetRejectCode(),state.GetRejectReason()));
         }
     }
     else
     {
         CValidationState state;
-        LogPrintf("[%s:%d],data has exists in mempool already!\n",__FUNCTION__,__LINE__);
+        LogPrintf("[%s:%s:%d],data has exists in mempool already!\n", __FILE__, __FUNCTION__,__LINE__);
         return state.Invalid(false,REJECT_ALREADY_KNOWN,"already in mempool");
     }
 
