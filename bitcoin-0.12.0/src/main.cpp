@@ -1237,7 +1237,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     std::cout<<"second str2's value:"<<str2<<std::endl;
     assert(hashPrevBlock == view.GetBestBlock());
 
-    if(NULL != pindex->GetBlockHash())
+    if( uint256()!= pindex->GetBlockHash())
     LogPrintf("[%s:%d], blockHash:[%s] blockTime:[%ld] !\n",__FUNCTION__,__LINE__,pindex->GetBlockHash().ToString(),pindex->GetBlockTime());
     else
     	LogPrintf("[%s:%d], blockHash:[%s] blockTime:[%ld] !\n",__FUNCTION__,__LINE__,pindex->m_strMac,pindex->GetBlockTime());
