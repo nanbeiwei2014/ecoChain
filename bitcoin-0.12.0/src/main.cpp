@@ -1268,8 +1268,8 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 //    int64_t nTime4 = GetTimeMicros(); nTimeVerify += nTime4 - nTime2;
 //    LogPrint("bench", "    - Verify %u txins: %.2fms (%.3fms/txin) [%.2fs]\n", nInputs - 1, 0.001 * (nTime4 - nTime2), nInputs <= 1 ? 0 : 0.001 * (nTime4 - nTime2) / (nInputs-1), nTimeVerify * 0.000001);
 //
-//    if (fJustCheck)
-//        return true;
+    if (fJustCheck)
+        return true;
 //
 //    // Write undo information to disk
 //    if (pindex->GetUndoPos().IsNull() || !pindex->IsValid(BLOCK_VALID_SCRIPTS))
