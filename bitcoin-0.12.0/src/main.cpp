@@ -1220,7 +1220,10 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
 //    // Check it again in case a previous version let a bad block in
     if (!CheckBlock(block, state, !fJustCheck, !fJustCheck))
-        return false;
+    {
+    	LogPrintf("[%s:%d],CheckBlock:[%s] \n",__FUNCTION__,__LINE__,CheckBlock(block, state, !fJustCheck, !fJustCheck)?"TRUE":"FALSE");
+    	return false;
+    }
 //
 //    // verify that the view's current state corresponds to the previous block
     uint256 hashPrevBlock = pindex->pprev == NULL ? uint256() : pindex->pprev->GetBlockHash();
@@ -2084,8 +2087,12 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
 {
     // Check timestamp
     if (block.GetBlockTime() > GetAdjustedTime() + 2 * 60 * 60)
-        return state.Invalid(error("CheckBlockHeader(): block timestamp too far in the future"),
-                             REJECT_INVALID, "time-too-new");
+    {
+    	LogPrintf("[%s:%d], block.GetBlockTime():[%d]\n",__FUNCTION__,__LINE__,block.GetBlockTime());
+    	return state.Invalid(error("CheckBlockHeader(): block timestamp too far in the future"),
+    	                             REJECT_INVALID, "time-too-new");
+    }
+
     if(block.GetHash() == uint256S("0xef09d19fb6c9381c003514e9fc47d101ae96aec8fcb7b3b9a1b4f25b57b7e508"))
     {
     	return true;
@@ -2254,9 +2261,10 @@ static bool AcceptBlockHeader(const CBlockHeader& block, CValidationState& state
         assert(pindexPrev);
         if (fCheckpointsEnabled && !CheckIndexAgainstCheckpoint(pindexPrev, state, chainparams, hash))
             return error("%s: CheckIndexAgainstCheckpoint(): %s", __func__, state.GetRejectReason().c_str());
-
-        if (!ContextualCheckBlockHeader(block, state, pindexPrev))
-            return false;
+//#################begin delete by mengqg 20161230##############################################################
+//        if (!ContextualCheckBlockHeader(block, state, pindexPrev))
+//            return false;
+//#################end delete by mengqg 20161230####################################################################
     }
     if (pindex == NULL)
         pindex = AddToBlockIndex(block);
@@ -2391,24 +2399,28 @@ bool TestBlockValidity(CValidationState& state, const CChainParams& chainparams,
     assert(pindexPrev && pindexPrev == chainActive.Tip());
     if (fCheckpointsEnabled && !CheckIndexAgainstCheckpoint(pindexPrev, state, chainparams, block.GetHash()))
         return error("%s: CheckIndexAgainstCheckpoint(): %s", __func__, state.GetRejectReason().c_str());
-//*************beggin delete by mengqg 20161116*************************************************************************************
+//*************begin edit by mengqg 20161230*************************************************************************************
 //    CCoinsViewCache viewNew(pcoinsTip);
-//*************end delete by mengqg 20161116*************************************************************************************
+    CBestBlock viewNew=*pbestblock;
+//*************end edit by mengqg 20161230*************************************************************************************
     CBlockIndex indexDummy(block);
     indexDummy.pprev = pindexPrev;
     indexDummy.nHeight = pindexPrev->nHeight + 1;
 
     // NOTE: CheckBlockHeader is called by CheckBlock
-    if (!ContextualCheckBlockHeader(block, state, pindexPrev))
-        return false;
+//########begin delete by mengqg 20161230#################################################################################33
+//    if (!ContextualCheckBlockHeader(block, state, pindexPrev))
+//        return false;
+//
+//    if (!ContextualCheckBlock(block, state, pindexPrev))
+//        return false;
+//########end delete by mengqg 20161230#################################################################################33
     if (!CheckBlock(block, state, fCheckPOW, fCheckMerkleRoot))
         return false;
-    if (!ContextualCheckBlock(block, state, pindexPrev))
+
+    if (!ConnectBlock(block, state, &indexDummy, viewNew, true))
         return false;
-//**********************************************************************************************
-//    if (!ConnectBlock(block, state, &indexDummy, viewNew, true))
-//        return false;
-//************************************************************************************
+
     assert(state.IsValid());
 
     return true;
