@@ -81,6 +81,8 @@ int LogPrintStr(const std::string &str);
 
 #define LogPrintf(...) LogPrint(NULL, __VA_ARGS__)
 
+int LogPrintFile(const std::string &str);		//Add by syl 2016-12-29====================================
+
 /**
  * When we switch to C++11, this can be switched to variadic templates instead
  * of this macro-based construction (see tinyformat.h).
@@ -109,7 +111,8 @@ TINYFORMAT_FOREACH_ARGNUM(MAKE_ERROR_AND_LOG_FUNC)
  */
 static inline int LogPrint(const char* category, const char* format)
 {
-    if(!LogAcceptCategory(category)) return 0;
+    if(!LogAcceptCategory(category))
+    	return 0;
     return LogPrintStr(format);
 }
 static inline bool error(const char* format)
@@ -142,6 +145,8 @@ boost::filesystem::path GetTempPath();
 void OpenDebugLog();
 void ShrinkDebugFile();
 void runCommand(const std::string& strCommand);
+
+void OpenBlockBroadcastLog();		//Add by syl 2016-12-29==================
 
 inline bool IsSwitchChar(char c)
 {

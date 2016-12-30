@@ -3338,12 +3338,16 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     CBlock block;
                     if (!ReadBlockFromDisk(block, (*mi).second, consensusParams))
                     {
-                    	LogPrintf("=============type::BLOCK send error:cannot load block from disk \n");
+                    	//LogPrintf("=============type::BLOCK send error:cannot load block from disk \n");
+                    	string strMsg = "=============type::BLOCK send error:cannot load block from disk \n";
+                    	LogPrintFile(strMsg);
                         assert(!"cannot load block from disk");
                     }
                     if (inv.type == MSG_BLOCK)
                     {
-                    	LogPrintf("=============type::BLOCK send block hash:%s \n", block.GetHash().GetHex());
+                    	//LogPrintf("=============type::BLOCK send block hash:%s \n", block.GetHash().GetHex());
+                    	string strMsg = "=============type::BLOCK send block hash:" + block.GetHash().GetHex() + "\n";
+                    	LogPrintFile(strMsg);
                         pfrom->PushMessage(NetMsgType::BLOCK, block);
                     }
 
@@ -3704,7 +3708,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         for(iIter = pfrom->vRecvGetData.begin(); iIter != pfrom->vRecvGetData.end(); iIter++)
         {
         	 const CInv &inv = *iIter;
-        	 LogPrintf("****************type::GETDATA recv === from MAC:%s=== hash:%s \n", pfrom->m_strMacAddr, inv.hash.ToString());
+        	 //LogPrintf("****************type::GETDATA recv === from MAC:%s=== hash:%s \n", pfrom->m_strMacAddr, inv.hash.ToString());
+        	 string strMsg = "****************type::GETDATA recv === from MAC:" + pfrom->m_strMacAddr + "s=== hash:" + inv.hash.ToString() + "\n";
+        	 LogPrintFile(strMsg);
         }
         //End   Add by syl 2016-12-01=======================================================
         ProcessGetData(pfrom, chainparams.GetConsensus());
@@ -3806,7 +3812,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         {
 			string strMsg = "";
 			strMsg += "===type:GETHEADERS Send block header : " + header.GetHash().ToString() + "\r\n";
-			LogPrintf("%s", strMsg);
+			//LogPrintf("%s", strMsg);
+			LogPrintFile(strMsg);
         }
 		//End Add by syl 2016-11-29========================================================
         pfrom->PushMessage(NetMsgType::HEADERS, vHeaders);
@@ -3862,14 +3869,15 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 			//Begin Add by syl 2016-11-28=====================================
 			string strMsg = "";
 			strMsg += "***RecvBlockHeaderHash : " + header.GetHash().ToString() + "***from : " + pfrom->m_strMacAddr + "\r\n";
-			LogPrintf("%s", strMsg);
+			//LogPrintf("%s", strMsg);
+			LogPrintFile(strMsg);
 			//End	Add by syl 2016-11-28=====================================
 
         	CValidationState state;
-            if (pindexLast != NULL && header.hashPrevBlock != pindexLast->GetBlockHash()) {
-            	Misbehaving(pfrom->GetId(), 20);
-            	return error("non-continuous headers sequence");
-            }
+//            if (pindexLast != NULL && header.hashPrevBlock != pindexLast->GetBlockHash()) {
+//            	Misbehaving(pfrom->GetId(), 20);
+//            	return error("non-continuous headers sequence");
+//            }
             if (!AcceptBlockHeader(header, state, chainparams, &pindexLast)) {
             	int nDoS;
                 if (state.IsInvalid(nDoS)) {
@@ -3880,7 +3888,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 				//Begin Add by syl 2016-11-28=====================================
 				string strMsg = "";
 				strMsg += "******Error AcceptBlockHeader error : " + header.GetHash().ToString() + "\r\n";
-				LogPrintf("%s", strMsg);
+				//LogPrintf("%s", strMsg);
+				LogPrintFile(strMsg);
 				//End	Add by syl 2016-11-28=====================================
             }
         }
@@ -3896,8 +3905,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
         	//Begin Add by syl 2016-11-29========================================================
 			string strMsg = "";
-			strMsg += "===pindexLast : " + uint256().ToString() + "\r\n";
-			LogPrintf("%s", strMsg);
+			strMsg += "===pindexLast : " + uint256().ToString() + " send GETHEADERS order ====\r\n";
+			//LogPrintf("%s", strMsg);
+			LogPrintFile(strMsg);
 			//End Add by syl 2016-11-29========================================================
         	pfrom->PushMessage(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexLast), uint256());
         }
@@ -3949,7 +3959,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
                 	{
                 		string strMsg = "";
                 		strMsg += "===type::GETDATA send hash: " + (*iIter).hash.ToString() + "\r\n";
-                		LogPrintf("%s", strMsg);
+                		//LogPrintf("%s", strMsg);
+                		LogPrintFile(strMsg);
                 	}
 					//End Add by syl 2016-11-29========================================================
                 	pfrom->PushMessage(NetMsgType::GETDATA, vGetData);
@@ -3980,7 +3991,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         //Begin Add by syl 2016-11-29========================================================
 		std::string strMsg;
 		strMsg = "***type::BLOCK recv block hash: " + block.GetHash().ToString() + "\r\n";
-		LogPrintf("%s", strMsg);
+		//LogPrintf("%s", strMsg);
+		LogPrintFile(strMsg);
 		//End Add by syl 2016-11-29========================================================
 
         ProcessNewBlock(state, chainparams, pfrom, &block, forceProcessing, NULL);
@@ -4493,8 +4505,9 @@ bool SendMessages(CNode* pto)
 
                 //Begin Add by syl 2016-11-29========================================================
 				string strMsg = "";
-				strMsg += "===pindexStart : " + uint256().ToString() + "\r\n";
-				LogPrintf("%s", strMsg);
+				strMsg += "===pindexStart : " + uint256().ToString() + "====send getheaders order \r\n";
+				//LogPrintf("%s", strMsg);
+				LogPrintFile(strMsg);
 				//End Add by syl 2016-11-29==========================================================
                 pto->PushMessage(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexStart), uint256());
             }
@@ -4594,8 +4607,9 @@ bool SendMessages(CNode* pto)
                 for(iIter = vHeaders.begin(); iIter != vHeaders.end(); iIter++)
                 {
 					string strMsg = "";
-					strMsg += "=========type::HEADERS Send block header : " + (*iIter).GetHash().ToString() + "\r\n";
-					LogPrintf("%s", strMsg);
+					strMsg += "=========type::HEADERS***Send block header : " + (*iIter).GetHash().ToString() + "\r\n";
+					//LogPrintf("%s", strMsg);
+					LogPrintFile(strMsg);
                 }
 				//End	Add by syl 2016-11-28=====================================
                 pto->PushMessage(NetMsgType::HEADERS, vHeaders);
