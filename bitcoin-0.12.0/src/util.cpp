@@ -201,6 +201,10 @@ static FILE* fileout = NULL;
 static boost::mutex* mutexDebugLog = NULL;
 static list<string> *vMsgsBeforeOpenLog;
 
+static FILE* fileblockbroadcastout = NULL;			//Add by syl 2016-12-29============================
+static boost::mutex* mutexBlockBroadcastLog = new boost::mutex();	//Add by syl 2016-12-29============================
+
+
 static int FileWriteStr(const std::string &str, FILE *fp)
 {
     return fwrite(str.data(), 1, str.size(), fp);
@@ -232,6 +236,29 @@ void OpenDebugLog()
 
     delete vMsgsBeforeOpenLog;
     vMsgsBeforeOpenLog = NULL;
+}
+
+//Add by syl 2016-12-29==========================
+void OpenBlockBroadcastLog()
+{
+	//boost::call_once(&DebugPrintInit, debugPrintInitFlag);
+	boost::mutex::scoped_lock scoped_lock(*mutexBlockBroadcastLog);
+
+	assert(fileblockbroadcastout == NULL);
+	//assert(vMsgsBeforeOpenLog);
+	boost::filesystem::path pathBlockBrocadcast = GetDataDir() / "blockbroadcast.log";
+	fileblockbroadcastout = fopen(pathBlockBrocadcast.string().c_str(), "a");
+	if (fileblockbroadcastout)
+		setbuf(fileblockbroadcastout, NULL); // unbuffered
+
+//	// dump buffered messages from before we opened the log
+//	while (!vMsgsBeforeOpenLog->empty()) {
+//		FileWriteStr(vMsgsBeforeOpenLog->front(), fileout);
+//		vMsgsBeforeOpenLog->pop_front();
+//	}
+//
+//	delete vMsgsBeforeOpenLog;
+//	vMsgsBeforeOpenLog = NULL;
 }
 
 bool LogAcceptCategory(const char* category)
@@ -330,6 +357,19 @@ int LogPrintStr(const std::string &str)
         }
     }
     return ret;
+}
+
+//Add by syl 2016-12-29====================================
+int LogPrintFile(const std::string &str)
+{
+	int ret = 0;
+	static bool fStartedNewLine = true;
+	string strTimestamped = LogTimestampStr(str, &fStartedNewLine);
+
+	boost::mutex::scoped_lock scoped_lock(*mutexBlockBroadcastLog);
+	ret = FileWriteStr(strTimestamped, fileblockbroadcastout);
+
+	return ret;
 }
 
 /** Interpret string as boolean, for argument parsing */

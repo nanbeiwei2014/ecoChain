@@ -463,13 +463,12 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 			pblock->sPubKey = g_signature.getPublicKey();
 			pblock->sSign = g_signature.Sign(pblock->GetHash());
 
-//############## create NewBlock method############################################################################################3
+//############## create NewBlock method########################################
 //******************************************************************
             //pblock->nHeight = pindexPrev->nHeight+1;
             //define height into blockheader for caculating blockhash
 //**************************************************************************
-            LogPrintf("Running QKGJMiner with %u datas in block (%u bytes)\n", pblock->qvtx.size(),
-                    ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
+            LogPrintf("Running QKGJMiner with %u datas in block (%u bytes)\n", pblock->qvtx.size(), ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
             // In regression test mode, stop mining after a block is found.
             if (chainparams.MineBlocksOnDemand())

@@ -213,7 +213,7 @@ bool CAlert::ProcessAlert(const std::vector<unsigned char>& alertKey, bool fThre
             else if (!alert.IsInEffect())
             {
                 LogPrint("alert", "expiring alert %d\n", alert.nID);
-                uiInterface.NotifyAlertChanged((*mi).first, CT_DELETED);
+                //uiInterface.NotifyAlertChanged((*mi).first, CT_DELETED);
                 mapAlerts.erase(mi++);
             }
             else
@@ -236,7 +236,7 @@ bool CAlert::ProcessAlert(const std::vector<unsigned char>& alertKey, bool fThre
         // Notify UI and -alertnotify if it applies to me
         if(AppliesToMe())
         {
-            uiInterface.NotifyAlertChanged(GetHash(), CT_NEW);
+            //uiInterface.NotifyAlertChanged(GetHash(), CT_NEW);
             Notify(strStatusBar, fThread);
         }
     }

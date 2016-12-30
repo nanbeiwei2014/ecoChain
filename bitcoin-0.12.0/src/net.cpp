@@ -1953,7 +1953,7 @@ void static Discover(boost::thread_group& threadGroup)
 
 void StartNode(boost::thread_group& threadGroup, CScheduler& scheduler)
 {
-    uiInterface.InitMessage(_("Loading addresses..."));
+    //uiInterface.InitMessage(_("Loading addresses..."));
     // Load addresses for peers.dat
     int64_t nStart = GetTimeMillis();
     {
