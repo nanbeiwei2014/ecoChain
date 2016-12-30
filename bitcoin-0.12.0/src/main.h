@@ -244,8 +244,8 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
 CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams);
 
 //Begin Add by syl 2016-11-21==================================================
-extern void SendNewBlockTime(const CBlock* pblock);
-extern void BroadcastNewBlockheader(const CBlock* pblock);
+//extern void SendNewBlockTime(const CBlock* pblock);
+//extern void BroadcastNewBlockheader(const CBlock* pblock);
 //End	Add by syl 2016-11-21==================================================
 
 /**
