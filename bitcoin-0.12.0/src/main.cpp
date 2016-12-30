@@ -2092,7 +2092,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
     }
     if(fCheckPOW && !g_signature.Verify(block.GetHash(),block.sSign,block.sPubKey))
     {
-
+    	LogPrintf("[%s:%d], fCheckPOW:[%d],Verify:[%d]\n",__FUNCTION__,__LINE__,fCheckPOW, g_signature.Verify(block.GetHash(),block.sSign,block.sPubKey));
      	return false;
     }
 
