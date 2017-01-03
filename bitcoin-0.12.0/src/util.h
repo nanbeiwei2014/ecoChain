@@ -344,7 +344,7 @@ public:
 		bool bSign = DecodeBase58(strSign, vchSig);
 		if (!bSign)
 		{
-			LogPrintf("[%s:%d],DecodeBase58_strSign:[%s] \n",__FUNCTION__,__LINE__,bSign ? "FALSE":"TRUE");
+			LogPrintf("[%s:%d],DecodeBase58_strSign:[%s] \n",__FUNCTION__,__LINE__,bSign ? "TRUE":"FALSE");
 			return false;
 		}
 
@@ -355,7 +355,7 @@ public:
 		bool bdecodeRet = DecodeBase58(strPublicKey, vch_pub_key);
 		if (!bdecodeRet)
 		{
-			LogPrintf("[%s:%d],DecodeBase58_strPublicKey:[%s] \n",__FUNCTION__,__LINE__,bSign ? "bdecodeRet":"TRUE");
+			LogPrintf("[%s:%d],DecodeBase58_strPublicKey:[%s] \n",__FUNCTION__,__LINE__,bdecodeRet ? "TRUE":"FALSE");
 			return false;
 		}
 
