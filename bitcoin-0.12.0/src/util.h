@@ -343,14 +343,22 @@ public:
 		vchSig.clear();
 		bool bSign = DecodeBase58(strSign, vchSig);
 		if (!bSign)
+		{
+			LogPrintf("[%s:%d],DecodeBase58_strSign:[%s] \n",__FUNCTION__,__LINE__,bSign ? "FALSE":"TRUE");
 			return false;
+		}
+
 
 		std::vector<unsigned char> vch_pub_key;
 		vch_pub_key.clear();
 		/* 把得到的数据以base58格式解码 */
 		bool bdecodeRet = DecodeBase58(strPublicKey, vch_pub_key);
 		if (!bdecodeRet)
+		{
+			LogPrintf("[%s:%d],DecodeBase58_strPublicKey:[%s] \n",__FUNCTION__,__LINE__,bSign ? "bdecodeRet":"TRUE");
 			return false;
+		}
+
 
 		CPubKey pub_key(vch_pub_key);
 		return pub_key.Verify(hash, vchSig);
