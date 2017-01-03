@@ -2102,7 +2102,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
     }
     if(fCheckPOW && !g_signature.Verify(block.GetHash(),block.sSign,block.sPubKey))
     {
-    	LogPrintf("[%s:%d], fCheckPOW:[%d],Verify:[%d]\n",__FUNCTION__,__LINE__,fCheckPOW, g_signature.Verify(block.GetHash(),block.sSign,block.sPubKey));
+    	LogPrintf("[%s:%d], fCheckPOW:[%d],Verify:[%d],block.GetHash():[%s]\n",__FUNCTION__,__LINE__,fCheckPOW, g_signature.Verify(block.GetHash(),block.sSign,block.sPubKey),block.GetHash());
      	return false;
     }
 
@@ -2363,13 +2363,6 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
     LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s\n",__FUNCTION__,__LINE__,"NULL",pblock->ToString(),"NULL");
     else
     LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s\n",__FUNCTION__,__LINE__,dbp->ToString(),pblock->ToString(),pfrom->addrName);
-	if (NULL == dbp || NULL == pfrom)
-		LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s",
-				__FUNCTION__, __LINE__, "NULL", pblock->ToString(), "NULL");
-	else
-		LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s",
-				__FUNCTION__, __LINE__, dbp->ToString(), pblock->ToString(),
-				pfrom->addrName);
 
     {
         LOCK(cs_main);
