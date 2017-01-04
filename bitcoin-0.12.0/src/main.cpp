@@ -4579,48 +4579,18 @@ bool SendMessages(CNode* pto)
                     assert(pBestIndex == NULL || pindex->pprev == pBestIndex);
                     pBestIndex = pindex;
 
-                    //==========================================================================
-					//Print pindex blockhash
-					std::stringstream ss;
-					ss << "========= pindex blockhash : "
-							<< pindex->GetBlockHash().ToString()
-							<< " =================\r\n";
-					string strNewData = ss.str();
-					LogPrintFile(strNewData);
-					if (pindex->pprev == NULL) {
-						std::stringstream ss;
-						ss << "========= pindex->pprev == NULL \r\n";
-						string strNewData = ss.str();
-						LogPrintFile(strNewData);
-					}
-					//==========================================================================
-
 					if (fFoundStartingHeader) {
-						string strMsg = "";
-						strMsg +=
-								"========= fFoundStartingHeader is true =================\r\n";
-						LogPrintFile(strMsg);
 						// add this to the headers message
 						vHeaders.push_back(pindex->GetBlockHeader());
 					} else if (PeerHasHeader(&state, pindex)) {
-						string strMsg = "";
-						strMsg +=
-								"========= PeerHasHeader(&state, pindex) == true ==continue=========\r\n";
-						LogPrintFile(strMsg);
 						continue; // keep looking for the first new block
 					} else if (pindex->pprev == NULL
 							|| PeerHasHeader(&state, pindex->pprev)) {
 						// Peer doesn't have this header but they do have the prior one.
 						// Start sending headers.
-						string strMsg = "";
-						strMsg += "========= fFoundStartingHeader = true =================\r\n";
-						LogPrintFile(strMsg);
 						fFoundStartingHeader = true;
 						vHeaders.push_back(pindex->GetBlockHeader());
 					} else {
-						string strMsg = "";
-						strMsg += "========= fFoundStartingHeader is true 2=================\r\n";
-						LogPrintFile(strMsg);
 						// Peer doesn't have this header or the prior one -- nothing will
 						// connect, so bail out.
 						fRevertToInv = true;
