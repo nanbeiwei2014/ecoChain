@@ -2103,6 +2103,7 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
     }
     if(fCheckPOW && !g_signature.Verify(block.GetHash(),block.sSign,block.sPubKey))
     {
+    	LogPrintf("[%s:%d], block.sSign:[%s], block.sPubKey:[%s] \n",__FUNCTION__,__LINE__, block.sSign, block.sPubKey);
     	LogPrintf("[%s:%d], fCheckPOW:[%d],Verify:[%d],block.GetHash():[%s]\n",__FUNCTION__,__LINE__,fCheckPOW, g_signature.Verify(block.GetHash(),block.sSign,block.sPubKey),block.GetHash().ToString());
      	return false;
     }
@@ -2127,15 +2128,13 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
         bool mutated;
         uint256 hashMerkleRoot2 = BlockMerkleRoot(block, &mutated);
         if (block.hashMerkleRoot != hashMerkleRoot2)
-            return state.DoS(100, error("CheckBlock(): hashMerkleRoot mismatch"),
-                             REJECT_INVALID, "bad-txnmrklroot", true);
+            return state.DoS(100, error("CheckBlock(): hashMerkleRoot mismatch"), REJECT_INVALID, "bad-txnmrklroot", true);
 
         // Check for merkle tree malleability (CVE-2012-2459): repeating sequences
         // of transactions in a block without affecting the merkle root of a block,
         // while still invalidating it.
         if (mutated)
-            return state.DoS(100, error("CheckBlock(): duplicate transaction"),
-                             REJECT_INVALID, "bad-txns-duplicate", true);
+            return state.DoS(100, error("CheckBlock(): duplicate transaction"), REJECT_INVALID, "bad-txns-duplicate", true);
     }
 
     // All potential-corruption validation must be done before we do any
@@ -2361,9 +2360,9 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
     // Preliminary checks
     bool checked = CheckBlock(*pblock, state);
     if (NULL==dbp ||NULL==pfrom)
-    LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s\n",__FUNCTION__,__LINE__,"NULL",pblock->ToString(),"NULL");
+    LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s, block.sign:%s, block.pubkey:%s\n",__FUNCTION__,__LINE__,"NULL", pblock->ToString(),"NULL", pblock->sSign, pblock->sPubKey);
     else
-    LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s\n",__FUNCTION__,__LINE__,dbp->ToString(),pblock->ToString(),pfrom->addrName);
+    LogPrintf("[%s:%d],CDiskBlockPos:%s  ,CBlock:%s,CNode :%s, block.sign:%s, block.pubkey:%s\n",__FUNCTION__,__LINE__,dbp->ToString(),pblock->ToString(),pfrom->addrName, pblock->sSign, pblock->sPubKey);
 
     {
         LOCK(cs_main);
