@@ -355,6 +355,7 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 						LOCK(cs_vNodes);
 						fvNodesEmpty = vNodes.empty();
 					}
+
 					if (!fvNodesEmpty)           //&& !IsInitialBlockDownload())
 						break;
 					else

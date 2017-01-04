@@ -32,7 +32,7 @@ public:
     uint32_t nNonce;
     std::string sPubKey;
     std::string sSign;
- //****************end edit by mengqg 20161105******************************************
+ //****************end edit by mengqg 20161105********************************************
     std::string m_strMac;	//Add by syl 2016-11-24=========================================
 
     CBlockHeader()
