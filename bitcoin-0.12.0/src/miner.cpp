@@ -341,7 +341,6 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 	LogPrintf("QKGJBlockChainMiner started\n");
 	SetThreadPriority(THREAD_PRIORITY_LOWEST);
 	RenameThread("QKGJ-miner");
-
 	try {
 		// Throw an error if no script was provided.  This can happen
 		// due to some internal error but also if the keypool is empty.
@@ -358,6 +357,11 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 					}
 					if (!fvNodesEmpty)           //&& !IsInitialBlockDownload())
 						break;
+					else
+						LogPrintf(
+								"[%s:%d], vNodes.size():[%d] g_vAllNodes.size():[%d] !\n",
+								__FUNCTION__, __LINE__, vNodes.size(),
+								g_vAllNodes.size());
 					MilliSleep(1000);
 				} while (true);
 			}
@@ -366,22 +370,25 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 			// Create new block
 			//
 //##########################################################################################################
-            unsigned int nTransactionsUpdatedLast = qmempool.get_data_updated();
-            CBlockIndex* pindexPrev = chainActive.Tip();
+			unsigned int nTransactionsUpdatedLast = qmempool.get_data_updated();
+			CBlockIndex* pindexPrev = chainActive.Tip();
 
-            while(!pindexPrev){
-            	 LogPrintf("[%s:%d], chainActive.size():[%d] chainActive.Tip() is NULL!\n",__FUNCTION__,__LINE__,chainActive.Height());
-            	pindexPrev = chainActive.Tip();
-            }
+			while (!pindexPrev) {
+				LogPrintf(
+						"[%s:%d], chainActive.size():[%d] chainActive.Tip() is NULL!\n",
+						__FUNCTION__, __LINE__, chainActive.Height());
+				pindexPrev = chainActive.Tip();
+			}
 
-            unsigned int nConnectCount = 0;
+			unsigned int nConnectCount = 0;
 
-            for(vector<CNode*>::iterator iter=g_vAllNodes.begin();iter!=g_vAllNodes.end();iter++)
-            {
-            	if ((*iter)->m_bNetState) nConnectCount++;
-            }
-            std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
-            vector<CNode*>::iterator iter=g_vAllNodes.begin();
+			for (vector<CNode*>::iterator iter = g_vAllNodes.begin();
+					iter != g_vAllNodes.end(); iter++) {
+				if ((*iter)->m_bNetState)
+					nConnectCount++;
+			}
+			std::sort(g_vAllNodes.begin(), g_vAllNodes.end(), SortVNodesBy);
+			vector<CNode*>::iterator iter = g_vAllNodes.begin();
 			for (; iter != g_vAllNodes.end(); iter++) {
 				if ((*iter)->m_strMacAddr == pindexPrev->sPubKey) {
 
@@ -392,7 +399,7 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 					break;
 				}
 			}
-			std::string strIp, strTest="";
+			std::string strIp, strTest = "";
 			if ((g_vAllNodes.size()) <= (iter - g_vAllNodes.begin())) {
 				strIp = (*g_vAllNodes.begin())->addr.ToStringIP();
 			} else {
@@ -401,18 +408,18 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 
 //			LogPrintf("[%s:%d], MAC:[%s],IP address:[%s],g_vAllNodes.size():[%d],loop i:[%d]!\n",__FUNCTION__,__LINE__,strTest, strIp,g_vAllNodes.size(),iter-g_vAllNodes.begin());
 //            LogPrintf("[%s:%d], IP address:[%s],g_vAllNodes.size():[%d],loop iter:[%d]!\n",__FUNCTION__,__LINE__, strIp,g_vAllNodes.size(),iter-g_vAllNodes.begin());
-            if((VALID_BLOCK_NODES<nConnectCount)&&(std::string::npos != strIp.find("127.0.0.1")))
-            {
-        	   if ((GetTime()-pindexPrev->nTime)<(0.95*DEFAULT_GENERATE_PERIOD))
-        	   {
+			if ((VALID_BLOCK_NODES < nConnectCount)
+					&& (std::string::npos != strIp.find("127.0.0.1"))) {
+				if ((GetTime() - pindexPrev->nTime)
+						< (0.95 * DEFAULT_GENERATE_PERIOD)) {
 
-        		   continue;
-        	   }
-            }else{
-            	continue;
-            }
+					continue;
+				}
+			} else {
+				continue;
+			}
 
- //##############second method############################################################################################3
+			//##############second method############################################################################################3
 //            for(vector<CNode*>::iterator iter=g_vAllNodes.begin();iter!=g_vAllNodes.end();iter++)
 //                     {
 //                     	if ((*iter)->m_bNetState) nConnectCount++;
@@ -446,18 +453,18 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 //            }
 //
 //            sleep(5);
-            //if (false==lockState)  continue;
+			//if (false==lockState)  continue;
 
-
-            auto_ptr<CBlockTemplate> pblocktemplate(CreateNewBlock(chainparams));
-            if (!pblocktemplate.get())
-            {
-                LogPrintf("Error in QKGJMiner: Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
-                return;
-            }
-            CBlock *pblock = &pblocktemplate->block;
-            pblock->m_strMac = g_localMacInfo.GetLocalMac();
-            pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
+			auto_ptr<CBlockTemplate> pblocktemplate(
+					CreateNewBlock(chainparams));
+			if (!pblocktemplate.get()) {
+				LogPrintf(
+						"Error in QKGJMiner: Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
+				return;
+			}
+			CBlock *pblock = &pblocktemplate->block;
+			pblock->m_strMac = g_localMacInfo.GetLocalMac();
+			pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
 
 //################start add strpubkey##########################################
 			pblock->sPubKey = g_signature.getPublicKey();
@@ -465,57 +472,55 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 
 //############## create NewBlock method########################################
 //******************************************************************
-            //pblock->nHeight = pindexPrev->nHeight+1;
-            //define height into blockheader for caculating blockhash
+			//pblock->nHeight = pindexPrev->nHeight+1;
+			//define height into blockheader for caculating blockhash
 //**************************************************************************
-            LogPrintf("Running QKGJMiner with %u datas in block (%u bytes)\n", pblock->qvtx.size(), ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
+			LogPrintf("Running QKGJMiner with %u datas in block (%u bytes)\n",
+					pblock->qvtx.size(),
+					::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
-            // In regression test mode, stop mining after a block is found.
-            if (chainparams.MineBlocksOnDemand())
-                throw boost::thread_interrupted();
+			// In regression test mode, stop mining after a block is found.
+			if (chainparams.MineBlocksOnDemand())
+				throw boost::thread_interrupted();
 
+			// Check for stop or if block needs to be rebuilt
+			boost::this_thread::interruption_point();
+			// Regtest mode doesn't require peers
+			if (vNodes.empty() && chainparams.MiningRequiresPeers())
+				continue;
 
-            // Check for stop or if block needs to be rebuilt
-            boost::this_thread::interruption_point();
-            // Regtest mode doesn't require peers
-            if (vNodes.empty() && chainparams.MiningRequiresPeers())
-                continue;
+			if (pindexPrev != chainActive.Tip())
+				continue;
 
+			// Update nTime every few seconds
+			if (UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev) < 0)
+				continue; // Recreate the block if the clock has run backwards,
+						  // so that we can use the correct time.
+			if (nTransactionsUpdatedLast != qmempool.get_data_updated())
+				continue;
 
-            if (pindexPrev != chainActive.Tip())
-                continue;
+			SetThreadPriority(THREAD_PRIORITY_NORMAL);
+			LogPrintf("QKGJMiner:\n");
+			LogPrintf("proof-of-idleTime found  \n  hash: %s  \n",
+					pblock->GetHash().GetHex());
+			ProcessBlockFound(pblock, chainparams);
+			std::cout << "create block : " << pblock->GetHash().ToString()
+					<< std::endl;
+			SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
-            // Update nTime every few seconds
-            if (UpdateTime(pblock, chainparams.GetConsensus(), pindexPrev) < 0)
-                continue; // Recreate the block if the clock has run backwards,
-                           // so that we can use the correct time.
-            if(nTransactionsUpdatedLast != qmempool.get_data_updated())
-                continue;
-
-            SetThreadPriority(THREAD_PRIORITY_NORMAL);
-            LogPrintf("QKGJMiner:\n");
-            LogPrintf("proof-of-idleTime found  \n  hash: %s  \n", pblock->GetHash().GetHex());
-            ProcessBlockFound(pblock, chainparams);
-            std::cout<<"create block : "<<pblock->GetHash().ToString() <<std::endl;
-            SetThreadPriority(THREAD_PRIORITY_LOWEST);
-
- /***************Period average caclulate******************************************
-            if (chainparams.GetConsensus().fPowAllowMinDifficultyBlocks)
-               {
-                    // Changing pblock->nTime can change work required on testnet:
-                    hashTarget.SetCompact(pblock->nBits);
-               }
-*********************************************/
-        }
-    }
-    catch (const boost::thread_interrupted&)
-    {
-        LogPrintf("QKGJMiner terminated\n");
-        throw;
-    }
-    catch (const std::runtime_error &e)
-    {
-        LogPrintf("QKGJMiner runtime error: %s\n", e.what());
-        return;
-    }
+			/***************Period average caclulate******************************************
+			 if (chainparams.GetConsensus().fPowAllowMinDifficultyBlocks)
+			 {
+			 // Changing pblock->nTime can change work required on testnet:
+			 hashTarget.SetCompact(pblock->nBits);
+			 }
+			 *********************************************/
+		}
+	} catch (const boost::thread_interrupted&) {
+		LogPrintf("QKGJMiner terminated\n");
+		throw;
+	} catch (const std::runtime_error &e) {
+		LogPrintf("QKGJMiner runtime error: %s\n", e.what());
+		return;
+	}
 }

@@ -1037,6 +1037,8 @@ static void AcceptConnection(const ListenSocket& hListenSocket) {
 		//Begin Add by syl 2016-11-04================================================
 		LOCK(g_csAllvNodes);
 		g_vAllNodes.push_back(pnode);
+		string strPing = "************************************* Add a new node ***********************************\n";
+		LogPrintFile(strPing);
 		//End	Add by syl 2016-11-04================================================
 	}
 }
@@ -1063,6 +1065,8 @@ void ThreadSocketHandler()
                     //Begin Add syl 2016-11-22==============================================
                     LOCK(g_csAllvNodes);
                     g_vAllNodes.erase(remove(g_vAllNodes.begin(), g_vAllNodes.end(), pnode), g_vAllNodes.end());
+                    string strPing = "************************************* Remove a disconnect Node ***********************************\n";
+                    LogPrintFile(strPing);
                     //End	Add syl 2016-11-22==============================================
 
                     // release outbound grant (if any)
