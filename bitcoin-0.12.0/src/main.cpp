@@ -3677,8 +3677,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     	    {
     	    	 bool fAlreadyHave = AlreadyHave(inv);
 				UpdateBlockAvailability(pfrom->GetId(), inv.hash);
-				if (!fAlreadyHave && !fImporting && !fReindex
-						&& !mapBlocksInFlight.count(inv.hash)) {
+				if (!fAlreadyHave && !fImporting && !fReindex&& !mapBlocksInFlight.count(inv.hash)) {
 					// First request the headers preceding the announced block. In the normal fully-synced
 					// case where a new block is announced that succeeds the current tip (no reorganization),
 					// there are no such headers.
@@ -3689,14 +3688,11 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 					// not a direct successor.
 					pfrom->PushMessage(NetMsgType::GETHEADERS,chainActive.GetLocator(pindexBestHeader), inv.hash);
 					CNodeState *nodestate = State(pfrom->GetId());
-					if (CanDirectFetch(chainparams.GetConsensus())
-							&& nodestate->nBlocksInFlight
-									< MAX_BLOCKS_IN_TRANSIT_PER_PEER) {
+					if (CanDirectFetch(chainparams.GetConsensus())&& nodestate->nBlocksInFlight < MAX_BLOCKS_IN_TRANSIT_PER_PEER) {
 						vToFetch2.push_back(inv);
 						// Mark block as in flight already, even though the actual "getdata" message only goes out
 						// later (within the same cs_main lock, though).
-						MarkBlockAsInFlight(pfrom->GetId(), inv.hash,
-								chainparams.GetConsensus());
+						MarkBlockAsInFlight(pfrom->GetId(), inv.hash,chainparams.GetConsensus());
 					}
 				}
     	    }
@@ -3707,7 +3703,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     		pfrom->PushMessage(NetMsgType::MEMPOOL, vToFetch);
     	}
 		if (!vToFetch2.empty())
-			pfrom->PushMessage(NetMsgType::GETDATA, vToFetch);
+			pfrom->PushMessage(NetMsgType::GETDATA, vToFetch2);
     	//End 	Add by syl 2016-111-01================================
     }
 
