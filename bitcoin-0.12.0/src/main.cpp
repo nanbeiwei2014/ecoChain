@@ -1687,6 +1687,7 @@ static void PruneBlockIndexCandidates() {
  */
 static bool ActivateBestChainStep(CValidationState& state, const CChainParams& chainparams, CBlockIndex* pindexMostWork, const CBlock* pblock)
 {
+	LogPrintf("[%s:%d] [%s]! \n",__FUNCTION__,__LINE__ ,"stepInto");
     AssertLockHeld(cs_main);
     bool fInvalidFound = false;
     const CBlockIndex *pindexOldTip = chainActive.Tip();
@@ -1766,7 +1767,7 @@ static bool ActivateBestChainStep(CValidationState& state, const CChainParams& c
  * that is already loaded (to avoid loading it again from disk).
  */
 bool ActivateBestChain(CValidationState &state, const CChainParams& chainparams, const CBlock *pblock) {
-
+	LogPrintf("[%s:%d] [%s]! \n",__FUNCTION__,__LINE__ ,"stepInto");
 	CBlockIndex *pindexMostWork = NULL;
     do {
         boost::this_thread::interruption_point();
@@ -1833,7 +1834,7 @@ bool ActivateBestChain(CValidationState &state, const CChainParams& chainparams,
         }
     } while(pindexMostWork != chainActive.Tip());
     CheckBlockIndex(chainparams.GetConsensus());
-
+    LogPrintf("[%s:%d] [%s]! \n",__FUNCTION__,__LINE__ ,"second");
     // Write changes periodically to disk, after relay.
     if (!FlushStateToDisk(state, FLUSH_STATE_PERIODIC)) {
         return false;
@@ -4074,6 +4075,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
     else if (strCommand == NetMsgType::PING)
     {
+    	string strPing = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Recv PING MSG @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
+    	LogPrintFile(strPing);
+
         if (pfrom->nVersion > BIP0031_VERSION)
         {
             uint64_t nonce = 0;
@@ -4096,6 +4100,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
 
     else if (strCommand == NetMsgType::PONG)
     {
+    	string strPong = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Recv PONG MSG @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
+    	LogPrintFile(strPong);
+
         int64_t pingUsecEnd = nTimeReceived;
         uint64_t nonce = 0;
         size_t nAvail = vRecv.in_avail();
@@ -4445,6 +4452,8 @@ bool SendMessages(CNode* pto)
                 pto->nPingNonceSent = 0;
                 pto->PushMessage(NetMsgType::PING);
             }
+            string strPing = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SEND PING MSG @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n";
+            LogPrintFile(strPing);
         }
 
         TRY_LOCK(cs_main, lockMain); // Acquire cs_main for IsInitialBlockDownload() and CNodeState()
@@ -4562,6 +4571,10 @@ bool SendMessages(CNode* pto)
                     BlockMap::iterator mi = mapBlockIndex.find(hash);
                     assert(mi != mapBlockIndex.end());
                     CBlockIndex *pindex = mi->second;
+                    if (pindex->pprev->GetBlockHash()==consensusParams.hashGenesisBlock)
+                    {
+                    	vHeaders.push_back(pindex->GetBlockHeader());
+                    }
                     if (chainActive[pindex->nHeight] != pindex) {
                         // Bail out if we reorged away from this block
                         fRevertToInv = true;
@@ -4569,22 +4582,54 @@ bool SendMessages(CNode* pto)
                     }
                     assert(pBestIndex == NULL || pindex->pprev == pBestIndex);
                     pBestIndex = pindex;
-                    if (fFoundStartingHeader) {
-                        // add this to the headers message
-                        vHeaders.push_back(pindex->GetBlockHeader());
-                    } else if (PeerHasHeader(&state, pindex)) {
-                        continue; // keep looking for the first new block
-                    } else if (pindex->pprev == NULL || PeerHasHeader(&state, pindex->pprev)) {
-                        // Peer doesn't have this header but they do have the prior one.
-                        // Start sending headers.
-                        fFoundStartingHeader = true;
-                        vHeaders.push_back(pindex->GetBlockHeader());
-                    } else {
-                        // Peer doesn't have this header or the prior one -- nothing will
-                        // connect, so bail out.
-                        fRevertToInv = true;
-                        break;
-                    }
+
+                    //==========================================================================
+					//Print pindex blockhash
+					std::stringstream ss;
+					ss << "========= pindex blockhash : "
+							<< pindex->GetBlockHash().ToString()
+							<< " =================\r\n";
+					string strNewData = ss.str();
+					LogPrintFile(strNewData);
+					if (pindex->pprev == NULL) {
+						std::stringstream ss;
+						ss << "========= pindex->pprev == NULL \r\n";
+						string strNewData = ss.str();
+						LogPrintFile(strNewData);
+					}
+					//==========================================================================
+
+					if (fFoundStartingHeader) {
+						string strMsg = "";
+						strMsg +=
+								"========= fFoundStartingHeader is true =================\r\n";
+						LogPrintFile(strMsg);
+						// add this to the headers message
+						vHeaders.push_back(pindex->GetBlockHeader());
+					} else if (PeerHasHeader(&state, pindex)) {
+						string strMsg = "";
+						strMsg +=
+								"========= PeerHasHeader(&state, pindex) == true ==continue=========\r\n";
+						LogPrintFile(strMsg);
+						continue; // keep looking for the first new block
+					} else if (pindex->pprev == NULL
+							|| PeerHasHeader(&state, pindex->pprev)) {
+						// Peer doesn't have this header but they do have the prior one.
+						// Start sending headers.
+						string strMsg = "";
+						strMsg += "========= fFoundStartingHeader = true =================\r\n";
+						LogPrintFile(strMsg);
+						fFoundStartingHeader = true;
+						vHeaders.push_back(pindex->GetBlockHeader());
+					} else {
+						string strMsg = "";
+						strMsg += "========= fFoundStartingHeader is true 2=================\r\n";
+						LogPrintFile(strMsg);
+						// Peer doesn't have this header or the prior one -- nothing will
+						// connect, so bail out.
+						fRevertToInv = true;
+						break;
+					}
                 }
             }
             if (fRevertToInv) {
