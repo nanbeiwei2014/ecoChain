@@ -4570,10 +4570,7 @@ bool SendMessages(CNode* pto)
                     BlockMap::iterator mi = mapBlockIndex.find(hash);
                     assert(mi != mapBlockIndex.end());
                     CBlockIndex *pindex = mi->second;
-                    if (pindex->pprev->GetBlockHash()==consensusParams.hashGenesisBlock)
-                    {
-                    	vHeaders.push_back(pindex->GetBlockHeader());
-                    }
+
                     if (chainActive[pindex->nHeight] != pindex) {
                         // Bail out if we reorged away from this block
                         fRevertToInv = true;
