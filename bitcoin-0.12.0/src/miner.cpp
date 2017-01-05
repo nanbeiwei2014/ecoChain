@@ -469,11 +469,8 @@ void static BitcoinMiner(const CChainParams& chainparams) {
 
 //################start add strpubkey##########################################
 			pblock->sPubKey = g_signature.getPublicKey();
-			pblock->sSign = g_signature.Sign(pblock->GetHash());
+			pblock->sSign = g_signature.Sign(pblock->GetBlockHeader().GetHash());
 
-			CValidationState state;
-			if (!CheckBlockHeader(*pblock, state, true))
-				continue;
 
 //############## create NewBlock method########################################
 //******************************************************************

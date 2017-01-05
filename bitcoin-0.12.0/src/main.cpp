@@ -2101,7 +2101,10 @@ bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state, bool f
     {
     	return true;
     }
-    if(fCheckPOW && !g_signature.Verify(block.GetHash(),block.sSign,block.sPubKey))
+    CBlockHeader block1=block;
+    block1.sSign="";
+
+    if(fCheckPOW && !g_signature.Verify(block1.GetHash(),block.sSign,block.sPubKey))
     {
     	LogPrintf("[%s:%d], block.sSign:[%s], block.sPubKey:[%s] \n",__FUNCTION__,__LINE__, block.sSign, block.sPubKey);
     	LogPrintf("[%s:%d], fCheckPOW:[%d],Verify:[%d],block.GetHash():[%s]\n",__FUNCTION__,__LINE__,fCheckPOW, g_signature.Verify(block.GetHash(),block.sSign,block.sPubKey),block.GetHash().ToString());
