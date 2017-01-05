@@ -73,7 +73,7 @@ int64_t GetSecondsByStr( string timeStr )
             &timeinfo.tm_hour,&timeinfo.tm_min,&timeinfo.tm_sec );
     timeinfo.tm_year -= 1900; /**/
     timeinfo.tm_mon  -= 1;    /**/
-    return mktime( &timeinfo ) - TimeZone;
+    return mktime( &timeinfo );
 }
 
 int64_t GetStartTimeByStr( string timeStr )
@@ -424,7 +424,7 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
         if ( ulStartTime > pBlkIdx->GetBlockTime() || curItem >= GetMaxColumn )
         {
             LogPrintf( "[%s:%s:%d],blockHash:%s\n", __FILE__, __FUNCTION__, __LINE__,pBlkIdx->GetBlockHash().GetHex() );
-            LogPrintf( "[%s:%s:%d],input:%ld,blockTime:%ld,curtimes:%d,max:%d\n", __FILE__, __FUNCTION__, __LINE__, ulStartTime, pBlkIdx->GetBlockTime(), i, GetMaxColumn );
+            LogPrintf( "[%s:%s:%d],input:%ld,blockTime:%ld,curtimes:%d,max:%d\n", __FILE__, __FUNCTION__, __LINE__, ulStartTime, pBlkIdx->GetBlockTime(), curItem, GetMaxColumn );
             break;
         }
 
@@ -445,7 +445,7 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
         pBlkIdx = chainActive[ blockHeight-i ];
     }
 
-    LogPrintf( "[%s:%s:%d],Leave the process!get %d datas\n", __FILE__, __FUNCTION__, __LINE__, i );
+    LogPrintf( "[%s:%s:%d],Leave the process!get %d datas\n", __FILE__, __FUNCTION__, __LINE__, curItem );
 
     return res;
 }
