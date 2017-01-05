@@ -193,7 +193,10 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
         // Parse request
         UniValue valRequest;
         if (!valRequest.read(strbody))
+		{
+			LogPrintf( "[%s:%d],read error!\n", __FUNCTION__, __LINE__ );
             throw JSONRPCError(RPC_PARSE_ERROR, "Parse error");
+		}
 
         std::string strReply;
         // singleton request
