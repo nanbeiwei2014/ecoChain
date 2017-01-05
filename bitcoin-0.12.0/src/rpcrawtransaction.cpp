@@ -38,6 +38,73 @@ using namespace std;
 
 const int IntMaxRecordNum = 100;
 const int IntMaxBlockNum = 100;
+const int GetMaxColumn = 100;
+const int TimeZone = 28800;
+
+bool IsNum( string str )
+{
+    const char *p = str.c_str();
+    for( int i = 0; i < str.length(); i++ )
+    {
+        if ( i == 4 || i == 7 || i == 10 || i == 13 || i==16 )
+            continue;
+        if ( p[i] < 48 || p[i] > 57 )
+            return false;
+    }
+    return true;
+}
+
+int64_t GetSecondsByStr( string timeStr )
+{
+    if ( timeStr.length() != 19 )
+    {
+        return -1;
+    }
+    const char *p = timeStr.c_str();
+    if ( p[4] != '-' || p[7] != '-' || p[10] !=' ' || p[13] != ':' || p[16] != ':' )
+        return -1;
+    if ( !IsNum( timeStr ))
+    {
+        return -1;
+    }
+
+    struct tm timeinfo;
+    sscanf( p, "%d-%d-%d %d:%d:%d",&timeinfo.tm_year,&timeinfo.tm_mon,&timeinfo.tm_mday,
+            &timeinfo.tm_hour,&timeinfo.tm_min,&timeinfo.tm_sec );
+    timeinfo.tm_year -= 1900; /**/
+    timeinfo.tm_mon  -= 1;    /**/
+    return mktime( &timeinfo ) - TimeZone;
+}
+
+int64_t GetStartTimeByStr( string timeStr )
+{
+    if ( timeStr.length() != 19 )
+    {
+        return -1;
+    }
+    const char *p = timeStr.c_str();
+    if ( p[4] != '-' || p[7] != '-' || p[10] !=' ' || p[13] != ':' || p[16] != ':' )
+        return -1;
+
+    string baseStr = timeStr.substr( 0,timeStr.length()-9 );
+    string startTime = baseStr + " 00:00:00";
+    return GetSecondsByStr( startTime );
+}
+
+int64_t GetEndTimeByStr( string timeStr )
+{
+    if ( timeStr.length() != 19 )
+    {
+        return -1;
+    }
+    const char *p = timeStr.c_str();
+    if ( p[4] != '-' || p[7] != '-' || p[10] !=' ' || p[13] != ':' || p[16] != ':' )
+        return -1;
+
+    string baseStr = timeStr.substr( 0,timeStr.length()-9 );
+    string EndTime = baseStr + " 23:59:59";
+    return GetSecondsByStr( EndTime );
+}
 
 /* add by sdk begin */
 /*********************************************************************
@@ -312,9 +379,25 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
     }
 
     LOCK( cs_main );
-    //RPCTypeCheck( params, boost::assign::list_of( UniValue::VNUM ), true );
-    int64_t ulInputDate = params[0].get_int64();
-    LogPrintf( "[%s:%s:%d],inPutDate:%ld\n", __FILE__, __FUNCTION__, __LINE__, ulInputDate );
+
+    string timeStr = params[0].get_str();
+    LogPrintf( "[%s:%s:%d],inPutDate:%s\n", __FILE__, __FUNCTION__, __LINE__, timeStr );
+
+    int64_t ulStartTime = GetStartTimeByStr( timeStr );
+    if ( ulStartTime < 0 )
+    {
+        LogPrintf( "[%s:%s:%d],ulStartTime:%ld\n", __FILE__, __FUNCTION__, __LINE__, ulStartTime );
+        throw JSONRPCError( RPC_INVALID_PARAMETER, "time format error!" );
+    }
+
+    int64_t ulEndTime = GetEndTimeByStr( timeStr );
+    if ( ulEndTime < 0 )
+    {
+        LogPrintf( "[%s:%s:%d],ulEndTime:%ld\n", __FILE__, __FUNCTION__, __LINE__, ulEndTime );
+        throw JSONRPCError( RPC_INVALID_PARAMETER, "time format error!" );
+    }
+
+    LogPrintf( "[%s:%s:%d],startTime:%ld,endTime:%ld\n", __FILE__, __FUNCTION__, __LINE__, ulStartTime, ulEndTime );
 
     int blockHeight = chainActive.Height();
     LogPrintf( "[%s:%s:%d],blockHeight:%d\n", __FILE__, __FUNCTION__, __LINE__, blockHeight );
@@ -322,13 +405,28 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
     UniValue res( UniValue::VARR );
     int i = 0;
     CBlockIndex *pBlkIdx = chainActive[ blockHeight -i ];
+    LogPrintf( "[%s:%s:%d],blockHash:%s\n", __FILE__, __FUNCTION__, __LINE__,pBlkIdx->GetBlockHash().GetHex() );
+    LogPrintf( "[%s:%s:%d],getBlockTime:%s\n", __FILE__, __FUNCTION__, __LINE__,pBlkIdx->GetBlockTime() );
 
+    LogPrintf( "[%s:%s:%d],begin enter while loop\n", __FILE__, __FUNCTION__, __LINE__ );
+    int curItem  = 0;
     while ( NULL != pBlkIdx && i <= blockHeight )
     {
         UniValue obj(UniValue::VOBJ);
 
-        if ( ulInputDate > pBlkIdx->GetBlockTime() )
+        pBlkIdx = chainActive[ blockHeight-i ];
+        if ( ulEndTime < pBlkIdx->GetBlockTime() )
+        {
+            i++;
+            continue;
+        }
+
+        if ( ulStartTime > pBlkIdx->GetBlockTime() || curItem >= GetMaxColumn )
+        {
+            LogPrintf( "[%s:%s:%d],blockHash:%s\n", __FILE__, __FUNCTION__, __LINE__,pBlkIdx->GetBlockHash().GetHex() );
+            LogPrintf( "[%s:%s:%d],input:%ld,blockTime:%ld,curtimes:%d,max:%d\n", __FILE__, __FUNCTION__, __LINE__, ulStartTime, pBlkIdx->GetBlockTime(), i, GetMaxColumn );
             break;
+        }
 
         obj.push_back( Pair("height", pBlkIdx->nHeight) );
         obj.push_back( Pair("generateTime", (int)(pBlkIdx->nHeight == 0 ? 0 : pBlkIdx->nTime - pBlkIdx->pprev->nTime )) );
@@ -343,10 +441,11 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
         res.push_back( obj );
 
         i++;
+        curItem ++;
         pBlkIdx = chainActive[ blockHeight-i ];
     }
 
-    LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
+    LogPrintf( "[%s:%s:%d],Leave the process!get %d datas\n", __FILE__, __FUNCTION__, __LINE__, i );
 
     return res;
 }
