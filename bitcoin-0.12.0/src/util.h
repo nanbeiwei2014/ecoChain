@@ -23,6 +23,8 @@
 #include "serialize.h"
 #include "uint256.h"
 
+#include <iconv.h>
+
 #include <exception>
 #include <map>
 #include <stdint.h>
@@ -368,5 +370,9 @@ public:
 };
 extern signature g_signature;
 /*End add by syl  2016-11-23============================= */
+
+int code_convert(char *from_charset,char *to_charset,char *inbuf,int inlen,char *outbuf,int outlen);
+int u2g(char *inbuf,int inlen,char *outbuf,int outlen);
+int g2u(char *inbuf,size_t inlen,char *outbuf,size_t outlen);
 
 #endif // BITCOIN_UTIL_H
