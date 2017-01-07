@@ -170,6 +170,37 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
 //    }
 //End   Noted by syl 2016-12-05===========================================================================
 
+    std::string strType;
+    std::string strRawData;
+    std::string strHeader("Content-Type");
+    std::pair<bool, std::string> type = req->GetHeader(strHeader);
+    if(type.first)
+    {
+    	int nPos = type.second.find("charset");
+    	strType = type.second.substr(nPos+7+1, type.second.length() - nPos);
+    }
+    if(strType.compare("gb2312") == 0)
+    {
+    	strRawData = req->ReadBody();
+
+    	//change encode type
+    	char *pInput = (char*)strRawData.c_str();
+    	char *pOutput = new char[strRawData.length()*3];
+    	int nRet = g2u(pInput, strRawData.length(), pOutput, strRawData.length()*3);
+    	if(nRet != 0)
+    	{
+    		delete pOutput;
+    		return false;
+    	}
+
+    	strRawData = pOutput;
+    	delete pOutput;
+    }
+    else
+    {
+    	strRawData = req->ReadBody();
+    }
+
     JSONRequest jreq;
     try {
     	std::string strbody;
@@ -179,7 +210,7 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     	{
     		std::string strTotal = "{\"method\":\"";
 
-    		std::string strData = req->ReadBody();
+    		std::string strData = strRawData;
     		std::string strMenthod = strUrl.substr(1, strUrl.length() - 1);
 
     		strTotal += strMenthod + "\",\"params\":[" + strData + "],\"id\":1}\n";
@@ -187,7 +218,7 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     	}
     	else
     	{
-    		strbody = req->ReadBody();
+    		strbody = strRawData;
     	}
 
         // Parse request
