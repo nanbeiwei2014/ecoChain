@@ -41,6 +41,15 @@ const int IntMaxBlockNum = 100;
 const int GetMaxColumn = 100;
 const int TimeZone = 28800;
 
+bool StrToLower( string &str )
+{
+	for( unsigned int i = 0; i < str.length(); i++ )
+	{
+		str[i] = str[i] + 32;
+	}
+	return true;
+}
+
 bool IsNum( string str )
 {
     const char *p = str.c_str();
@@ -815,8 +824,9 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
     string get_data;
     UniValue data = params[0].get_obj();
     std::vector<std::string>vData = data.getKeys();
-    BOOST_FOREACH( const string &name, vData )
+    BOOST_FOREACH( string &name, vData )
     {
+		StrToLower( name );
         if ( "prikey" == name )
         {
             pri_key = data[name].get_str();
