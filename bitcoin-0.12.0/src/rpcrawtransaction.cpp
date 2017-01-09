@@ -779,8 +779,8 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
     LogPrintf("[%s:%s:%d],prikey:[%s],pubkey:[%s]\n", __FILE__, __FUNCTION__,__LINE__,pri_key,strKey);
 
     UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("PriKey",pri_key));
-    result.push_back(Pair("PubKey",strKey));
+    result.push_back(Pair("prikey",pri_key));
+    result.push_back(Pair("pubkey",strKey));
 
     return result;
 }
