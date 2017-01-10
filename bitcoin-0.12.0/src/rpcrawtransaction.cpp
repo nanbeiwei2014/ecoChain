@@ -53,7 +53,7 @@ bool StrToLower( string &str )
 bool IsNum( string str )
 {
     const char *p = str.c_str();
-    for( int i = 0; i < str.length(); i++ )
+    for( unsigned int i = 0; i < str.length(); i++ )
     {
         if ( i == 4 || i == 7 || i == 10 || i == 13 || i==16 )
             continue;
@@ -574,6 +574,8 @@ UniValue GetBlockDetail( const UniValue &params, bool bHelp )
         throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY, "Block not found" );
     }
 
+    int chainHeight = chainActive.Tip()->nHeight;
+
     UniValue res( UniValue::VOBJ );
     CBlockIndex *pBlkIdx = mapBlockIndex[hash];
     if ( NULL != pBlkIdx )
@@ -592,7 +594,12 @@ UniValue GetBlockDetail( const UniValue &params, bool bHelp )
 
         res.push_back( Pair( "blockHash",         pBlkIdx->GetBlockHash().GetHex() ));
         res.push_back( Pair( "prevHash",     pBlkIdx->pprev->GetBlockHash().GetHex() ));
-        res.push_back( Pair( "nextHash",     chainActive[pBlkIdx->nHeight+1]->GetBlockHash().GetHex() ));
+        if ( pBlkIdx->nHeight >= chainHeight )
+        {
+            res.push_back( Pair( "nextHash",     ""));
+        }
+        else
+            res.push_back( Pair( "nextHash",     chainActive[pBlkIdx->nHeight+1]->GetBlockHash().GetHex() ));
         res.push_back( Pair( "merkleRoot",   pBlkIdx->hashMerkleRoot.GetHex() ));
     }
 
@@ -909,8 +916,9 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     //解析JSON
     UniValue get_data = params[0].get_obj();
     std::vector<std::string>vData = get_data.getKeys();
-    BOOST_FOREACH( const string &name, vData )
+    BOOST_FOREACH( string &name, vData )
     {
+        StrToLower( name );
         if( "data" == name )
         {
             str_data = get_data[name].get_str();
