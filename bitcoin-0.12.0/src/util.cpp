@@ -1053,5 +1053,6 @@ int u2g(char *inbuf, int inlen, char *outbuf, int outlen) {
 }
 //GB2312码转为UNICODE码
 int g2u(char *inbuf, size_t inlen, char *outbuf, size_t outlen) {
-	return code_convert("gb2312", "utf-8", inbuf, inlen, outbuf, outlen);
+	//return code_convert("gb2312", "utf-8", inbuf, inlen, outbuf, outlen);
+	return code_convert("gbk", "utf-8", inbuf, inlen, outbuf, outlen);
 }
