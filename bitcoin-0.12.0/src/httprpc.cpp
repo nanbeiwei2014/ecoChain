@@ -179,7 +179,7 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     	int nPos = type.second.find("charset");
     	strType = type.second.substr(nPos+7+1, type.second.length() - nPos);
     }
-    if(strType.compare("gb2312") == 0)
+    if(strType.compare("gb2312") == 0 || strType.compare("gbk") == 0)
     {
     	strRawData = req->ReadBody();
 
