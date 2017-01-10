@@ -418,6 +418,9 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest)
 
         addrman.Attempt(addrConnect);
 
+        string strPing = "************************************* connect to server ***********************************\n";
+        LogPrintFile(strPing);
+
         // Add node
         CNode* pnode = new CNode(hSocket, addrConnect, pszDest ? pszDest : "", false);
         pnode->AddRef();
@@ -432,6 +435,8 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest)
 			g_vAllNodes.push_back(pnode);
 		}
         //End	Add by syl 2016-11-04================================================
+
+		pnodeLocalHost->m_bNetState = true;
 
         pnode->nTimeConnected = GetTime();
 
@@ -1215,6 +1220,9 @@ void ThreadSocketHandler()
         {
             if (hListenSocket.socket != INVALID_SOCKET && FD_ISSET(hListenSocket.socket, &fdsetRecv))
             {
+            	string strPing = "************************************* Accetp a new connect ***********************************\n";
+            	LogPrintFile(strPing);
+
                 AcceptConnection(hListenSocket);
             }
         }
