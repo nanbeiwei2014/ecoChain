@@ -593,13 +593,24 @@ UniValue GetBlockDetail( const UniValue &params, bool bHelp )
         res.push_back( Pair( "generateNode", pBlkIdx->sPubKey ) );
 
         res.push_back( Pair( "blockHash",         pBlkIdx->GetBlockHash().GetHex() ));
-        res.push_back( Pair( "prevHash",     pBlkIdx->pprev->GetBlockHash().GetHex() ));
-        if ( pBlkIdx->nHeight >= chainHeight )
+
+        if ( 0 == pBlkIdx->nHeight ) //if current block is genesis block
+        {
+            res.push_back( Pair( "prevHash",     "" ));
+        }
+        else
+        {
+            res.push_back( Pair( "prevHash",     pBlkIdx->pprev->GetBlockHash().GetHex() ));
+        }
+
+        if ( pBlkIdx->nHeight >= chainHeight ) //if current block is the newest block
         {
             res.push_back( Pair( "nextHash",     ""));
         }
         else
+        {
             res.push_back( Pair( "nextHash",     chainActive[pBlkIdx->nHeight+1]->GetBlockHash().GetHex() ));
+        }
         res.push_back( Pair( "merkleRoot",   pBlkIdx->hashMerkleRoot.GetHex() ));
     }
 
