@@ -1041,6 +1041,8 @@ static void AcceptConnection(const ListenSocket& hListenSocket) {
 		LogPrintFile(strPing);
 		//End	Add by syl 2016-11-04================================================
 	}
+
+	pnodeLocalHost->m_bNetState = true;
 }
 
 void ThreadSocketHandler()
@@ -1060,6 +1062,8 @@ void ThreadSocketHandler()
                 if (pnode->fDisconnect ||
                     (pnode->GetRefCount() <= 0 && pnode->vRecvMsg.empty() && pnode->nSendSize == 0 && pnode->ssSend.empty()))
                 {
+                	pnode->m_bNetState = false;
+
                     // remove from vNodes
                     vNodes.erase(remove(vNodes.begin(), vNodes.end(), pnode), vNodes.end());
                     //Begin Add syl 2016-11-22==============================================
@@ -1080,6 +1084,11 @@ void ThreadSocketHandler()
                         pnode->Release();
                     vNodesDisconnected.push_back(pnode);
                 }
+            }
+
+            if(vNodes.size() <= 0)
+            {
+            	pnodeLocalHost->m_bNetState = false;
             }
         }
         {
@@ -2435,7 +2444,7 @@ CNode::CNode(SOCKET hSocketIn, const CAddress& addrIn, const std::string& addrNa
     GetNodeSignals().InitializeNode(GetId(), this);
 
     //Begin Add by syl 2016-11-04=============================
-    m_bNetState = true;
+    m_bNetState = false;
     m_strMacAddr = "";
     //End	Add by syl 2016-11-04=============================
 }
