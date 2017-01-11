@@ -1064,8 +1064,7 @@ void ThreadSocketHandler()
             vector<CNode*> vNodesCopy = vNodes;
             BOOST_FOREACH(CNode* pnode, vNodesCopy)
             {
-                if (pnode->fDisconnect ||
-                    (pnode->GetRefCount() <= 0 && pnode->vRecvMsg.empty() && pnode->nSendSize == 0 && pnode->ssSend.empty()))
+                if (pnode->fDisconnect || (pnode->GetRefCount() <= 0 && pnode->vRecvMsg.empty() && pnode->nSendSize == 0 && pnode->ssSend.empty()))
                 {
                 	pnode->m_bNetState = false;
 
@@ -1074,7 +1073,8 @@ void ThreadSocketHandler()
                     //Begin Add syl 2016-11-22==============================================
                     LOCK(g_csAllvNodes);
                     g_vAllNodes.erase(remove(g_vAllNodes.begin(), g_vAllNodes.end(), pnode), g_vAllNodes.end());
-                    string strPing = "************************************* Remove a disconnect Node ***********************************\n";
+
+                    string strPing = "************************************* Remove a disconnect Node *********node ip ：" + pnode->addrName + "=====\n";
                     LogPrintFile(strPing);
                     //End	Add syl 2016-11-22==============================================
 
