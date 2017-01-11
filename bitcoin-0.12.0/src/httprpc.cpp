@@ -209,6 +209,7 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
 		int nRet = unicode2utf8(pRawChar, strRawData.length(), pOutput, strRawData.length() * 2);
 		if (nRet != 0) {
 			delete pOutput;
+			delete pRawChar;
 			return false;
 		}
 
