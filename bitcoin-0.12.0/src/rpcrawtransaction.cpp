@@ -161,7 +161,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     result.push_back(Pair("address",data.m_address));
     result.push_back(Pair("data",data.m_data));
     result.push_back(Pair("sign",data.m_sign));
-    result.push_back(Pair("blockhash",hashBlock.GetHex()));
+    result.push_back(Pair("blockHash",hashBlock.GetHex()));
 
     return result;
 }
@@ -309,7 +309,7 @@ UniValue GetBlockList( const UniValue &params, bool bHelp )
             break;
         }
 
-        obj.push_back( Pair( "height",       pBlkIdx->nHeight) );
+        obj.push_back( Pair( "blockHeight",  pBlkIdx->nHeight) );
         obj.push_back( Pair( "generateTime", pBlkIdx->GetBlockTime()) );
         obj.push_back( Pair( "records",      (int)pBlkIdx->nTx) );
         obj.push_back( Pair( "blockHash",    pBlkIdx->GetBlockHash().GetHex()) );
@@ -440,7 +440,7 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
             break;
         }
 
-        obj.push_back( Pair("height", pBlkIdx->nHeight) );
+        obj.push_back( Pair("blockHeight", pBlkIdx->nHeight) );
         obj.push_back( Pair("generateTime", (int)(pBlkIdx->nHeight == 0 ? 0 : pBlkIdx->nTime - pBlkIdx->pprev->nTime )) );
         obj.push_back( Pair("records", (int32_t)pBlkIdx->nTx ) );
         obj.push_back( Pair("generateNode", pBlkIdx->sPubKey ) );
@@ -449,7 +449,7 @@ UniValue GetBlockByDate( const UniValue &params, bool bHelp )
         CBlock block( blockHeader );
         obj.push_back( Pair("blockSize", (int)::GetSerializeSize( block,SER_DISK, CLIENT_VERSION )));
 
-        obj.push_back( Pair("hash",    pBlkIdx->GetBlockHash().GetHex() ) );
+        obj.push_back( Pair("blockHash",    pBlkIdx->GetBlockHash().GetHex() ) );
         res.push_back( obj );
 
         i++;
@@ -507,8 +507,8 @@ UniValue GetNodeStatus( const UniValue &params, bool bHelp )
         {
             bFind = true;
             res.push_back( Pair( "nodeVersion", node->nVersion ));
-            res.push_back( Pair( "protVersion", node->nVersion ));
-            res.push_back( Pair( "linkNode", g_vAllNodes.size()-1 ));
+            res.push_back( Pair( "protocolVersion", node->nVersion ));
+            res.push_back( Pair( "linkNodes", g_vAllNodes.size()-1 ));
             res.push_back( Pair( "netState", node->m_bNetState ));
             break;
         }
@@ -538,7 +538,7 @@ UniValue GetBlockDetail( const UniValue &params, bool bHelp )
     if( bHelp || params.size() != 1 )
     {
         throw runtime_error(
-             "get_new_key  \"blockHash\" \n"
+             "GetBlockDetail  \"blockHash\" \n"
              "\nGet the block's detail info private key and public key.\n"
              "If  the parameters is null,the system can generate a private/public key pair.\n"
              "But if the parameters is set ,you must make sure the length of the string equale 32.\n"
@@ -584,7 +584,7 @@ UniValue GetBlockDetail( const UniValue &params, bool bHelp )
     if ( NULL != pBlkIdx )
     {
         res.push_back( Pair( "blockHeight",       pBlkIdx->nHeight ));
-        res.push_back( Pair( "confirm",      chainActive.Height() - pBlkIdx->nHeight ));
+        res.push_back( Pair( "confirms",      chainActive.Height() - pBlkIdx->nHeight ));
 
         CBlockHeader blockHeader = pBlkIdx->GetBlockHeader();
         CBlock block( blockHeader );
@@ -628,7 +628,7 @@ UniValue GetBlockHashByTx( const UniValue &params, bool bHelp )
     if( bHelp || params.size() != 1 )
     {
         throw runtime_error(
-             "get_new_key  \"recordHash\" \n"
+             "GetBlockHashByTx  \"recordHash\" \n"
              "\nGet the block's detail info private key and public key.\n"
              "If  the parameters is null,the system can generate a private/public key pair.\n"
              "But if the parameters is set ,you must make sure the length of the string equale 32.\n"
@@ -806,11 +806,11 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
 	/* 获得私钥*/
     string pri_key(CBitcoinSecret(secret).ToString());
 
-    LogPrintf("[%s:%s:%d],prikey:[%s],pubkey:[%s]\n", __FILE__, __FUNCTION__,__LINE__,pri_key,strKey);
+    LogPrintf("[%s:%s:%d],privateKey:[%s],publicKey:[%s]\n", __FILE__, __FUNCTION__,__LINE__,pri_key,strKey);
 
     UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("prikey",pri_key));
-    result.push_back(Pair("pubkey",strKey));
+    result.push_back(Pair("privateKey",pri_key));
+    result.push_back(Pair("publicKey",strKey));
 
     return result;
 }
@@ -818,17 +818,17 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
 UniValue send_data_for_sign( const UniValue& params, bool bHelp )
 {
     LogPrintf( "[%s:%s:%d],Enter process.... \n", __FILE__, __FUNCTION__, __LINE__ );
-    if( bHelp || params.size() < 1 )
+    if( bHelp || params.size() != 1 )
     {
         throw runtime_error(
             "send_data_for_sign \"hexstring\"\n"
             "\nsign data parameters for data that comes from application.\n"
             "\nArguments:\n"
-            "{\"pubkey\":\"addr value\",\"data\":\"data value\",\"prikey\":\"prikey value\"}\n"
+            "{\"publicKey\":\"addr value\",\"data\":\"data value\",\"privateKey\":\"private key value\"}\n"
             "\nResult:\n"
             "\"signatures\" (string) the data's sign \n"
-            + HelpExampleCli("send_data_for_sign", "{\"pubkey\":\"public value\",\"data\":\"data value\",\"prikey\":\"prikey value\"}")
-            + HelpExampleRpc("send_data_for_sign", "{\"pubkey\":\"public value\",\"data\":\"data value\",\"prikey\":\"prikey value\"}")
+            + HelpExampleCli("send_data_for_sign", "{\"publicKey\":\"public value\",\"data\":\"data value\",\"privateKey\":\"private key value\"}")
+            + HelpExampleRpc("send_data_for_sign", "{\"publicKey\":\"public value\",\"data\":\"data value\",\"privateKey\":\"private key value\"}")
          );
     }
     LOCK( cs_main );
@@ -848,11 +848,11 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
     BOOST_FOREACH( string &name, vData )
     {
 		StrToLower( name );
-        if ( "prikey" == name )
+        if ( "privateKey" == name )
         {
             pri_key = data[name].get_str();
         }
-        if ( "pubkey" == name )
+        if ( "publicKey" == name )
         {
             pub_key = data[name].get_str();
         }
@@ -862,7 +862,7 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
         }
     }
 
-    LogPrintf("[%s:%s:%d],addr:%s,prikey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,pub_key,pri_key,get_data);
+    LogPrintf("[%s:%s:%d],addr:%s,privatekey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,pub_key,pri_key,get_data);
 
     std::vector<unsigned char> vch_sign;
     std::string addr,temp;
@@ -883,13 +883,13 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
     bool bSign = create_sign( key, vch_sign, basic_data );
     if ( false == bSign )
     {
-        LogPrintf("[%s:%s:%d],data signature failure!prikey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,pri_key,get_data);
+        LogPrintf("[%s:%s:%d],data signature failure!privatekey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,pri_key,get_data);
         throw JSONRPCError( RPC_INVALID_ADDRESS_OR_KEY,"Private signature data error!");
     }
 
 	/* 把签名转换成base58编码格式 */
     string ret = EncodeBase58(vch_sign);
-    LogPrintf("[%s:%s:%d],sign:%s,prikey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,ret,pri_key,get_data);
+    LogPrintf("[%s:%s:%d],sign:%s,privatekey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,ret,pri_key,get_data);
     LogPrintf( "[%s:%s:%d],Leave process.... \n", __FILE__, __FUNCTION__, __LINE__ );
     return ret;
 }
@@ -937,7 +937,7 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
         {
             str_data = get_data[name].get_str();
         }
-        else if ( "address" == name )
+        else if ( "publicKey" == name )
         {
             str_addr = get_data[name].get_str();
         }
