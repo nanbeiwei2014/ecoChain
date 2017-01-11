@@ -1047,12 +1047,23 @@ int code_convert(char *from_charset, char *to_charset, char *inbuf, int inlen, c
 	iconv_close(cd);
 	return 0;
 }
-//UNICODE码转为GB2312码
+//UTF-8码转为GBK码
 int u2g(char *inbuf, int inlen, char *outbuf, int outlen) {
-	return code_convert("utf-8", "gb2312", inbuf, inlen, outbuf, outlen);
+	return code_convert("utf-8", "gbk", inbuf, inlen, outbuf, outlen);
 }
-//GB2312码转为UNICODE码
+//GBK码转为UTF-8码
 int g2u(char *inbuf, size_t inlen, char *outbuf, size_t outlen) {
 	//return code_convert("gb2312", "utf-8", inbuf, inlen, outbuf, outlen);
 	return code_convert("gbk", "utf-8", inbuf, inlen, outbuf, outlen);
+}
+
+//UTF-8码转为UTF-16(unicode)
+int utf82unicode(char *inbuf, size_t inlen, char *outbuf, size_t outlen)
+{
+	return code_convert("UTF-8","UTF-16", inbuf, inlen, outbuf, outlen);
+}
+//UTF-16(unicode)码转为UTF-8
+int unicode2utf8(char *inbuf, size_t inlen, char *outbuf, size_t outlen)
+{
+	return code_convert("UTF-16", "UTF-8", inbuf, inlen, outbuf, outlen);
 }

@@ -172,6 +172,7 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
 
     std::string strType;
     std::string strRawData;
+    std::wstring strUnicodeRawData;
     std::string strHeader("Content-Type");
     std::pair<bool, std::string> type = req->GetHeader(strHeader);
     if(type.first)
@@ -183,7 +184,7 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     {
     	strRawData = req->ReadBody();
 
-    	//change encode type
+    	//change encode type from gbk to utf-8
     	char *pInput = (char*)strRawData.c_str();
     	char *pOutput = new char[strRawData.length()*3];
     	int nRet = g2u(pInput, strRawData.length(), pOutput, strRawData.length()*3);
@@ -195,6 +196,25 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
 
     	strRawData = pOutput;
     	delete pOutput;
+    }
+    else if(strType.compare("unicode") == 0)
+    {
+    	std::string strRawUnicodeData = req->ReadBody();
+    	char *pRawChar = new char[strRawUnicodeData.length()];
+
+    	memcpy(pRawChar, strRawUnicodeData.c_str(), strRawUnicodeData.length());
+
+		//change encode type from unicode to utf-8
+		char *pOutput = new char[strRawUnicodeData.length()];
+		int nRet = unicode2utf8(pRawChar, strRawData.length(), pOutput, strRawData.length() * 2);
+		if (nRet != 0) {
+			delete pOutput;
+			return false;
+		}
+
+		strRawData = pOutput;
+		delete pOutput;
+		delete pRawChar;
     }
     else
     {

@@ -372,7 +372,9 @@ extern signature g_signature;
 /*End add by syl  2016-11-23============================= */
 
 int code_convert(char *from_charset,char *to_charset,char *inbuf,int inlen,char *outbuf,int outlen);
-int u2g(char *inbuf,int inlen,char *outbuf,int outlen);
-int g2u(char *inbuf,size_t inlen,char *outbuf,size_t outlen);
+int u2g(char *inbuf, int inlen, char *outbuf, int outlen);
+int g2u(char *inbuf, size_t inlen, char *outbuf, size_t outlen);
+int utf82unicode(char *inbuf, size_t inlen, char *outbuf, size_t outlen);
+int unicode2utf8(char *inbuf, size_t inlen, char *outbuf, size_t outlen);
 
 #endif // BITCOIN_UTIL_H
