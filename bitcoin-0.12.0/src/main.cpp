@@ -4462,14 +4462,20 @@ bool SendMessages(CNode* pto)
         }
         else
         {
-        	//unavailable node
+        	if((GetTimeMicros() - pto->nPingUsecStart) > 2 * PING_INTERVAL * 1000000)
         	{
-        		LOCK(cs_vNodes);
-        		vNodes.erase(remove(vNodes.begin(), vNodes.end(), pto), vNodes.end());
-        	}
-        	{
-        		LOCK(g_csAllvNodes);
-        		g_vAllNodes.erase(remove(g_vAllNodes.begin(), g_vAllNodes.end(), pto), g_vAllNodes.end());
+				//unavailable node
+				{
+					LOCK(cs_vNodes);
+					vNodes.erase(remove(vNodes.begin(), vNodes.end(), pto), vNodes.end());
+				}
+				{
+					LOCK(g_csAllvNodes);
+					g_vAllNodes.erase(remove(g_vAllNodes.begin(), g_vAllNodes.end(), pto), g_vAllNodes.end());
+				}
+
+				string strPing = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ DEL INVALUE NODE :" + pto->addrName + "@@@@@@@@@\n";
+				LogPrintFile(strPing);
         	}
         }
 
