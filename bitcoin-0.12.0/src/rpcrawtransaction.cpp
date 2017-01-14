@@ -842,7 +842,7 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
     }
 
     string pri_key;
-    //string pub_key;
+    string pub_key;
     string get_data;
     UniValue data = params[0].get_obj();
     std::vector<std::string>vData = data.getKeys();

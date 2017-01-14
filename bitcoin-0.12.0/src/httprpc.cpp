@@ -180,7 +180,8 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     	int nPos = type.second.find("charset");
     	strType = type.second.substr(nPos+7+1, type.second.length() - nPos);
     }
-    if(strType.compare("gb2312") == 0 || strType.compare("gbk") == 0)
+    if(strType.compare("gb2312") == 0 || strType.compare("GB2312") == 0 ||
+    		strType.compare("gbk") == 0 || strType.compare("GBK") == 0)
     {
     	strRawData = req->ReadBody();
 
@@ -197,9 +198,11 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     	strRawData = pOutput;
     	delete pOutput;
     }
-    else if(strType.compare("unicode") == 0)
+    else if(strType.compare("UNICODE") == 0 || strType.compare("unicode") == 0 ||
+    		strType.compare("UTF-16") == 0 || strType.compare("utf-16") == 0)
     {
     	std::string strRawUnicodeData = req->ReadBody();
+    	int nlen = strRawUnicodeData.length();
     	char *pRawChar = new char[strRawUnicodeData.length()];
 
     	memcpy(pRawChar, strRawUnicodeData.c_str(), strRawUnicodeData.length());
