@@ -135,7 +135,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
              "1. \"data_id\"        (string, required) A json objects about this data's hash\n"
              "\nResult:\n"
              "{\n"
-                "\"address\":\"address\" (string) string of address\n"
+                "\"publickey\":\"publickey\" (string) string of publickey\n"
                 "\"data\":\"data\"       (string) string of the data\n"
                 "\"sign\":\"signature\"  (string) string of the sign\n"
                 "\"blockhash\":\"hash\", (string) the block hash\n"
@@ -158,7 +158,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     LogPrintf("[%s:%s:%d],data_id:%s\n", __FILE__, __FUNCTION__,__LINE__,hash.GetHex());
 
     UniValue result(UniValue::VOBJ);
-    result.push_back(Pair("address",data.m_address));
+    result.push_back(Pair("publicKey",data.m_address));
     result.push_back(Pair("data",data.m_data));
     result.push_back(Pair("sign",data.m_sign));
     result.push_back(Pair("blockHash",hashBlock.GetHex()));
@@ -760,7 +760,7 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
              "\nResult:\n"
              "{\n"
              "\"privateKey\":\"private value\"    (string) hex string of the private value\n"
-             "\"publicKey\":\"public value\" (string) hex string of the public value\n"
+             "\"publickey\":\"public value\" (string) hex string of the public value\n"
              "\nExamples\n"
              + HelpExampleCli("get_new_key", "")
              + HelpExampleCli("get_new_key", "\"string of seed\"")
@@ -807,7 +807,7 @@ UniValue get_new_key( const UniValue& params,bool bHelp )
 	/* 获得私钥*/
     string pri_key(CBitcoinSecret(secret).ToString());
 
-    LogPrintf("[%s:%s:%d],privateKey:[%s],publicKey:[%s]\n", __FILE__, __FUNCTION__,__LINE__,pri_key,strKey);
+    LogPrintf("[%s:%s:%d],privateKey:[%s],publickey:[%s]\n", __FILE__, __FUNCTION__,__LINE__,pri_key,strKey);
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("privateKey",pri_key));
@@ -825,11 +825,11 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
             "send_data_for_sign \"hexstring\"\n"
             "\nsign data parameters for data that comes from application.\n"
             "\nArguments:\n"
-            "{\"publicKey\":\"addr value\",\"data\":\"data value\",\"privateKey\":\"private key value\"}\n"
+            "{\"publickey\":\"addr value\",\"data\":\"data value\",\"privateKey\":\"private key value\"}\n"
             "\nResult:\n"
             "\"signatures\" (string) the data's sign \n"
-            + HelpExampleCli("send_data_for_sign", "{\"publicKey\":\"public value\",\"data\":\"data value\",\"privateKey\":\"private key value\"}")
-            + HelpExampleRpc("send_data_for_sign", "{\"publicKey\":\"public value\",\"data\":\"data value\",\"privateKey\":\"private key value\"}")
+            + HelpExampleCli("send_data_for_sign", "{\"publickey\":\"public value\",\"data\":\"data value\",\"privateKey\":\"private key value\"}")
+            + HelpExampleRpc("send_data_for_sign", "{\"publickey\":\"public value\",\"data\":\"data value\",\"privateKey\":\"private key value\"}")
          );
     }
     LOCK( cs_main );
@@ -849,13 +849,14 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
     BOOST_FOREACH( string &name, vData )
     {
 		StrToLower( name );
-        if ( "privateKey" == name )
+        if ( "privatekey" == name )
         {
             pri_key = data[name].get_str();
         }
-        //{
-        //    pub_key = data[name].get_str();
-        //}
+        else if ( "publickey" == name )
+        {
+            pub_key = data[name].get_str();
+        }
         if ( "data" == name )
         {
             get_data = data[name].get_str();
@@ -899,20 +900,20 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     if ( bHelp  || params.size() != 1)
     {
         throw runtime_error(
-            "send_data_to_sys \"{\"address\":\"address info\",\"data\":\"data info\",\"sign\":\"sign value\"}\"\n"
+            "send_data_to_sys \"{\"publickey\":\"publickey info\",\"data\":\"data info\",\"sign\":\"sign value\"}\"\n"
             "\nSend a application data to mempool .\n"
             "Returns hex-encoded data's hash.\n"
 
             "\nArguments:\n"
-            "1. \"address\"        (string, required) A json string of json objects\n"
+            "1. \"publickey\"        (string, required) A json string of json objects\n"
             "2. \"data\"           (string, required) a json object with outputs\n"
             "3. \"sign\"           (numeric, optional, default=0) Raw locktime. Non-0 value also locktime-activates inputs\n"
             "\nResult:\n"
             "\"data_id\"       (string) data's hash\n"
 
             "\nExamples\n"
-            + HelpExampleCli("send_data_to_sys", "\"{\\\"address\\\":\\\"address\\\",\\\"data\\\":\\\"data\\\",\\\"sign\\\":\\\"sign value\\\"}\"")
-            + HelpExampleRpc("send_data_to_sys", "\"{\\\"address\\\":\\\"address\\\",\\\"data\\\":\\\"data\\\",\\\"sign\\\":\\\"sign value\\\"}\"")
+            + HelpExampleCli("send_data_to_sys", "\"{\\\"publickey\\\":\\\"publickey\\\",\\\"data\\\":\\\"data\\\",\\\"sign\\\":\\\"sign value\\\"}\"")
+            + HelpExampleRpc("send_data_to_sys", "\"{\\\"publickey\\\":\\\"publibkey\\\",\\\"data\\\":\\\"data\\\",\\\"sign\\\":\\\"sign value\\\"}\"")
         );
     }
 
@@ -937,7 +938,7 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
         {
             str_data = get_data[name].get_str();
         }
-        else if ( "publicKey" == name )
+        else if ( "publickey" == name )
         {
             str_addr = get_data[name].get_str();
         }
