@@ -3681,7 +3681,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
     	    }
     	    else if (inv.type == MSG_BLOCK)
     	    {
-    	    	 bool fAlreadyHave = AlreadyHave(inv);
+    	    	bool fAlreadyHave = AlreadyHave(inv);
 				UpdateBlockAvailability(pfrom->GetId(), inv.hash);
 				if (!fAlreadyHave && !fImporting && !fReindex&& !mapBlocksInFlight.count(inv.hash)) {
 					// First request the headers preceding the announced block. In the normal fully-synced
@@ -4295,8 +4295,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
         LogPrint("net", "Unknown command \"%s\" from peer=%d\n", SanitizeString(strCommand), pfrom->id);
     }
 
-
-
     return true;
 }
 
@@ -4765,13 +4763,13 @@ bool SendMessages(CNode* pto)
         		}
         	}
         }
-        if (!vQkgjInv.empty())
-        {
-        	pto->PushMessage(NetMsgType::INV, vQkgjInv);
-        	vQkgjInv.clear();
-
-        	pto->msgQkgjToSend.clear();
-        }
+//        if (!vQkgjInv.empty())
+//        {
+//        	pto->PushMessage(NetMsgType::INV, vQkgjInv);
+//        	vQkgjInv.clear();
+//
+//        	pto->msgQkgjToSend.clear();
+//        }
         //End	Add by syl 2016-11-08===================================================
 
         //
