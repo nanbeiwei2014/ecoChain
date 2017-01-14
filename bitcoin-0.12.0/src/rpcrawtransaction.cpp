@@ -344,8 +344,8 @@ UniValue GetDataLastNew( const UniValue &params, bool bHelp )
                 "\"generateTime\":\"generate time\" (string) hex string of the public value\n"
              "}\n"
              "\nExamples\n"
-             + HelpExampleCli("GetDataList", "")
-             + HelpExampleRpc("GetDataList", "")
+             + HelpExampleCli("GetDataLastNew", "")
+             + HelpExampleRpc("GetDataLastNew", "")
              );
     }
 
@@ -638,14 +638,15 @@ UniValue GetBlockHashByTx( const UniValue &params, bool bHelp )
              "\nResult:\n"
              "\"hash\":\"xxxxx\" (string) block's hash\n"
              "\nExamples\n"
-             + HelpExampleCli("GetBlockDetail", "\"recordHash\"")
-             + HelpExampleRpc("GetBlockDetail", "\"recordHash\"")
+             + HelpExampleCli("GetBlockHashByTx", "\"recordHash\"")
+             + HelpExampleRpc("GetBlockHashByTx", "\"recordHash\"")
         );
     } // end of if
 
     LOCK( cs_main );
+    string timeStr = params[0].get_str();
     uint256 hash = ParseHashV( params[0], "parameter 1");
-    //LogPrintf( "[%s:%s:%d],dataHash:%s\n", __FILE__, __FUNCTION__, __LINE__, hash );
+    LogPrintf( "[%s:%s:%d],dataHash:%s,timeStr:%s\n", __FILE__, __FUNCTION__, __LINE__, hash.GetHex(), timeStr );
 
     Cqkgj_basic_data data;
     uint256 hashBlock;
@@ -841,7 +842,7 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
     }
 
     string pri_key;
-    string pub_key;
+    //string pub_key;
     string get_data;
     UniValue data = params[0].get_obj();
     std::vector<std::string>vData = data.getKeys();
@@ -852,17 +853,16 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
         {
             pri_key = data[name].get_str();
         }
-        if ( "publicKey" == name )
-        {
-            pub_key = data[name].get_str();
-        }
+        //{
+        //    pub_key = data[name].get_str();
+        //}
         if ( "data" == name )
         {
             get_data = data[name].get_str();
         }
     }
 
-    LogPrintf("[%s:%s:%d],addr:%s,privatekey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,pub_key,pri_key,get_data);
+    LogPrintf("[%s:%s:%d],privatekey:%s,data:%s\n", __FILE__, __FUNCTION__,__LINE__,pri_key,get_data);
 
     std::vector<unsigned char> vch_sign;
     std::string addr,temp;
