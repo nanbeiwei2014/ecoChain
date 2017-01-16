@@ -848,18 +848,19 @@ UniValue send_data_for_sign( const UniValue& params, bool bHelp )
     std::vector<std::string>vData = data.getKeys();
     BOOST_FOREACH( string &name, vData )
     {
+        string tempStr = name;
 		StrToLower( name );
         if ( "privatekey" == name )
         {
-            pri_key = data[name].get_str();
+            pri_key = data[tempStr].get_str();
         }
         else if ( "publickey" == name )
         {
-            pub_key = data[name].get_str();
+            pub_key = data[tempStr].get_str();
         }
         if ( "data" == name )
         {
-            get_data = data[name].get_str();
+            get_data = data[tempStr].get_str();
         }
     }
 
@@ -933,18 +934,19 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     std::vector<std::string>vData = get_data.getKeys();
     BOOST_FOREACH( string &name, vData )
     {
+        string tempStr = name;
         StrToLower( name );
         if( "data" == name )
         {
-            str_data = get_data[name].get_str();
+            str_data = get_data[tempStr].get_str();
         }
         else if ( "publickey" == name )
         {
-            str_addr = get_data[name].get_str();
+            str_addr = get_data[tempStr].get_str();
         }
         else
         {
-            str_sign = get_data[name].get_str();
+            str_sign = get_data[tempStr].get_str();
         }
     }
 
