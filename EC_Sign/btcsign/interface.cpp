@@ -95,11 +95,13 @@ int GetPriPubKey( char* seeds, char *prikey, char *pubkey, char* errmsg )
     tempVch.assign(pub_key.begin(),pub_key.end());
     string temppubkey = EncodeBase58( tempVch );
     strncpy( pubkey,temppubkey.c_str(),temppubkey.length() );
+    pubkey[temppubkey.length()] = 0;
 
     /* 获得私钥*/
     string pri_key(CBitcoinSecret(secret).ToString());
     //prikey = pri_key;
     strncpy( prikey, pri_key.c_str(), pri_key.length() );
+    prikey[pri_key.length()] = 0;
 
     strncpy( errmsg,ErrMsg[ERR_CODE_SUCC],strlen( ErrMsg[ERR_CODE_SUCC]));
     return ERR_CODE_SUCC;
@@ -135,6 +137,7 @@ int GetDataSign( char* prikey, char* data, char* sign, char* errmsg )
     /* 把签名转换成base58编码格式 */
     tempsign = EncodeBase58(vchSign);
     strncpy( sign, tempsign.c_str(),tempsign.length() );
+    sign[tempsign.length()] = 0;
 
     strncpy( errmsg,ErrMsg[ERR_CODE_SUCC],strlen( ErrMsg[ERR_CODE_SUCC]));
     return ERR_CODE_SUCC;
@@ -182,6 +185,7 @@ void EncodeBase64( const unsigned char *str, unsigned int len, unsigned char* ou
 
     *outLen = (UINT)retStr.length();
     strncpy( (char*)outStr, retStr.c_str(), *outLen );
+    outStr[*outLen] = 0;
     return ;
 
 }
@@ -193,6 +197,7 @@ void DecodeBase64( const unsigned char *str, unsigned int len, unsigned char *ou
     string tmpStr = DecodeBase64( inStr );
     *outLen= (UINT)tmpStr.length();
     strncpy( (char*)outStr, tmpStr.c_str(), *outLen);
+    outStr[*outLen] = 0;
 }
 
 char ErrMsg[][32] =
