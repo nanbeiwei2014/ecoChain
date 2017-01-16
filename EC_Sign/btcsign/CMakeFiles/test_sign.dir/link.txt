@@ -1,0 +1,1 @@
+/usr/bin/c++    -fPIC -Wall -g  -g   CMakeFiles/test_sign.dir/test_sign.cpp.o  -o test_sign -rdynamic -lssl -lboost_system -lboost_thread -lgmp lib/libbtcsign.so -lssl -lboost_system -lboost_thread -lgmp -Wl,-rpath,/home/sdk/src/sign/btcsign/lib 

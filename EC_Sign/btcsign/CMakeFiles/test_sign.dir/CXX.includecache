@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/sdk/src/sign/btcsign/ErrorCode.h
+
+/home/sdk/src/sign/btcsign/interface.h
+string
+-
+
+/home/sdk/src/sign/btcsign/test_sign.cpp
+iostream
+-
+string.h
+-
+stdio.h
+-
+fstream
+-
+interface.h
+/home/sdk/src/sign/btcsign/interface.h
+ErrorCode.h
+/home/sdk/src/sign/btcsign/ErrorCode.h
+
