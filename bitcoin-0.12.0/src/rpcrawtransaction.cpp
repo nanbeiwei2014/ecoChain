@@ -163,6 +163,7 @@ UniValue get_data_from_sys( const UniValue& params, bool bHelp )
     result.push_back(Pair("sign",data.m_sign));
     result.push_back(Pair("blockHash",hashBlock.GetHex()));
 
+    LogPrintf("[%s:%s:%d],Leave... blockHash:%s\n", __FILE__, __FUNCTION__,__LINE__,hashBlock.GetHex());
     return result;
 }
 
@@ -961,14 +962,16 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
     else
     {
         LogPrintf("[%s:%s:%d],verify signature success\n", __FILE__, __FUNCTION__,__LINE__ );
-        std::cout<<"success"<<std::endl;
+        //std::cout<<"success"<<std::endl;
     }
 
     //写入内存池
     //Cqkgj_process_data	newProData(data, 0, 123.00, 1,0);
     uint256 data_hash = data.get_hash();
+
+    bool bIsHaveChain = data_in_chain( data_hash );
     bool bExists = qmempool.exists(data_hash);
-    if ( !bExists )
+    if ( !bExists && !bIsHaveChain )
     {
         CValidationState state;
         bool bRet = AddToMempool( qmempool, state, data );
@@ -978,17 +981,16 @@ UniValue send_data_to_sys(const UniValue& params, bool bHelp)
             throw JSONRPCError(RPC_TRANSACTION_REJECTED,strprintf("%i:%s",state.GetRejectCode(),state.GetRejectReason()));
         }
     }
-    else
+    else if( bIsHaveChain )
     {
-        CValidationState state;
-        LogPrintf("[%s:%s:%d],data has exists in mempool already!\n", __FILE__, __FUNCTION__,__LINE__);
-        return state.Invalid(false,REJECT_ALREADY_KNOWN,"already in mempool");
+        LogPrintf("[%s:%s:%d],data[%s] already in block chain!\n", __FILE__, __FUNCTION__,__LINE__, data_hash.GetHex());
+        throw JSONRPCError(RPC_TRANSACTION_ALREADY_IN_CHAIN,"data already in block chain!");
     }
 
     //触发广播数据到其他节点的广播消息
     RelayQkgjMsg(data);
 
-    UniValue result;
+    //UniValue result;
     //result.push_back(Pair("hash",data.get_hash().GetHash());
     //return result;
     uint256 hash_data = data.get_hash();
