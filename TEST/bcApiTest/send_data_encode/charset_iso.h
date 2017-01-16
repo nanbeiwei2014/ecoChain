@@ -1,0 +1,1 @@
+#define CHARSET_ISO      "ABCDE0123456789abcqwertyuiop"
