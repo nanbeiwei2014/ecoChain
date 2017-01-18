@@ -907,7 +907,7 @@ CLocalMacAddr& CLocalMacAddr::operator=( const CLocalMacAddr &data )
 static inline void IntToString (std::string& out, const int value)
 {
     std::strstream ss; // #include <strstream>
-    ss <<  value;
+    ss << value;
     ss >> out;
 }
 std::string CLocalMacAddr::GetStr() const {
@@ -1065,5 +1065,5 @@ int utf82unicode(char *inbuf, size_t inlen, char *outbuf, size_t outlen)
 //UTF-16(unicode)码转为UTF-8
 int unicode2utf8(char *inbuf, size_t inlen, char *outbuf, size_t outlen)
 {
-	return code_convert("UNICODE", "UTF-8", inbuf, inlen, outbuf, outlen);
+	return code_convert("UTF-16", "UTF-8", inbuf, inlen, outbuf, outlen);
 }

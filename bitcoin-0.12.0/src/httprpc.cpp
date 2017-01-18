@@ -17,6 +17,8 @@
 #include <boost/algorithm/string.hpp> // boost::trim
 #include <boost/foreach.hpp> //BOOST_FOREACH
 
+#include <wchar.h>
+
 /** WWW-Authenticate to present with 401 Unauthorized response */
 static const char* WWW_AUTH_HEADER_DATA = "Basic realm=\"jsonrpc\"";
 
@@ -175,6 +177,8 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     std::wstring strUnicodeRawData;
     std::string strHeader("Content-Type");
     std::pair<bool, std::string> type = req->GetHeader(strHeader);
+    std::string strUrl = req->GetURI();
+
     if(type.first)
     {
     	int nPos = type.second.find("charset");
@@ -195,21 +199,20 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     		return false;
     	}
 
-    	strRawData = pOutput;
     	delete pOutput;
     }
     else if(strType.compare("UNICODE") == 0 || strType.compare("unicode") == 0 ||
     		strType.compare("UTF-16") == 0 || strType.compare("utf-16") == 0)
     {
     	std::string strRawUnicodeData = req->ReadBody();
+
     	int nlen = strRawUnicodeData.length();
     	char *pRawChar = new char[strRawUnicodeData.length()];
-
     	memcpy(pRawChar, strRawUnicodeData.c_str(), strRawUnicodeData.length());
 
 		//change encode type from unicode to utf-8
-		char *pOutput = new char[strRawUnicodeData.length()];
-		int nRet = unicode2utf8(pRawChar, strRawData.length(), pOutput, strRawData.length() * 2);
+		char *pOutput = new char[strRawUnicodeData.length()*3+1];
+		int nRet = unicode2utf8(pRawChar, nlen, pOutput, nlen * 3 + 1);
 		if (nRet != 0) {
 			delete pOutput;
 			delete pRawChar;
@@ -244,6 +247,9 @@ static bool HTTPReq_JSONRPC(HTTPRequest* req, const std::string &)
     	{
     		strbody = strRawData;
     	}
+
+    	std::string strTemp = strbody + "\n";
+    	LogPrintFile(strTemp);
 
         // Parse request
         UniValue valRequest;
