@@ -7,7 +7,6 @@
 #define BITCOIN_KEY_H
 
 #include "pubkey.h"
-//#include "serialize.h"
 #include "secure.h"
 #include "uint256.h"
 
@@ -102,17 +101,8 @@ public:
     //! Check whether the public key corresponding to this private key is (to be) compressed.
     bool IsCompressed() const { return fCompressed; }
 
-    //! Initialize from a CPrivKey (serialized OpenSSL private key data).
-    bool SetPrivKey(const CPrivKey& vchPrivKey, bool fCompressed);
-
     //! Generate a new private key using a cryptographic PRNG.
     void MakeNewKey(bool fCompressed);
-
-    /**
-     * Convert the private key to a CPrivKey (serialized OpenSSL private key data).
-     * This is expensive. 
-     */
-    CPrivKey GetPrivKey() const;
 
     /**
      * Compute the public key from a private key.
@@ -127,28 +117,11 @@ public:
     bool Sign(const uint256& hash, std::vector<unsigned char>& vchSig, uint32_t test_case = 0) const;
 
     /**
-     * Create a compact signature (65 bytes), which allows reconstructing the used public key.
-     * The format is one header byte, followed by two times 32 bytes for the serialized r and s values.
-     * The header byte: 0x1B = first key with even y, 0x1C = first key with odd y,
-     *                  0x1D = second key with even y, 0x1E = second key with odd y,
-     *                  add 0x04 for compressed keys.
-     */
-    //bool SignCompact(const uint256& hash, std::vector<unsigned char>& vchSig) const;
-
-    //! Derive BIP32 child key.
-    bool Derive(CKey& keyChild, ChainCode &ccChild, unsigned int nChild, const ChainCode& cc) const;
-
-    /**
      * Verify thoroughly whether a private key and a public key match.
      * This is done using a different mechanism than just regenerating it.
      */
     bool VerifyPubKey(const CPubKey& vchPubKey) const;
 
-    //! Load private key and check that public key matches.
-    bool Load(CPrivKey& privkey, CPubKey& vchPubKey, bool fSkipCheck);
-
-    //! Check whether an element of a signature (r or s) is valid.
-    static bool CheckSignatureElement(const unsigned char* vch, int len, bool half);
 };
 
 
