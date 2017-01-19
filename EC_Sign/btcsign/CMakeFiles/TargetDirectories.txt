@@ -1,4 +1,0 @@
-/home/sdk/src/sign/btcsign/CMakeFiles/edit_cache.dir
-/home/sdk/src/sign/btcsign/CMakeFiles/rebuild_cache.dir
-/home/sdk/src/sign/btcsign/CMakeFiles/test_sign.dir
-/home/sdk/src/sign/btcsign/CMakeFiles/btcsign.dir
