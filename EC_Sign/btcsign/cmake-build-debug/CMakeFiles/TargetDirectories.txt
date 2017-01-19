@@ -1,4 +1,0 @@
-/home/sdk/src/sign/btcsign/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/sdk/src/sign/btcsign/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/home/sdk/src/sign/btcsign/cmake-build-debug/CMakeFiles/test_sign.dir
-/home/sdk/src/sign/btcsign/cmake-build-debug/CMakeFiles/btcsign.dir
