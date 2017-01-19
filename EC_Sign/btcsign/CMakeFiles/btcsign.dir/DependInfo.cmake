@@ -27,7 +27,6 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/sdk/src/sign/btcsign/pubkey.cpp" "/home/sdk/src/sign/btcsign/CMakeFiles/btcsign.dir/pubkey.cpp.o"
   "/home/sdk/src/sign/btcsign/random.cpp" "/home/sdk/src/sign/btcsign/CMakeFiles/btcsign.dir/random.cpp.o"
   "/home/sdk/src/sign/btcsign/ripemd160.cpp" "/home/sdk/src/sign/btcsign/CMakeFiles/btcsign.dir/ripemd160.cpp.o"
-  "/home/sdk/src/sign/btcsign/sha1.cpp" "/home/sdk/src/sign/btcsign/CMakeFiles/btcsign.dir/sha1.cpp.o"
   "/home/sdk/src/sign/btcsign/sha256.cpp" "/home/sdk/src/sign/btcsign/CMakeFiles/btcsign.dir/sha256.cpp.o"
   "/home/sdk/src/sign/btcsign/sha512.cpp" "/home/sdk/src/sign/btcsign/CMakeFiles/btcsign.dir/sha512.cpp.o"
   "/home/sdk/src/sign/btcsign/test_sign.cpp" "/home/sdk/src/sign/btcsign/CMakeFiles/btcsign.dir/test_sign.cpp.o"
