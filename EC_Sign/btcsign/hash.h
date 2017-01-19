@@ -57,11 +57,12 @@ public:
         sha.Write(data, len);
         return *this;
     }
-
+#if 0
     CHash160& Reset() {
         sha.Reset();
         return *this;
     }
+#endif
 };
 
 /** Compute the 256-bit hash of an object. */
@@ -86,7 +87,7 @@ inline uint256 Hash(const T1 p1begin, const T1 p1end,
               .Finalize((unsigned char*)&result);
     return result;
 }
-
+#if 0
 /** Compute the 256-bit hash of the concatenation of three objects. */
 template<typename T1, typename T2, typename T3>
 inline uint256 Hash(const T1 p1begin, const T1 p1end,
@@ -100,7 +101,7 @@ inline uint256 Hash(const T1 p1begin, const T1 p1end,
               .Finalize((unsigned char*)&result);
     return result;
 }
-
+#endif
 /** Compute the 160-bit hash an object. */
 template<typename T1>
 inline uint160 Hash160(const T1 pbegin, const T1 pend)
@@ -112,19 +113,12 @@ inline uint160 Hash160(const T1 pbegin, const T1 pend)
     return result;
 }
 
+#if 0
 /** Compute the 160-bit hash of a vector. */
 inline uint160 Hash160(const std::vector<unsigned char>& vch)
 {
     return Hash160(vch.begin(), vch.end());
 }
-#if 0
-/** Compute the 160-bit hash of a vector. */
-template<unsigned int N>
-inline uint160 Hash160(const prevector<N, unsigned char>& vch)
-{
-    return Hash160(vch.begin(), vch.end());
-}
-#endif
 
 /** A writer stream (for serialization) that computes a 256-bit hash. */
 class CHashWriter
@@ -149,27 +143,10 @@ public:
         ctx.Finalize((unsigned char*)&result);
         return result;
     }
-#if 0
-    template<typename T>
-    CHashWriter& operator<<(const T& obj) {
-        // Serialize to this stream
-        ::Serialize(*this, obj, nType, nVersion);
-        return (*this);
-    }
-#endif
 };
-#if 0
-/** Compute the 256-bit hash of an object's serialization. */
-template<typename T>
-uint256 SerializeHash(const T& obj, int nType=SER_GETHASH, int nVersion=PROTOCOL_VERSION)
-{
-    CHashWriter ss(nType, nVersion);
-    ss << obj;
-    return ss.GetHash();
-}
-#endif
+
 unsigned int MurmurHash3(unsigned int nHashSeed, const std::vector<unsigned char>& vDataToHash);
 
 void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char header, const unsigned char data[32], unsigned char output[64]);
-
+#endif
 #endif // BITCOIN_HASH_H
