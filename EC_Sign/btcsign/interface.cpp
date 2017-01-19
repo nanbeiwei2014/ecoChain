@@ -11,8 +11,8 @@
 #include "ErrorCode.h"
 #include <boost/scoped_ptr.hpp>
 
-#include <vector>
-#include <string>
+//#include <vector>
+//#include <string>
 
 const char* g_version = "1.0";
 
