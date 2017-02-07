@@ -300,7 +300,7 @@ UniValue GetBlockList( const UniValue &params, bool bHelp )
 
     UniValue res(UniValue::VARR);
 
-    for ( int i = 0; i <= tempVar; i++ )
+    for ( int i = 0; i < tempVar; i++ )
     {
         UniValue obj(UniValue::VOBJ);
         CBlockIndex *pBlkIdx = chainActive[ tempVar - i ];
