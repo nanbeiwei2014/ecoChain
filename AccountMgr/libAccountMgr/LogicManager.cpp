@@ -807,7 +807,7 @@ bool LogicManager::CheckRight(int nRight, ACCRIGHT eRigType)
 	case eExecute:
 		{
 		int nTemp = nRight & 0x0004;
-                if (nTemp == 3)
+                if (nTemp == 4)
                         return true;
                 else
                         return false;
