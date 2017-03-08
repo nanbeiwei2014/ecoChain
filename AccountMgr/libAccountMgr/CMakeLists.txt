@@ -1,0 +1,8 @@
+#cmake_minimum_required(VERSION 2.8)
+include_directories(/usr/local/curl/include /usr/include/boost)
+#add_subdirectory(Jsoncpp)
+#LINK_DIRECTORIES( /home/syl/c++pro/bitcoin-0.12.0/AccountMgr/libAccountMgr/lib)
+LINK_LIBRARIES(event curl boost_date_time boost_math_tr1f-mt boost_serialization-mt boost_date_time-mt)
+set(LIB_SRC AccountMgr.cpp HttpServer.cpp LogicManager.cpp Jsoncpp/json_value.cpp Jsoncpp/json_reader.cpp Jsoncpp/json_writer.cpp)
+add_library(AccMgr ${LIB_SRC} ${JSON})
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
