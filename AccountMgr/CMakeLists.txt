@@ -1,0 +1,8 @@
+SET(CMAKE_BUILD_TYPE "Debug") 
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+project(ACCMGR)
+#LINK_DIRECTORIES(/home/syl/c++pro/bitcoin-0.12.0/AccountMgr/libAccountMgr/lib)
+add_subdirectory(src)
+add_subdirectory(libAccountMgr)
+#target_link_libraries(target src libAccountMgr)
