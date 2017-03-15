@@ -1,0 +1,7 @@
+2017-03-14 12:54:46 ERROR (HbaseOperate.cpp:45) HbaseOperate.cpp - Connect Hbase error : connect() failed: Connection refused
+2017-03-14 12:54:46 ERROR (HbaseOperate.cpp:228) HbaseOperate.cpp - Haven't connected to Hbase yet, can't put row
+2017-03-14 12:54:46 ERROR (HbaseOperate.cpp:173) HbaseOperate.cpp - Haven't connected to Hbase yet, can't put row
+2017-03-14 12:54:46 ERROR (HbaseOperate.cpp:205) HbaseOperate.cpp - Haven't connected to Hbase yet, can't put row
+2017-03-14 12:54:46 ERROR (HbaseOperate.cpp:459) HbaseOperate.cpp - Haven't connected to Hbase yet, can't put row
+2017-03-14 12:54:46 ERROR (HbaseOperate.cpp:331) HbaseOperate.cpp - Haven't connected to Hbase yet, can't put row
+2017-03-14 12:54:46 ERROR (HbaseOperate.cpp:72) HbaseOperate.cpp - Haven't connected to Hbase yet, can't disconnect from it
