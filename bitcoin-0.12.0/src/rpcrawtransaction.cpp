@@ -300,10 +300,11 @@ UniValue GetBlockList( const UniValue &params, bool bHelp )
 
     UniValue res(UniValue::VARR);
 
+    CBlockIndex *pBlkIdx = pblockindex;
     for ( int i = 0; i < tempVar; i++ )
     {
         UniValue obj(UniValue::VOBJ);
-        CBlockIndex *pBlkIdx = chainActive[ tempVar - i ];
+        //CBlockIndex *pBlkIdx = chainActive[ tempVar - i ];
         if ( NULL == pBlkIdx )
         {
             LogPrintf( "[%s:%s:%d]chain index is null!", __FILE__, __FUNCTION__,__LINE__);
@@ -321,6 +322,7 @@ UniValue GetBlockList( const UniValue &params, bool bHelp )
         obj.push_back( Pair( "blockSize",    (int)::GetSerializeSize( block,SER_DISK, CLIENT_VERSION )));
 
         res.push_back(obj);
+        pBlkIdx = pBlkIdx->pprev;
     }
 
     LogPrintf( "[%s:%s:%d],Leave the process!\n", __FILE__, __FUNCTION__, __LINE__ );
