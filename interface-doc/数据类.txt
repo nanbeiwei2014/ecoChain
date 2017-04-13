@@ -1,0 +1,9 @@
+192.168.100.185
+root/qukuailian123
+
+张春明:
+C:\Users\Administrator\Desktop\com\qkl\controller>javac -classpath ./jna-3.3.0.jar -encoding UTF-8 TestLib.java
+这是编译
+执行：java com.qkl.controller.TestLib
+com文件夹放在你当前执行的目录才行
+
