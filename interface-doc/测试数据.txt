@@ -1,0 +1,84 @@
+get_new_key
+{
+	"result":
+	{
+		"PriKey":"Kww6jgrH329fCWDXbdjE1skfdpU5weyT5vu7CKvHPh8jYuUgJvt8",
+		"PubKey":"iiqu7bC46ApqKa23yn5YjsvVr55yyAWXmDhuaGxaCjgc"
+	},
+	"error":null,
+	"id":1
+}
+send_data_for_sign
+input:
+{"prikey":"Kww6jgrH329fCWDXbdjE1skfdpU5weyT5vu7CKvHPh8jYuUgJvt8","pubkey":"iiqu7bC46ApqKa23yn5YjsvVr55yyAWXmDhuaGxaCjgc","data":"hello"}
+output:
+{
+"AN1rKvtPYW3Mc7goYL6Fc8nFjQqCiVp3qasDAZ96PAAqRkNd88MJHaCQX5SbgduNzAUC66R2M6ZQABGZwYdFefKvdFjZnoB39",
+}
+
+send_data_to_data
+"d5112ec77ecd5f7fa2cf9407e614d83cde8e057b4e258a3f526478149b9d7f49"
+
+get_new_key
+{"result":
+{
+"privateKey":"KxbfF6171xXDwb2FMxaWtpjevY5Zz67US3ButyB4BRtoEzNzYgco",
+"publicKey":"u5LqA1P9cMsxfhYkkjsSqSkPCBpKmKuMrT3KpAakVdo9"
+},
+"error":null,"id":1}
+
+send_data_for_sign
+input:
+{"prikey":"KxbfF6171xXDwb2FMxaWtpjevY5Zz67US3ButyB4BRtoEzNzYgco","pubkey":"u5LqA1P9cMsxfhYkkjsSqSkPCBpKmKuMrT3KpAakVdo9","data":"hello"}
+
+{"result":"AN1rKvth2Koeggn9t2brmktXoaiXKkL8EhYdV6AffhDaqm47UU6qJdG45H1U6AQH3ZCKkCojLYX9W2PzRLxKBH6aE3qxcPoBX","error":null,"id":1}
+send_data_to_sys 
+{"data":"hello","publickey":"u5LqA1P9cMsxfhYkkjsSqSkPCBpKmKuMrT3KpAakVdo9","sign":"AN1rKvth2Koeggn9t2brmktXoaiXKkL8EhYdV6AffhDaqm47UU6qJdG45H1U6AQH3ZCKkCojLYX9W2PzRLxKBH6aE3qxcPoBX"}
+
+
+{"result":"94bc6bb918fcb6781ac9218c16bb6247af588aa69dd8f98c5f52509dd4006ec6","error":null,"id":1}
+
+
+
+楼下
+{"result":{
+"PriKey":"KwUEH928nRyYsadmhWMzgeRN1APcBrJ57P7B6c9Dpv6ewuopNNNc",
+"PubKey":"tV45dB5C25iZpXunJ715jBFdzR92KoLKmni79nrZvNNm"
+},"error":null,"id":1}
+
+input:
+{"privatekey":"KwUEH928nRyYsadmhWMzgeRN1APcBrJ57P7B6c9Dpv6ewuopNNNc","publickey":"tV45dB5C25iZpXunJ715jBFdzR92KoLKmni79nrZvNNm","data":"hello"}
+
+{"result":"AN1rKvt8DVAS1FdYrYVBYbie54fMVxLZX5BtSeaeXVwkWuZgmyPsMGrTd3PrE5kYTUEqkwgisjTQTtHpvEVV88zvgM78uo41u","error":null,"id":1}
+
+send_data_to_sys 
+{"data":"hello","pubkey":"tV45dB5C25iZpXunJ715jBFdzR92KoLKmni79nrZvNNm","sign":"AN1rKvt8DVAS1FdYrYVBYbie54fMVxLZX5BtSeaeXVwkWuZgmyPsMGrTd3PrE5kYTUEqkwgisjTQTtHpvEVV88zvgM78uo41u"}
+
+{"result":"c679a03b6460f11fa5d9bb51533c3861219844f7a1c15912ca413fac6e2bafee","error":null,"id":1}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
